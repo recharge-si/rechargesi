@@ -810,10 +810,22 @@ class SliderComponent extends HTMLElement {
   onButtonClick(event) {
     event.preventDefault();
     const step = event.currentTarget.dataset.step || 1;
-    this.slideScrollPosition =
-      event.currentTarget.name === 'next'
+    const isNext = event.currentTarget.name === 'next';
+
+    if (this.enableSliderLooping) {
+      const maxScroll = this.slider.scrollWidth - this.slider.clientWidth;
+      if (isNext) {
+        this.slideScrollPosition =
+          this.slider.scrollLeft >= maxScroll - 1 ? 0 : this.slider.scrollLeft + step * this.sliderItemOffset;
+      } else {
+        this.slideScrollPosition =
+          this.slider.scrollLeft <= 1 ? maxScroll : this.slider.scrollLeft - step * this.sliderItemOffset;
+      }
+    } else {
+      this.slideScrollPosition = isNext
         ? this.slider.scrollLeft + step * this.sliderItemOffset
         : this.slider.scrollLeft - step * this.sliderItemOffset;
+    }
     this.setSlidePosition(this.slideScrollPosition);
   }
 

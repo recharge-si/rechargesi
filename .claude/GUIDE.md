@@ -143,3 +143,15 @@ Use theme-explorer to find every section that uses the product card snippet
 | Before deploying | `/check` then `/deploy` |
 | Checkpoint work | `/commit` |
 | Schema broken in Admin | `/schema-validate` |
+| Product gallery layout issue | See CLAUDE.md → Product Page / Gallery |
+
+## Known customizations to be aware of
+
+### Product gallery (`assets/media-gallery.js` + `assets/section-main-product.css`)
+The product page uses `thumbnail_slider` layout with `constrain_to_viewport: true` and `media_fit: contain`. This causes portrait images to render narrower than the full container (the CSS shrinks the image container width to match `constrained-height × aspect-ratio`).
+
+**Custom additions:**
+1. `MediaGallery.syncThumbnailWidth()` in `media-gallery.js` — JS method that reads the active image container's rendered width and applies it as `max-width` on the thumbnail strip (with `margin: auto` to center). Called on init RAF, resize, and media change.
+2. CSS at the bottom of `section-main-product.css` — hides thumbnail nav arrows, equalizes thumbnail widths with `flex: 1 0 0`, and zeroes horizontal padding for edge alignment.
+
+**When editing product gallery behavior:** Read both files together — CSS alone can't solve the dynamic width sync since `--aspect-ratio` is scoped to the image container and not accessible from the thumbnail strip (different DOM branch).

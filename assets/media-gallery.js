@@ -12,6 +12,9 @@ if (!customElements.get('media-gallery')) {
         this.mql = window.matchMedia('(min-width: 750px)');
         if (!this.elements.thumbnails) return;
 
+        this.elements.thumbnails.enableSliderLooping = false;
+        this.initInfiniteScroll();
+
         this.elements.viewer.addEventListener('slideChanged', debounce(this.onSlideChanged.bind(this), 500));
         this.elements.thumbnails.querySelectorAll('[data-target]').forEach((mediaToSwitch) => {
           mediaToSwitch
@@ -19,6 +22,10 @@ if (!customElements.get('media-gallery')) {
             .addEventListener('click', this.setActiveMedia.bind(this, mediaToSwitch.dataset.target, false));
         });
         if (this.dataset.desktopLayout.includes('thumbnail') && this.mql.matches) this.removeListSemantic();
+
+        this.syncThumbnailWidth = this.syncThumbnailWidth.bind(this);
+        window.addEventListener('resize', debounce(this.syncThumbnailWidth, 200));
+        requestAnimationFrame(this.syncThumbnailWidth);
       }
 
       onSlideChanged(event) {
@@ -63,6 +70,7 @@ if (!customElements.get('media-gallery')) {
           window.scrollTo({ top: top, behavior: 'smooth' });
         });
         this.playActiveMedia(activeMedia);
+        requestAnimationFrame(this.syncThumbnailWidth);
 
         if (!this.elements.thumbnails) return;
         const activeThumbnail = this.elements.thumbnails.querySelector(`[data-target="${mediaId}"]`);
@@ -99,6 +107,70 @@ if (!customElements.get('media-gallery')) {
         window.pauseAllMedia();
         const deferredMedia = activeItem.querySelector('.deferred-media');
         if (deferredMedia) deferredMedia.loadContent(false);
+      }
+
+      /* Linear thumbnail nav: scrolls one step at a time, stops at each end */
+      initInfiniteScroll() {
+        const thumbSlider = this.elements.thumbnails;
+        if (!thumbSlider.prevButton || !thumbSlider.nextButton) return;
+
+        // Clone buttons to remove bound click listeners from SliderComponent
+        [thumbSlider.prevButton, thumbSlider.nextButton].forEach((oldBtn) => {
+          const newBtn = oldBtn.cloneNode(true);
+          oldBtn.parentNode.replaceChild(newBtn, oldBtn);
+        });
+        thumbSlider.prevButton = thumbSlider.querySelector('button[name="previous"]');
+        thumbSlider.nextButton = thumbSlider.querySelector('button[name="next"]');
+
+        let scrolling = false;
+        let atStart = true;
+        let atEnd = false;
+
+        const handleClick = (event) => {
+          event.preventDefault();
+          if (scrolling) return;
+
+          const slider = thumbSlider.slider;
+          const step = parseInt(event.currentTarget.dataset.step) || 1;
+          const isNext = event.currentTarget.name === 'next';
+          const maxScroll = slider.scrollWidth - slider.clientWidth;
+          const itemOffset = thumbSlider.sliderItemOffset;
+
+          if (maxScroll <= 2) return;
+          if (isNext && atEnd) return;
+          if (!isNext && atStart) return;
+
+          let target;
+          if (isNext) {
+            target = Math.min(slider.scrollLeft + step * itemOffset, maxScroll);
+          } else {
+            target = Math.max(slider.scrollLeft - step * itemOffset, 0);
+          }
+
+          scrolling = true;
+          slider.scrollTo({ left: target, behavior: 'smooth' });
+          setTimeout(() => {
+            scrolling = false;
+            const ms = slider.scrollWidth - slider.clientWidth;
+            atStart = slider.scrollLeft <= 2;
+            atEnd = slider.scrollLeft >= ms - 2;
+          }, 400);
+        };
+
+        thumbSlider.prevButton.addEventListener('click', handleClick);
+        thumbSlider.nextButton.addEventListener('click', handleClick);
+      }
+
+      syncThumbnailWidth() {
+        if (!this.mql.matches || !this.elements.thumbnails) return;
+        const activeContainer = this.elements.viewer.querySelector('.is-active .product-media-container');
+        if (!activeContainer) return;
+        const width = activeContainer.getBoundingClientRect().width;
+        if (width > 0) {
+          this.elements.thumbnails.style.maxWidth = `${width}px`;
+          this.elements.thumbnails.style.marginLeft = 'auto';
+          this.elements.thumbnails.style.marginRight = 'auto';
+        }
       }
 
       preventStickyHeader() {

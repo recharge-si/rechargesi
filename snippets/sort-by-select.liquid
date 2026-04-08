@@ -1,0 +1,349 @@
+{%- comment -%}
+  Renders a modern custom sort-by dropdown for collection/search pages.
+  Replaces the native <select> with a fully-styled custom listbox while
+  keeping a hidden <select> in the DOM so facets.js FormData still works.
+
+  Accepts:
+  - results  {Object}: The collection or search object. (Required)
+  - select_id {String}: HTML id for the hidden <select>. (Optional, default: 'SortBy')
+
+  Usage:
+  {% render 'sort-by-select', results: collection, select_id: 'SortBy' %}
+{%- endcomment -%}
+
+{%- liquid
+  assign select_id = select_id | default: 'SortBy'
+  assign sort_by   = results.sort_by | default: results.default_sort_by
+  assign uid       = select_id | handleize
+-%}
+
+<div class="sbs sbs--{{ uid }}" data-sbs>
+
+  {%- comment -%} Hidden native select — stays in FormData, triggers facets.js {%- endcomment -%}
+  <select
+    name="sort_by"
+    id="{{ select_id }}"
+    aria-describedby="a11y-refresh-page-message"
+    class="sbs__native visually-hidden"
+    tabindex="-1"
+    aria-hidden="true"
+  >
+    {%- for option in results.sort_options -%}
+      <option
+        value="{{ option.value | escape }}"
+        {% if option.value == sort_by %}selected="selected"{% endif %}
+      >{{ option.name | escape }}</option>
+    {%- endfor -%}
+  </select>
+
+  {%- comment -%} Visible trigger button {%- endcomment -%}
+  <button
+    type="button"
+    class="sbs__trigger"
+    aria-haspopup="listbox"
+    aria-expanded="false"
+    aria-controls="sbs-panel-{{ uid }}"
+  >
+    <span class="sbs__trigger-value">
+      {%- for option in results.sort_options -%}
+        {%- if option.value == sort_by -%}{{ option.name | escape }}{%- endif -%}
+      {%- endfor -%}
+    </span>
+    <span class="sbs__caret svg-wrapper" aria-hidden="true">
+      {{- 'icon-caret.svg' | inline_asset_content -}}
+    </span>
+  </button>
+
+  {%- comment -%} Dropdown panel {%- endcomment -%}
+  <ul
+    id="sbs-panel-{{ uid }}"
+    class="sbs__panel"
+    role="listbox"
+    aria-label="{{ 'products.facets.sort_by_label' | t }}"
+    tabindex="-1"
+  >
+    {%- for option in results.sort_options -%}
+      <li
+        class="sbs__option{% if option.value == sort_by %} is-selected{% endif %}"
+        role="option"
+        aria-selected="{% if option.value == sort_by %}true{% else %}false{% endif %}"
+        data-value="{{ option.value | escape }}"
+      >
+        <span class="sbs__option-check" aria-hidden="true"></span>
+        {{ option.name | escape }}
+      </li>
+    {%- endfor -%}
+  </ul>
+</div>
+
+<style>
+  /* ── Sort-by select — pill style matching filter chips ─────────────── */
+  .sbs {
+    position: relative;
+    display: inline-block;
+    font-size: 1.3rem;
+    font-family: inherit;
+    min-width: auto;
+  }
+
+  /* Trigger button — matches .facets__summary pill */
+  .sbs__trigger {
+    all: unset;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    width: 100%;
+    padding: 0.55rem 1.2rem 0.55rem 1rem;
+    border: 0.1rem solid rgba(var(--color-foreground), 0.18);
+    border-radius: 3rem;
+    background: transparent;
+    color: rgb(var(--color-foreground));
+    font-weight: 500;
+    cursor: pointer;
+    transition: border-color 0.15s ease, color 0.15s ease, background 0.15s ease;
+    white-space: nowrap;
+  }
+
+  .sbs__trigger:hover {
+    border-color: rgba(var(--color-foreground), 0.4);
+  }
+
+  .sbs__trigger:focus-visible {
+    outline: 0.2rem solid var(--color-brand-primary);
+    outline-offset: 0.2rem;
+  }
+
+  .sbs__trigger[aria-expanded="true"] {
+    border-color: var(--color-brand-primary);
+    color: var(--color-brand-primary);
+    background: rgba(189, 18, 24, 0.04);
+  }
+
+  .sbs__trigger[aria-expanded="true"] .sbs__caret {
+    transform: rotate(180deg);
+  }
+
+  .sbs__trigger-value {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .sbs__caret {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+    transition: transform 0.2s ease;
+  }
+
+  .sbs__caret svg {
+    width: 1rem;
+    height: 1rem;
+  }
+
+  /* Dropdown panel */
+  .sbs__panel {
+    list-style: none;
+    margin: 0;
+    padding: 0.4rem 0;
+    position: absolute;
+    top: calc(100% + 0.4rem);
+    left: 0;
+    min-width: 100%;
+    background: rgb(var(--color-background));
+    border: 0.1rem solid rgba(var(--color-foreground), 0.12);
+    border-radius: 0.6rem;
+    box-shadow: 0 0.8rem 2.4rem rgba(0, 0, 0, 0.1), 0 0.2rem 0.6rem rgba(0, 0, 0, 0.06);
+    z-index: 100;
+    /* hidden state */
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-0.4rem);
+    transition: opacity 0.15s ease, transform 0.15s ease, visibility 0.15s;
+    pointer-events: none;
+  }
+
+  .sbs__panel.is-open {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+
+  /* Option items */
+  .sbs__option {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    padding: 0.9rem 1.6rem 0.9rem 1.2rem;
+    cursor: pointer;
+    color: rgb(var(--color-foreground));
+    transition: background 0.1s ease;
+    white-space: nowrap;
+  }
+
+  .sbs__option:hover {
+    background: rgba(var(--color-foreground), 0.05);
+  }
+
+  .sbs__option.is-selected {
+    color: var(--color-brand-primary);
+    font-weight: 600;
+  }
+
+  .sbs__option.is-focused {
+    background: rgba(var(--color-foreground), 0.08);
+    outline: none;
+  }
+
+  /* Checkmark for selected option */
+  .sbs__option-check {
+    display: inline-flex;
+    width: 1rem;
+    height: 1rem;
+    flex-shrink: 0;
+  }
+
+  .sbs__option-check::after {
+    content: '';
+    display: block;
+    width: 0.5rem;
+    height: 0.9rem;
+    border-right: 0.2rem solid var(--color-brand-primary);
+    border-bottom: 0.2rem solid var(--color-brand-primary);
+    transform: rotate(45deg) scale(0);
+    transition: transform 0.15s ease;
+    margin-top: -0.15rem;
+  }
+
+  .sbs__option.is-selected .sbs__option-check::after {
+    transform: rotate(45deg) scale(1);
+  }
+</style>
+
+<script>
+  (() => {
+    // Global one-time setup (click-outside + event listeners).
+    // Runs only on first script execution; subsequent AJAX re-renders skip this block.
+    if (!window.__sbsGlobalInit) {
+      window.__sbsGlobalInit = true;
+
+      document.addEventListener('click', (e) => {
+        if (!e.target.closest('[data-sbs]')) {
+          document.querySelectorAll('.sbs__panel.is-open').forEach(p => closePanel(p));
+        }
+      });
+
+      document.addEventListener('shopify:section:load', () => {
+        document.querySelectorAll('[data-sbs]').forEach(initSbs);
+      });
+
+      // facets.js replaces innerHTML of filter elements — observe for new [data-sbs] nodes
+      new MutationObserver((mutations) => {
+        for (const mutation of mutations) {
+          for (const node of mutation.addedNodes) {
+            if (!(node instanceof Element)) continue;
+            if (node.matches('[data-sbs]')) initSbs(node);
+            node.querySelectorAll('[data-sbs]').forEach(initSbs);
+          }
+        }
+      }).observe(document.body, { childList: true, subtree: true });
+    }
+
+    // Always run on every script execution so new elements after AJAX get initialized.
+    document.querySelectorAll('[data-sbs]').forEach(initSbs);
+
+    function initSbs(root) {
+      if (root.__sbsReady) return;
+      root.__sbsReady = true;
+
+      const trigger = root.querySelector('.sbs__trigger');
+      const panel   = root.querySelector('.sbs__panel');
+      const native  = root.querySelector('.sbs__native');
+      const options = root.querySelectorAll('.sbs__option');
+
+      if (!trigger || !panel || !native) return;
+
+      trigger.addEventListener('click', () => {
+        const isOpen = panel.classList.contains('is-open');
+        // Close any other open panels first
+        document.querySelectorAll('.sbs__panel.is-open').forEach(p => {
+          if (p !== panel) closePanel(p);
+        });
+        isOpen ? closePanel(panel, trigger) : openPanel(panel, trigger);
+      });
+
+      // Keyboard navigation inside panel
+      panel.addEventListener('keydown', (e) => {
+        const focused = panel.querySelector('.is-focused');
+        const allOpts = [...options];
+        const idx     = allOpts.indexOf(focused);
+
+        if (e.key === 'ArrowDown') {
+          e.preventDefault();
+          const next = allOpts[(idx + 1) % allOpts.length];
+          setFocus(panel, next);
+        } else if (e.key === 'ArrowUp') {
+          e.preventDefault();
+          const prev = allOpts[(idx - 1 + allOpts.length) % allOpts.length];
+          setFocus(panel, prev);
+        } else if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          if (focused) selectOption(focused, root, trigger, panel, native);
+        } else if (e.key === 'Escape' || e.key === 'Tab') {
+          closePanel(panel, trigger);
+          trigger.focus();
+        }
+      });
+
+      options.forEach(opt => {
+        opt.addEventListener('click', () => {
+          selectOption(opt, root, trigger, panel, native);
+        });
+      });
+    }
+
+    function openPanel(panel, trigger) {
+      panel.classList.add('is-open');
+      if (trigger) trigger.setAttribute('aria-expanded', 'true');
+      // Focus the currently selected option
+      const selected = panel.querySelector('.is-selected');
+      if (selected) setFocus(panel, selected);
+      else panel.focus();
+    }
+
+    function closePanel(panel, trigger) {
+      panel.classList.remove('is-open');
+      panel.querySelectorAll('.is-focused').forEach(el => el.classList.remove('is-focused'));
+      const btn = trigger || panel.closest('[data-sbs]')?.querySelector('.sbs__trigger');
+      if (btn) btn.setAttribute('aria-expanded', 'false');
+    }
+
+    function setFocus(panel, el) {
+      panel.querySelectorAll('.is-focused').forEach(e => e.classList.remove('is-focused'));
+      if (el) {
+        el.classList.add('is-focused');
+        el.scrollIntoView({ block: 'nearest' });
+      }
+    }
+
+    function selectOption(opt, root, trigger, panel, native) {
+      const value = opt.dataset.value;
+      const label = opt.textContent.trim();
+
+      // Update UI
+      root.querySelectorAll('.sbs__option').forEach(o => {
+        o.classList.toggle('is-selected', o === opt);
+        o.setAttribute('aria-selected', o === opt ? 'true' : 'false');
+      });
+      root.querySelector('.sbs__trigger-value').textContent = label;
+
+      // Update hidden native select → facets.js picks this up via FormData
+      native.value = value;
+      native.dispatchEvent(new Event('input', { bubbles: true }));
+
+      closePanel(panel, trigger);
+      trigger.focus();
+    }
+  })();
+</script>

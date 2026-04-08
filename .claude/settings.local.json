@@ -2,7 +2,8 @@
   "permissions": {
     "allow": [
       "Bash(grep -E \"\\\\.\\(js|css\\)$\")",
-      "Bash(sed 's/.*\\\\.//')"
+      "Bash(sed 's/.*\\\\.//')",
+      "Bash(shopify theme:*)"
     ]
   }
 }

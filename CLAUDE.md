@@ -81,3 +81,34 @@ Key files:
 - `assets/component-mega-menu.css` — all mega menu styles
 - `assets/details-disclosure.js` — `HeaderMenu` class handles hover open + click-navigate
 - `snippets/header-mega-menu.liquid` — summary has `data-url="{{ link.url }}"` for click navigation
+
+### Product Page / Gallery
+
+**Active settings** (`templates/product.json`):
+- `gallery_layout: "thumbnail_slider"` — single main image + thumbnail strip below
+- `media_fit: "contain"` — shows full image without cropping
+- `constrain_to_viewport: true` — limits image height to `100vh - 300px` (desktop)
+- `media_size: "large"` — media column is 65% width on desktop
+
+**How `constrain_to_viewport` + `media_fit: contain` interact:**
+`.product-media-container.constrain-height.media-fit-contain` in `assets/section-main-product.css` computes:
+```css
+--constrained-height: max(400px, calc(100vh - 300px));
+--contained-width: calc(var(--constrained-height) * var(--aspect-ratio));
+width: min(var(--contained-width), 100%);
+```
+This makes **portrait images narrower than the full container**. The `--aspect-ratio` comes from the inline style `--preview-ratio` set in `snippets/product-thumbnail.liquid`.
+
+**Thumbnail strip width sync:**
+Because the constrained image is narrower than its container, `assets/media-gallery.js` contains a `syncThumbnailWidth()` method (added as a customization) that measures the active `.product-media-container` width and sets it as `max-width` on the thumbnail slider. Called on: initial RAF, window resize (debounced 200ms), and active media change.
+
+**Thumbnail strip CSS customizations** (in `assets/section-main-product.css`, end of file):
+- Nav arrow buttons hidden (`display: none !important`) — all images shown in a single row
+- Thumbnail items use `flex: 1 0 0` to fill width equally
+- Horizontal padding zeroed out so thumbnails align flush with image edges
+
+Key files:
+- `assets/section-main-product.css` — all product layout + constrain-height rules
+- `assets/media-gallery.js` — `MediaGallery` custom element; `syncThumbnailWidth()` is our addition
+- `snippets/product-media-gallery.liquid` — gallery HTML structure
+- `snippets/product-thumbnail.liquid` — sets `--ratio`/`--preview-ratio` inline styles on each media container
