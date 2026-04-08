@@ -6,8 +6,7 @@
   user-select: none;
 }
 
-.mega-menu > summary.header__menu-item:hover span,
-.mega-menu > summary.header__menu-item .header__active-menu-item {
+.mega-menu > summary.header__menu-item:hover span {
   text-decoration: none;
   color: inherit;
 }
@@ -31,6 +30,17 @@
 
 .mega-menu[open] > summary.header__menu-item .icon-caret {
   filter: brightness(0) invert(1);
+}
+
+a.header__menu-item:hover {
+  background-color: var(--color-brand-primary);
+  color: #ffffff;
+  text-decoration: none;
+}
+
+a.header__menu-item:hover span {
+  color: #ffffff;
+  text-decoration: none;
 }
 
 .mega-menu__content {

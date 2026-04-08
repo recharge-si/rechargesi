@@ -1,3 +1,7 @@
+---
+description: Scaffold a new Shopify Dawn theme snippet with parameter docs and render signature.
+---
+
 Scaffold a new Shopify Dawn theme snippet in this project.
 
 Snippet name/purpose: $ARGUMENTS

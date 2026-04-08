@@ -37,29 +37,34 @@ class HeaderMenu extends DetailsDisclosure {
     super();
     this.header = document.querySelector('.header-wrapper');
     this.summary = this.mainDetailsToggle.querySelector('summary');
+    this._onDocumentClick = this.onDocumentClick.bind(this);
 
     if (this.summary && this.summary.dataset.url) {
       this.summary.addEventListener('click', this.onSummaryClick.bind(this));
-      this.mainDetailsToggle.addEventListener('mouseenter', this.onMouseEnter.bind(this));
-      this.mainDetailsToggle.addEventListener('mouseleave', this.onMouseLeave.bind(this));
     }
   }
 
   onSummaryClick(event) {
     event.preventDefault();
-    window.location.href = this.summary.dataset.url;
-  }
-
-  onMouseEnter() {
-    clearTimeout(this._closeTimer);
-    if (!this.mainDetailsToggle.hasAttribute('open')) {
+    if (this.mainDetailsToggle.hasAttribute('open')) {
+      window.location.href = this.summary.dataset.url;
+    } else {
       this.mainDetailsToggle.setAttribute('open', '');
       this.onToggle();
+      document.addEventListener('click', this._onDocumentClick);
     }
   }
 
-  onMouseLeave() {
-    this._closeTimer = setTimeout(() => this.close(), 100);
+  onDocumentClick(event) {
+    if (!this.contains(event.target)) {
+      this.close();
+      document.removeEventListener('click', this._onDocumentClick);
+    }
+  }
+
+  close() {
+    super.close();
+    document.removeEventListener('click', this._onDocumentClick);
   }
 
   onToggle() {

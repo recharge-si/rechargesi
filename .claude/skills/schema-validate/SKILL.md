@@ -1,3 +1,7 @@
+---
+description: Validate section {% schema %} blocks against Dawn conventions — required fields, valid setting types, block structure, and color hygiene.
+---
+
 Validate the {% schema %} block(s) in one or more section files against Dawn conventions.
 
 Target file(s) or section name: $ARGUMENTS

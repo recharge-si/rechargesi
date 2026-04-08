@@ -1,3 +1,7 @@
+---
+description: Run Shopify theme check and summarize results. Use before deploying or after editing Liquid/schema files.
+---
+
 Run Shopify theme check and summarize the results.
 
 Target file or directory (optional): $ARGUMENTS

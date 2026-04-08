@@ -1,3 +1,7 @@
+---
+description: Scaffold a new Shopify Dawn theme section with correct boilerplate — schema, padding pattern, color-scheme wrapper, and brand color rules enforced.
+---
+
 Scaffold a new Shopify Dawn theme section in this project.
 
 Section name/description: $ARGUMENTS

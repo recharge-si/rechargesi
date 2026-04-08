@@ -1,3 +1,7 @@
+---
+description: Audit this Shopify theme for hardcoded color values that should use CSS variables. Use when adding colors, reviewing CSS, or doing a color consistency check.
+---
+
 Audit this Shopify theme for hardcoded color values that should use CSS variables instead.
 
 ## Step 1 — Build the known variable map

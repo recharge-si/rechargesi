@@ -1,3 +1,7 @@
+---
+description: Deploy this Shopify theme to the connected store. Runs theme check, shows changed files, and confirms before pushing.
+---
+
 Deploy this Shopify theme to the connected store.
 
 Options/flags to pass through: $ARGUMENTS
