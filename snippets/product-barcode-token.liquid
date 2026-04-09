@@ -1,5 +1,6 @@
 {% comment %}
-  Renders variant Barcode (EAN) and SKU as label/value rows.
+  Renders variant SKU and Barcode (EAN) as label/value rows.
+  Positioned at the top of the product info panel.
   Updates dynamically when the selected variant changes.
 
   Accepts:
@@ -12,8 +13,8 @@
 
 {%- liquid
   assign current_variant = product.selected_or_first_available_variant
-  assign barcode_val = current_variant.barcode | default: ''
   assign sku_val     = current_variant.sku | default: ''
+  assign barcode_val = current_variant.barcode | default: ''
 -%}
 
 <style>
@@ -21,41 +22,49 @@
     display: flex;
     flex-direction: column;
     gap: 0;
-    border-top: 1px solid rgba(var(--color-foreground), 0.08);
+    margin-bottom: 0.4rem;
   }
 
   .pbt-row {
     display: flex;
     align-items: baseline;
     justify-content: space-between;
-    gap: 1.6rem;
-    padding: 0.75rem 0;
-    border-bottom: 1px solid rgba(var(--color-foreground), 0.08);
+    gap: 2rem;
+    padding: 0.6rem 0;
+    border-bottom: 1px solid rgba(var(--color-foreground), 0.07);
+  }
+
+  .pbt-row:first-child {
+    border-top: 1px solid rgba(var(--color-foreground), 0.07);
   }
 
   .pbt-label {
-    font-size: 1.3rem;
-    color: rgba(var(--color-foreground), 0.55);
+    font-size: 1.25rem;
+    color: rgba(var(--color-foreground), 0.45);
     white-space: nowrap;
     flex-shrink: 0;
+    letter-spacing: 0.01em;
   }
 
   .pbt-value {
-    font-size: 1.3rem;
+    font-size: 1.25rem;
     font-weight: 500;
-    color: rgba(var(--color-foreground), 0.9);
+    color: rgba(var(--color-foreground), 0.85);
     text-align: right;
-    letter-spacing: 0.01em;
-    transition: opacity 0.18s ease, transform 0.18s ease;
+    letter-spacing: 0.02em;
+    font-variant-numeric: tabular-nums;
+    transition: opacity 0.15s ease, transform 0.15s ease;
   }
 
   .pbt-value.pbt-updating {
     opacity: 0;
-    transform: translateY(3px);
+    transform: translateY(2px);
   }
 
   .pbt-value.pbt-empty {
-    color: rgba(var(--color-foreground), 0.25);
+    color: rgba(var(--color-foreground), 0.2);
+    font-style: italic;
+    font-weight: 400;
   }
 </style>
 
@@ -63,8 +72,8 @@
   window.__pbt = window.__pbt || {};
   {% for v in product.variants %}
   window.__pbt[{{ v.id | json }}] = {
-    barcode: {{ v.barcode | default: '' | json }},
-    sku:     {{ v.sku | default: '' | json }}
+    sku:     {{ v.sku | default: '' | json }},
+    barcode: {{ v.barcode | default: '' | json }}
   };
   {% endfor %}
 </script>
@@ -105,7 +114,7 @@
         el.textContent = v || '—';
         el.classList.toggle('pbt-empty', !v);
         el.classList.remove('pbt-updating');
-      }, 180);
+      }, 150);
     }
 
     document.addEventListener('variant-change', function (event) {

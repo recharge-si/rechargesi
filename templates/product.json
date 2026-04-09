@@ -63,9 +63,9 @@
       "block_order": [
         "vendor",
         "title",
+        "barcode_token",
         "price",
         "variant_picker",
-        "barcode_token",
         "quantity_selector",
         "buy_buttons",
         "description",

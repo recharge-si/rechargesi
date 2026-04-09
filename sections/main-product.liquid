@@ -75,31 +75,31 @@
 
   {% assign variant_images = product.images | where: 'attached_to_variant?', true | map: 'src' %}
   <div class="page-width">
-    {%- comment -%} Pre-grid header: vendor text + product title rendered above the image column {%- endcomment -%}
-    <div class="product-page-header">
-      {%- assign pph_done = false -%}
-      {%- for block in section.blocks -%}
-        {%- unless pph_done -%}
-          {%- case block.type -%}
-            {%- when 'text' -%}
-              <p
-                class="product__text inline-richtext{% if block.settings.text_style == 'uppercase' %} caption-with-letter-spacing{% elsif block.settings.text_style == 'subtitle' %} subtitle{% endif %}"
-                {{ block.shopify_attributes }}
-              >{{- block.settings.text -}}</p>
-            {%- when 'title' -%}
-              <div class="product__title" {{ block.shopify_attributes }}>
-                <h1>{{ product.title | escape }}</h1>
-                <a href="{{ product.url }}" class="product__title">
-                  <h2 class="h1">{{ product.title | escape }}</h2>
-                </a>
-              </div>
-              {%- assign pph_done = true -%}
-          {%- endcase -%}
-        {%- endunless -%}
-      {%- endfor -%}
-    </div>
     <div class="product product--{{ section.settings.media_size }} product--{{ section.settings.media_position }} product--{{ section.settings.gallery_layout }} product--mobile-{{ section.settings.mobile_thumbnails }} grid grid--1-col {% if product.media.size > 0 %}grid--2-col-tablet{% else %}product--no-media{% endif %}">
       <div class="grid__item product__media-wrapper">
+        {%- comment -%} Title rendered inside the image column — guarantees left-edge alignment {%- endcomment -%}
+        <div class="product-page-header">
+          {%- assign pph_done = false -%}
+          {%- for block in section.blocks -%}
+            {%- unless pph_done -%}
+              {%- case block.type -%}
+                {%- when 'text' -%}
+                  <p
+                    class="product__text inline-richtext{% if block.settings.text_style == 'uppercase' %} caption-with-letter-spacing{% elsif block.settings.text_style == 'subtitle' %} subtitle{% endif %}"
+                    {{ block.shopify_attributes }}
+                  >{{- block.settings.text -}}</p>
+                {%- when 'title' -%}
+                  <div class="product__title" {{ block.shopify_attributes }}>
+                    <h1>{{ product.title | escape }}</h1>
+                    <a href="{{ product.url }}" class="product__title">
+                      <h2 class="h1">{{ product.title | escape }}</h2>
+                    </a>
+                  </div>
+                  {%- assign pph_done = true -%}
+              {%- endcase -%}
+            {%- endunless -%}
+          {%- endfor -%}
+        </div>
         {% render 'product-media-gallery', variant_images: variant_images %}
       </div>
       <div class="product__info-wrapper grid__item{% if settings.page_width > 1400 and section.settings.media_size == "small" %} product__info-wrapper--extra-padding{% endif %}{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--slide-in{% endif %}">
