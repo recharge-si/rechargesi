@@ -32,7 +32,7 @@ product-info {
   }
 
   .product__info-wrapper {
-    padding: 0 0 0 5rem;
+    padding: 0 0 0 2rem;
   }
 
   .product__info-wrapper--extra-padding {
@@ -63,14 +63,14 @@ product-info {
 /* Tablet: 750–989px — override the default 50/50 grid split for better proportions */
 @media screen and (min-width: 750px) and (max-width: 989px) {
   .product--large:not(.product--no-media) .product__media-wrapper {
-    max-width: 60%;
-    width: calc(60% - var(--grid-desktop-horizontal-spacing) / 2);
+    max-width: 52%;
+    width: calc(52% - var(--grid-desktop-horizontal-spacing) / 2);
   }
 
   .product--large:not(.product--no-media) .product__info-wrapper {
-    padding: 0 0 0 2.5rem;
-    max-width: 40%;
-    width: calc(40% - var(--grid-desktop-horizontal-spacing) / 2);
+    padding: 0 0 0 1.5rem;
+    max-width: 48%;
+    width: calc(48% - var(--grid-desktop-horizontal-spacing) / 2);
   }
 
   .product--medium:not(.product--no-media) .product__media-wrapper,
@@ -89,14 +89,14 @@ product-info {
 
 @media screen and (min-width: 990px) {
   .product--large:not(.product--no-media) .product__media-wrapper {
-    max-width: 65%;
-    width: calc(65% - var(--grid-desktop-horizontal-spacing) / 2);
+    max-width: 58%;
+    width: calc(58% - var(--grid-desktop-horizontal-spacing) / 2);
   }
 
   .product--large:not(.product--no-media) .product__info-wrapper {
-    padding: 0 0 0 4rem;
-    max-width: 35%;
-    width: calc(35% - var(--grid-desktop-horizontal-spacing) / 2);
+    padding: 0 0 0 2rem;
+    max-width: 42%;
+    width: calc(42% - var(--grid-desktop-horizontal-spacing) / 2);
   }
 
   .product--large:not(.product--no-media).product--right .product__info-wrapper {
@@ -1445,7 +1445,7 @@ a.product__text {
   --constrained-min-height: 300px;
   --constrained-height: max(var(--constrained-min-height), calc(100vh - var(--viewport-offset)));
   margin-right: auto;
-  margin-left: auto;
+  margin-left: 0;
 }
 
 .product-media-container.constrain-height.media-fit-contain {

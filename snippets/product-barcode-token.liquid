@@ -100,7 +100,7 @@
 </div>
 
 <script>
-  (function () {
+  document.addEventListener('DOMContentLoaded', function () {
     var sectionId = {{ section_id | json }};
     var skuEl     = document.getElementById('PbtSku-' + sectionId);
     var barcodeEl = document.getElementById('PbtBarcode-' + sectionId);
@@ -117,8 +117,8 @@
       }, 150);
     }
 
-    document.addEventListener('variant-change', function (event) {
-      var data = event.detail && event.detail.data;
+    subscribe(PUB_SUB_EVENTS.variantChange, function (event) {
+      var data = event.data;
       if (!data || data.sectionId !== sectionId) return;
       var variant = data.variant;
       if (!variant) return;
@@ -126,5 +126,5 @@
       updateField(skuEl,     pbt.sku     || variant.sku     || '');
       updateField(barcodeEl, pbt.barcode || variant.barcode || '');
     });
-  })();
+  });
 </script>
