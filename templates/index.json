@@ -41,16 +41,15 @@
       ],
       "settings": {
         "auto_rotate": true,
-        "rotation_speed": 3,
-        "banner_height": "large"
+        "rotation_speed": 3
       }
     },
     "featured_collection": {
       "type": "featured-collection",
       "settings": {
-        "collection": "all",
+        "collection": "izpostavljeno",
         "products_to_show": 8,
-        "title": "Featured products",
+        "title": "Izpostavljeno",
         "heading_size": "h2",
         "description": "",
         "show_description": false,
