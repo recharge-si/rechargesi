@@ -104,12 +104,27 @@
                 >
               {%- endif -%}
             </div>
-            {%- if card_product.variants_count > 1 -%}
-              <span class="card__variant-count">
-                <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
-                {{- card_product.variants_count -}}
-              </span>
-            {%- endif -%}
+            {%- liquid
+              assign longest_tag = ''
+              for tag in card_product.tags
+                if tag.size > longest_tag.size
+                  assign longest_tag = tag
+                endif
+              endfor
+              assign tag_parts = longest_tag | split: ' / '
+              assign card_category_tag = tag_parts | last
+            -%}
+            <div class="card__image-overlays">
+              {%- if card_category_tag != blank -%}
+                <span class="card__category-tag">{{ card_category_tag }}</span>
+              {%- endif -%}
+              {%- if card_product.variants_count > 1 -%}
+                <span class="card__variant-count">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+                  {{- card_product.variants_count -}}
+                </span>
+              {%- endif -%}
+            </div>
           </div>
         {%- endif -%}
         <div class="card__content">
@@ -151,19 +166,6 @@
       </div>
       <div class="card__content">
         <div class="card__information">
-          {%- liquid
-            assign longest_tag = ''
-            for tag in card_product.tags
-              if tag.size > longest_tag.size
-                assign longest_tag = tag
-              endif
-            endfor
-            assign tag_parts = longest_tag | split: ' / '
-            assign card_category_tag = tag_parts | last
-          -%}
-          {%- if card_category_tag != blank -%}
-            <span class="card__category-tag">{{ card_category_tag }}</span>
-          {%- endif -%}
           <h3
             class="card__heading{% if card_product.featured_media or settings.card_style == 'standard' %} h5{% endif %}"
             {% if card_product.featured_media or settings.card_style == 'card' %}

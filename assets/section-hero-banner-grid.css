@@ -1,0 +1,152 @@
+/* Hero Banner Grid — page-width hero with main display + thumbnail sidebar */
+
+section.section:has(.hero-banner-grid) {
+  margin-top: 1.2rem;
+}
+
+.hero-banner-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 4px;
+}
+
+@media screen and (min-width: 750px) {
+  .hero-banner-grid {
+    grid-template-columns: 1fr 24%;
+    align-items: start;
+  }
+}
+
+/* ── Main display area ── */
+.hero-banner-grid__main {
+  position: relative;
+  overflow: hidden;
+  border-radius: 4px;
+  transition: height 0.4s ease;
+}
+
+.hero-banner-grid__main-item {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+  pointer-events: none;
+}
+
+.hero-banner-grid__main-item--active {
+  opacity: 1;
+  pointer-events: auto;
+  z-index: 1;
+}
+
+.hero-banner-grid__main-link {
+  display: block;
+  width: 100%;
+}
+
+.hero-banner-grid__image {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* ── Thumbnail sidebar ── */
+.hero-banner-grid__thumbs {
+  display: flex;
+  flex-direction: row;
+  gap: 4px;
+}
+
+@media screen and (min-width: 750px) {
+  .hero-banner-grid__thumbs {
+    flex-direction: column;
+  }
+}
+
+.hero-banner-grid__thumb {
+  position: relative;
+  overflow: hidden;
+  border: none;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+  background: none;
+  border-radius: 4px;
+  outline: none;
+  flex: 0 0 auto;
+}
+
+.hero-banner-grid__thumb::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.3);
+  transition: background 0.3s ease;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.hero-banner-grid__thumb--active::after {
+  background: rgba(0, 0, 0, 0);
+}
+
+.hero-banner-grid__thumb:hover::after {
+  background: rgba(0, 0, 0, 0.08);
+}
+
+.hero-banner-grid__thumb--active {
+  outline: 2px solid var(--color-brand-primary);
+  outline-offset: -2px;
+}
+
+.hero-banner-grid__thumb-image {
+  display: block;
+  width: 100%;
+  height: auto;
+  transition: transform 0.3s ease;
+}
+
+.hero-banner-grid__thumb:hover .hero-banner-grid__thumb-image {
+  transform: scale(1.05);
+}
+
+/* ── Progress bar on active thumb ── */
+.hero-banner-grid__thumb-progress {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: rgba(255, 255, 255, 0.25);
+  z-index: 2;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.hero-banner-grid__thumb--active .hero-banner-grid__thumb-progress {
+  opacity: 1;
+}
+
+.hero-banner-grid__thumb-progress-bar {
+  height: 100%;
+  width: 0;
+  background: var(--color-brand-primary);
+}
+
+/* ── Placeholder styling ── */
+.hero-banner-grid__placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  background: rgba(var(--color-foreground), 0.04);
+}
+
+.hero-banner-grid__placeholder svg {
+  width: 50%;
+  max-width: 180px;
+  fill: rgba(var(--color-foreground), 0.12);
+}

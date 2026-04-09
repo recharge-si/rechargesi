@@ -2332,8 +2332,18 @@ input[type='checkbox'] {
   background-color: rgb(var(--color-background));
 }
 
-.header-wrapper--border-bottom {
-  border-bottom: 3px solid var(--color-brand-primary);
+.header-wrapper--border-bottom::after {
+  content: '';
+  display: block;
+  height: 3px;
+  background: var(--color-brand-primary);
+  max-width: calc(var(--page-width) - 10rem);
+  margin: 0 auto;
+  transition: opacity 0.15s ease;
+}
+
+.header-wrapper--border-bottom:has(.mega-menu[open])::after {
+  opacity: 0;
 }
 
 .header {
@@ -2776,20 +2786,33 @@ details[open] > .header__submenu {
 }
 
 .header__menu {
-  padding: 0 1rem;
+  padding: 0;
+}
+
+.header__inline-menu .list-menu--inline {
+  gap: 0.6rem;
 }
 
 .header__menu-item {
-  padding: 1.2rem;
+  padding: 0.8rem 1.2rem;
   text-decoration: none;
-  color: rgba(var(--color-foreground), 0.75);
+  color: rgba(var(--color-foreground), 0.55);
   text-transform: uppercase;
-  letter-spacing: 0.05em;
-  font-size: 0.9em;
+  letter-spacing: 0.1rem;
+  font-size: 1.15rem;
+  font-weight: 600;
+  line-height: 1;
+  border: none;
+  background: none;
+  position: relative;
+  transition: color 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
 }
 
 .header__menu-item:hover {
-  color: rgb(var(--color-foreground));
+  color: var(--color-brand-primary);
 }
 
 .header__menu-item span {
