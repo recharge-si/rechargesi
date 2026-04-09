@@ -184,6 +184,10 @@
 }
 
 /* Variant pill grid — columns = min(variant count, 5), all rows same button width */
+.product-form__input--pill .variant-pills-grid {
+  margin-top: 1.2rem;
+}
+
 .variant-pills-grid {
   display: grid;
   grid-template-columns: repeat(var(--pill-cols, 5), 1fr);

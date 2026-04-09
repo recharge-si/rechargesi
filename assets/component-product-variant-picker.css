@@ -23,8 +23,17 @@ variant-selects {
 }
 
 :is(.product-form__input--pill, .product-form__input--swatch) .form__label {
-  margin-bottom: 0.2rem;
+  display: inline-block;
+  margin-bottom: 0;
+  padding-bottom: 0.7rem;
+  border-bottom: 3px solid var(--color-brand-primary);
+  font-size: 1.2rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  line-height: 1;
 }
+
 
 .product-form__input input[type='radio'] {
   clip: rect(0, 0, 0, 0);

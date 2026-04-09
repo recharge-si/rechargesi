@@ -8,7 +8,7 @@
   Usage:
   {% render 'product-variant-picker', product: product, block: block, product_form_id: product_form_id %}
 {% endcomment %}
-{%- unless product.has_only_default_variant -%}
+{%- unless product.has_only_default_variant or product.variants.size <= 1 -%}
   <variant-selects
     id="variant-selects-{{ section.id }}"
     data-section="{{ section.id }}"
@@ -30,7 +30,7 @@
       {%- if picker_type == 'swatch' -%}
         <fieldset class="js product-form__input product-form__input--swatch">
           <legend class="form__label">
-            {{ option.name }}:
+            {%- if option.name == 'Title' -%}Select product variant{%- else -%}{{ option.name }}{%- endif -%}:
             <span data-selected-value>
               {{- option.selected_value -}}
             </span>
@@ -46,7 +46,7 @@
         {%- assign pill_cols = option.values.size | at_most: 5 -%}
         {%- assign grid_id = section.id | append: '-opt' | append: option.position -%}
         <fieldset class="js product-form__input product-form__input--pill">
-          <legend class="form__label">{{ option.name }}</legend>
+          <legend class="form__label">{%- if option.name == 'Title' -%}Select product variant{%- else -%}{{ option.name }}{%- endif -%}</legend>
           <div class="variant-pills-grid" data-grid="{{ grid_id }}" style="--pill-cols: {{ pill_cols }}">
             {% render 'product-variant-options',
               product: product,
@@ -85,7 +85,7 @@
       {%- else -%}
         <div class="product-form__input product-form__input--dropdown">
           <label class="form__label" for="Option-{{ section.id }}-{{ forloop.index0 }}">
-            {{ option.name }}
+            {%- if option.name == 'Title' -%}Select product variant{%- else -%}{{ option.name }}{%- endif -%}
           </label>
           <div class="select">
             {%- if picker_type == 'swatch_dropdown' -%}
