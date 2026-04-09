@@ -34,6 +34,10 @@
             "swatch_shape": "circle"
           }
         },
+        "barcode_token": {
+          "type": "barcode_token",
+          "settings": {}
+        },
         "quantity_selector": {
           "type": "quantity_selector",
           "settings": {}
@@ -61,6 +65,7 @@
         "title",
         "price",
         "variant_picker",
+        "barcode_token",
         "quantity_selector",
         "buy_buttons",
         "description",

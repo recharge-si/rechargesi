@@ -1,0 +1,121 @@
+{% comment %}
+  Renders variant Barcode (EAN) and SKU as label/value rows.
+  Updates dynamically when the selected variant changes.
+
+  Accepts:
+    - product:    {Object} Product Liquid object
+    - section_id: {String} Section ID for unique element IDs
+
+  Usage:
+    {%- render 'product-barcode-token', product: product, section_id: section.id -%}
+{% endcomment %}
+
+{%- liquid
+  assign current_variant = product.selected_or_first_available_variant
+  assign barcode_val = current_variant.barcode | default: ''
+  assign sku_val     = current_variant.sku | default: ''
+-%}
+
+<style>
+  .pbt-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    border-top: 1px solid rgba(var(--color-foreground), 0.08);
+  }
+
+  .pbt-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1.6rem;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid rgba(var(--color-foreground), 0.08);
+  }
+
+  .pbt-label {
+    font-size: 1.3rem;
+    color: rgba(var(--color-foreground), 0.55);
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .pbt-value {
+    font-size: 1.3rem;
+    font-weight: 500;
+    color: rgba(var(--color-foreground), 0.9);
+    text-align: right;
+    letter-spacing: 0.01em;
+    transition: opacity 0.18s ease, transform 0.18s ease;
+  }
+
+  .pbt-value.pbt-updating {
+    opacity: 0;
+    transform: translateY(3px);
+  }
+
+  .pbt-value.pbt-empty {
+    color: rgba(var(--color-foreground), 0.25);
+  }
+</style>
+
+<script>
+  window.__pbt = window.__pbt || {};
+  {% for v in product.variants %}
+  window.__pbt[{{ v.id | json }}] = {
+    barcode: {{ v.barcode | default: '' | json }},
+    sku:     {{ v.sku | default: '' | json }}
+  };
+  {% endfor %}
+</script>
+
+<div
+  class="pbt-wrap"
+  id="ProductBarcodeToken-{{ section_id }}"
+  data-section-id="{{ section_id }}"
+>
+  <div class="pbt-row">
+    <span class="pbt-label">SKU:</span>
+    <span
+      class="pbt-value{% if sku_val == blank %} pbt-empty{% endif %}"
+      id="PbtSku-{{ section_id }}"
+    >{{- sku_val | default: '—' -}}</span>
+  </div>
+  <div class="pbt-row">
+    <span class="pbt-label">EAN code:</span>
+    <span
+      class="pbt-value{% if barcode_val == blank %} pbt-empty{% endif %}"
+      id="PbtBarcode-{{ section_id }}"
+    >{{- barcode_val | default: '—' -}}</span>
+  </div>
+</div>
+
+<script>
+  (function () {
+    var sectionId = {{ section_id | json }};
+    var skuEl     = document.getElementById('PbtSku-' + sectionId);
+    var barcodeEl = document.getElementById('PbtBarcode-' + sectionId);
+
+    if (!skuEl || !barcodeEl) return;
+
+    function updateField(el, value) {
+      el.classList.add('pbt-updating');
+      setTimeout(function () {
+        var v = value && value.toString().trim();
+        el.textContent = v || '—';
+        el.classList.toggle('pbt-empty', !v);
+        el.classList.remove('pbt-updating');
+      }, 180);
+    }
+
+    document.addEventListener('variant-change', function (event) {
+      var data = event.detail && event.detail.data;
+      if (!data || data.sectionId !== sectionId) return;
+      var variant = data.variant;
+      if (!variant) return;
+      var pbt = (window.__pbt && window.__pbt[variant.id]) || {};
+      updateField(skuEl,     pbt.sku     || variant.sku     || '');
+      updateField(barcodeEl, pbt.barcode || variant.barcode || '');
+    });
+  })();
+</script>

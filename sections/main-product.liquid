@@ -75,6 +75,29 @@
 
   {% assign variant_images = product.images | where: 'attached_to_variant?', true | map: 'src' %}
   <div class="page-width">
+    {%- comment -%} Pre-grid header: vendor text + product title rendered above the image column {%- endcomment -%}
+    <div class="product-page-header">
+      {%- assign pph_done = false -%}
+      {%- for block in section.blocks -%}
+        {%- unless pph_done -%}
+          {%- case block.type -%}
+            {%- when 'text' -%}
+              <p
+                class="product__text inline-richtext{% if block.settings.text_style == 'uppercase' %} caption-with-letter-spacing{% elsif block.settings.text_style == 'subtitle' %} subtitle{% endif %}"
+                {{ block.shopify_attributes }}
+              >{{- block.settings.text -}}</p>
+            {%- when 'title' -%}
+              <div class="product__title" {{ block.shopify_attributes }}>
+                <h1>{{ product.title | escape }}</h1>
+                <a href="{{ product.url }}" class="product__title">
+                  <h2 class="h1">{{ product.title | escape }}</h2>
+                </a>
+              </div>
+              {%- assign pph_done = true -%}
+          {%- endcase -%}
+        {%- endunless -%}
+      {%- endfor -%}
+    </div>
     <div class="product product--{{ section.settings.media_size }} product--{{ section.settings.media_position }} product--{{ section.settings.gallery_layout }} product--mobile-{{ section.settings.mobile_thumbnails }} grid grid--1-col {% if product.media.size > 0 %}grid--2-col-tablet{% else %}product--no-media{% endif %}">
       <div class="grid__item product__media-wrapper">
         {% render 'product-media-gallery', variant_images: variant_images %}
@@ -86,7 +109,9 @@
         >
           {%- assign product_form_id = 'product-form-' | append: section.id -%}
 
+          {%- assign ppp_seen_title = false -%}
           {%- for block in section.blocks -%}
+            {%- if ppp_seen_title -%}
             {%- case block.type -%}
               {%- when '@app' -%}
                 {% render block %}
@@ -208,6 +233,8 @@
                   <span class="visually-hidden">{{ 'products.product.sku' | t }}:</span>
                   {{- product.selected_or_first_available_variant.sku -}}
                 </p>
+              {%- when 'barcode_token' -%}
+                {%- render 'product-barcode-token', product: product, section_id: section.id -%}
               {%- when 'custom_liquid' -%}
                 {{ block.settings.custom_liquid }}
               {%- when 'collapsible_tab' -%}
@@ -676,6 +703,9 @@
               {%- when 'icon-with-text' -%}
                 {% render 'icon-with-text', block: block %}
             {%- endcase -%}
+            {%- elsif block.type == 'title' -%}
+              {%- assign ppp_seen_title = true -%}
+            {%- endif -%}
           {%- endfor -%}
           <a href="{{ product.url }}" class="link product__view-details animate-arrow">
             {{ 'products.product.view_full_details' | t }}
@@ -816,6 +846,11 @@
           "label": "t:sections.main-product.blocks.sku.settings.text_style.label"
         }
       ]
+    },
+    {
+      "type": "barcode_token",
+      "name": "Barcode & Token",
+      "limit": 1
     },
     {
       "type": "inventory",

@@ -54,6 +54,19 @@
 }
 
 /* --- Product Title --- */
+.product__title {
+  padding-bottom: 1.4rem;
+}
+
+.product__title::after {
+  content: '';
+  display: block;
+  width: 36px;
+  height: 3px;
+  background: var(--color-brand-primary);
+  margin-top: 1rem;
+}
+
 .product__title h1,
 .product__title .h1 {
   font-size: 2.8rem;
@@ -118,9 +131,31 @@
   border-radius: 2px;
 }
 
+/* --- Pre-grid header: vendor + title above the image column --- */
+.product-page-header {
+  margin-bottom: 1.6rem;
+}
+
+.product-page-header .product__title {
+  padding-bottom: 0;
+}
+
+@media screen and (min-width: 750px) {
+  .product-page-header {
+    max-width: 60%;
+  }
+}
+
+@media screen and (min-width: 990px) {
+  .product-page-header {
+    max-width: 65%;
+    padding-right: 4rem;
+  }
+}
+
 /* --- Spacing & Visual Rhythm --- */
 .product__info-container > * + * {
-  margin-top: 1.8rem;
+  margin-top: 1.4rem;
 }
 
 .product__info-container > .product__title {
