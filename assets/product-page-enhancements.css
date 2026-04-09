@@ -437,10 +437,54 @@
     font-size: 1.35rem;
   }
 
-  /* Full-bleed gallery on mobile */
-  .product__media-wrapper {
-    margin: 0 -1.5rem;
-    width: calc(100% + 3rem);
+  /* Dawn's slider-component already handles full-bleed via its own margin: 0 -1.5rem.
+     Adding wrapper-level bleed on top causes a double-bleed / horizontal scroll bug. */
+
+  /* On mobile, constrain-height was designed for desktop (keep price visible in viewport).
+     Mobile is a stacked layout — user scrolls anyway.
+     Fix: use the image's natural aspect ratio for the container height so the container
+     is exactly image-proportioned. base.css's object-fit:cover then fills it with
+     zero cropping and zero letterboxing. Width = 100% of the slide. */
+  .product-media-container.constrain-height,
+  .product-media-container.constrain-height.media-fit-contain {
+    width: 100%;
+  }
+  .product-media-container.constrain-height .media {
+    padding-top: var(--ratio-percent) !important;
+  }
+
+  /* Hide gallery slider nav buttons on mobile — swipe only */
+  .product__media-wrapper .slider-buttons,
+  .product__media-wrapper .slider-button {
+    display: none !important;
+  }
+
+  /* No zoom icon, no tap-to-modal. User swipes; image is already full size. */
+  .product__media-icon {
+    display: none !important;
+  }
+  .product__modal-opener {
+    pointer-events: none;
+  }
+
+  /* Thumbnail strip: match the gallery viewer's full-bleed width.
+     syncThumbnailWidth() skips mobile (mql = min-width:750px), so width must be set via CSS.
+     The GalleryViewer gets margin: 0 -1.5rem from Dawn's existing mobile rule;
+     we apply the same to the thumbnail slider so they align. */
+  .thumbnail-slider {
+    margin-left: -1.5rem;
+    margin-right: -1.5rem;
+  }
+
+  /* Cap variant pill columns at 4 — 5 columns is too narrow on mobile screens */
+  .variant-pills-grid {
+    grid-template-columns: repeat(min(var(--pill-cols, 4), 4), 1fr);
+  }
+
+  /* Tighter trust strip on mobile */
+  .product-trust-strip {
+    gap: 1rem;
+    padding: 0.8rem 0 0.2rem;
   }
 }
 

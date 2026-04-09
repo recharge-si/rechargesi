@@ -5,7 +5,9 @@
       "Bash(sed 's/.*\\\\.//')",
       "Bash(shopify theme:*)",
       "Bash(git commit:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(grep -E \"\\\\.\\(js|ts\\)$\")",
+      "Bash(grep:*)"
     ]
   }
 }
