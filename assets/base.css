@@ -1389,6 +1389,7 @@ shopify-accelerated-checkout-cart {
   width: fit-content;
 }
 
+/* Trigger — clean inline text action, no box */
 .share-button__button {
   display: inline-flex;
   align-items: center;
@@ -1396,16 +1397,14 @@ shopify-accelerated-checkout-cart {
   cursor: pointer;
   background: transparent;
   border: none;
-  border-left: 3px solid var(--color-brand-primary);
-  padding: 0.55rem 1.1rem 0.55rem 0.9rem;
-  font-size: 1.05rem;
-  font-weight: 700;
-  letter-spacing: 0.12em;
+  padding: 0.5rem 0;
+  font-size: 1.2rem;
+  font-weight: 600;
+  letter-spacing: 0.1rem;
   text-transform: uppercase;
   color: rgb(var(--color-foreground));
-  transition: background-color 0.18s ease, color 0.18s ease;
-  min-height: 0;
-  line-height: 1.2;
+  transition: color var(--duration-short) ease;
+  line-height: 1;
   list-style: none;
 }
 
@@ -1415,61 +1414,68 @@ shopify-accelerated-checkout-cart {
 
 .share-button__button:hover,
 details[open] > .share-button__button {
-  background-color: var(--color-brand-primary);
-  color: #fff;
+  color: var(--color-brand-primary);
 }
 
+/* Override svg-wrapper's fixed 20px so icon scales with font */
+.share-button__button .svg-wrapper {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+/* Icon always brand red — immediate visual signal */
 .share-button__button .icon-share {
-  width: 1.3rem;
-  height: 1.3rem;
-  flex-shrink: 0;
+  color: var(--color-brand-primary);
 }
 
 details[open] > .share-button__fallback {
   animation: animateMenuOpen var(--duration-default) ease;
 }
 
+/* Popup card — matches mega menu border treatment */
 .share-button__fallback {
   position: absolute;
-  top: calc(100% + 0.3rem);
+  top: calc(100% + 0.2rem);
   left: 0;
   z-index: 10;
   background: rgb(var(--color-background));
+  border: 1px solid rgba(var(--color-foreground), 0.1);
   border-top: 3px solid var(--color-brand-primary);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1), 0 2px 8px rgba(0, 0, 0, 0.06);
   min-width: 26rem;
   display: flex;
   flex-direction: column;
 }
 
+/* URL display — styled as a real theme input */
 .share-button__url-input {
   width: 100%;
   border: none;
   border-bottom: 1px solid rgba(var(--color-foreground), 0.08);
-  background: rgba(var(--color-foreground), 0.03);
-  padding: 1rem 1.2rem;
-  font-size: 1.15rem;
-  font-family: ui-monospace, 'SFMono-Regular', 'Courier New', monospace;
-  color: rgba(var(--color-foreground), 0.55);
+  background: transparent;
+  padding: 1.2rem 1.4rem;
+  font-size: 1.2rem;
+  font-family: var(--font-body-family), sans-serif;
+  color: rgba(var(--color-foreground), 0.5);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  cursor: pointer;
+  cursor: text;
   outline: none;
   box-shadow: none;
 }
 
 .share-button__url-input:focus {
-  background: rgba(var(--color-foreground), 0.05);
-  color: rgba(var(--color-foreground), 0.8);
+  color: rgb(var(--color-foreground));
+  background: rgba(var(--color-foreground), 0.03);
 }
 
+/* Close — absolute X in top-right, shown after copy */
 .share-button__close {
   position: absolute;
-  top: 0.5rem;
-  right: 0.5rem;
-  width: 2.4rem;
-  height: 2.4rem;
+  top: 0.4rem;
+  right: 0.4rem;
+  width: 2.8rem;
+  height: 2.8rem;
   padding: 0;
   display: flex;
   align-items: center;
@@ -1477,8 +1483,8 @@ details[open] > .share-button__fallback {
   background: transparent;
   border: none;
   cursor: pointer;
-  color: rgba(var(--color-foreground), 0.4);
-  transition: color 0.15s ease;
+  color: rgba(var(--color-foreground), 0.35);
+  transition: color var(--duration-short) ease;
   z-index: 2;
 }
 
@@ -1495,26 +1501,28 @@ details[open] > .share-button__fallback {
   display: none;
 }
 
+/* Copy button — uses same vars as theme primary button */
 .share-button__copy {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 0.7rem;
   width: 100%;
-  padding: 1rem 1.4rem;
-  background: var(--color-brand-primary);
-  color: #fff;
+  padding: 1.1rem 1.4rem;
+  background: rgba(var(--color-button), var(--alpha-button-background));
+  color: rgb(var(--color-button-text));
   border: none;
   cursor: pointer;
-  font-size: 1.05rem;
-  font-weight: 700;
-  letter-spacing: 0.12em;
+  font-size: 1.2rem;
+  font-weight: 600;
+  letter-spacing: 0.1rem;
   text-transform: uppercase;
-  transition: opacity 0.15s ease;
+  transition: opacity var(--duration-short) ease;
+  font-family: var(--font-body-family), sans-serif;
 }
 
 .share-button__copy:hover {
-  opacity: 0.88;
+  opacity: 0.85;
 }
 
 .share-button__copy .icon {
@@ -1523,16 +1531,16 @@ details[open] > .share-button__fallback {
   flex-shrink: 0;
 }
 
+/* Confirmed state — matches theme's success green */
 .share-button__message:not(:empty) {
   display: flex;
   align-items: center;
-  padding: 1rem 4rem 1rem 1.2rem;
-  font-size: 1.05rem;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
+  padding: 1.1rem 4rem 1.1rem 1.4rem;
+  font-size: 1.2rem;
+  font-weight: 600;
+  letter-spacing: 0.06rem;
   color: #1a7a3c;
-  background: rgba(26, 122, 60, 0.07);
+  background: rgba(26, 122, 60, 0.06);
 }
 
 .share-button__message:not(:empty):not(.hidden) ~ .share-button__url-input,
