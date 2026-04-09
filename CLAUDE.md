@@ -112,3 +112,29 @@ Key files:
 - `assets/media-gallery.js` — `MediaGallery` custom element; `syncThumbnailWidth()` is our addition
 - `snippets/product-media-gallery.liquid` — gallery HTML structure
 - `snippets/product-thumbnail.liquid` — sets `--ratio`/`--preview-ratio` inline styles on each media container
+
+### Product Card Hover Image (Collection / Homepage)
+
+**Feature:** On hover, product cards show a different image — preferring an angle/lifestyle shot over a near-identical variant photo.
+
+**Why this is custom:** Products are imported via CSV with this typical media structure:
+1. **Variant images** (one per size variant, e.g., `f-cross87-1000.jpg`) — all `attached_to_variant? = true`, all look nearly identical (same board, different size label)
+2. **Duplicate general image** — the same photo re-uploaded without variant association; Shopify deduplicates the filename with a `_1`/`_2` suffix (e.g., variant gets `f-cross113-1000_1.jpg`, general keeps `f-cross113-1000.jpg`)
+3. **Actual angle/detail shots** — genuinely different images (different angle, accessories, lifestyle)
+
+Stock Dawn just shows `media[1]` on hover, which is another variant's identical-looking photo.
+
+**Custom logic in `snippets/card-product.liquid`** (lines ~86–140):
+1. Iterates `card_product.images` (not `.media` — avoids `variant_ids` nil issues)
+2. Skips variant-attached images (`attached_to_variant? = true`)
+3. Skips general images that are filename duplicates of variant images (strips Shopify `_1`/`_2`/`_3` suffixes before comparing)
+4. Picks the first genuinely different general image (angle/detail shot)
+5. Falls back to: first non-featured image → `images[1]` as last resort
+
+**Debug attributes** (temporary — remove before production): The hover `<img>` tag includes `data-hover-debug-*` attributes showing the product handle, selection reason, picked filename, all images with `attached_to_variant?` values, and total count. Inspect the second `<img>` inside `.media--hover-effect` in browser dev tools.
+
+**Enabled via section settings:** `show_secondary_image: true` in both `templates/collection.json` and `templates/index.json` (featured collection "Izpostavljeno").
+
+Key files:
+- `snippets/card-product.liquid` — hover image selection logic (lines ~86–140)
+- `assets/component-card.css` — CSS hover transition (fade out primary, fade in + scale secondary)
