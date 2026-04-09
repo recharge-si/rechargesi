@@ -183,20 +183,33 @@
   display: block;
 }
 
+/* Variant pill grid — columns = min(variant count, 5), all rows same button width */
+.variant-pills-grid {
+  display: grid;
+  grid-template-columns: repeat(var(--pill-cols, 5), 1fr);
+  gap: 0.5rem;
+}
+
 /* Button-type variant pills → square blocks */
 .product-form__input .swatch__input + .swatch__label,
 .product-form__input input[type='radio'] + label {
   border-radius: 0 !important;
-  min-width: 4.8rem;
-  height: 4.2rem;
+  min-height: 4.2rem;
   font-size: 1.2rem;
   font-weight: 600;
   letter-spacing: 0.04em;
   border: 1.5px solid rgba(var(--color-foreground), 0.18);
   transition: border-color 0.15s ease, background-color 0.15s ease, color 0.15s ease;
-  display: inline-flex;
+}
+
+.variant-pills-grid input[type='radio'] + label {
+  display: flex !important;
   align-items: center;
   justify-content: center;
+  text-align: center;
+  width: 100% !important;
+  margin: 0 !important;
+  padding: 0.4rem 0.6rem !important;
 }
 
 /* Selected state — solid brand fill */
