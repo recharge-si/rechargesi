@@ -32,14 +32,14 @@
 .product__info-container > *:nth-child(7) { animation-delay: 0.44s; }
 .product__info-container > *:nth-child(8) { animation-delay: 0.48s; }
 
-/* --- Product Page Header (vendor + title inside image column) --- */
+/* --- Product Page Header — full-width above the image/info grid --- */
 .product-page-header {
-  margin-bottom: 2rem;
+  margin-bottom: 1.6rem;
 }
 
 @media screen and (min-width: 750px) {
   .product-page-header {
-    padding-right: 1rem;
+    margin-bottom: 2rem;
   }
 }
 
@@ -101,9 +101,9 @@
   margin-top: 1.2rem;
 }
 
-/* SKU/EAN sits flush — tighter gap into price */
-.product__info-container > .pbt-wrap + [id^="price-"] {
-  margin-top: 2rem;
+/* SKU/EAN — below buy buttons, modest gap */
+.product__info-container > .pbt-wrap {
+  margin-top: 1.6rem !important;
 }
 
 /* Tighter gap from price to variant picker */
@@ -237,7 +237,25 @@
 
 /* --- Add to Cart: Full-Width Brand CTA --- */
 .product-form__buttons {
+  display: flex;
+  flex-direction: column;
   gap: 0.8rem;
+}
+
+/* Dynamic checkout (PayPal etc.) — divider before it */
+.shopify-payment-button {
+  position: relative;
+  margin-top: 0.2rem;
+}
+
+.shopify-payment-button::before {
+  content: 'or';
+  display: block;
+  text-align: center;
+  font-size: 1.1rem;
+  color: rgba(var(--color-foreground), 0.35);
+  letter-spacing: 0.05em;
+  margin-bottom: 0.6rem;
 }
 
 .product-form__submit.button--primary {
@@ -407,11 +425,55 @@
     margin: 0 -1.5rem;
     width: calc(100% + 3rem);
   }
+}
 
-  .product-page-header {
-    padding-left: 1.5rem;
-    padding-right: 1.5rem;
-  }
+/* --- Trust strip below CTA buttons --- */
+.product-form__buttons + .product-trust-strip,
+.product-trust-strip {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.8rem;
+  padding: 1.1rem 0 0.4rem;
+  margin-top: 0.2rem;
+  flex-wrap: wrap;
+}
+
+.product-trust-strip__item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.1rem;
+  color: rgba(var(--color-foreground), 0.5);
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+}
+
+.product-trust-strip__item svg {
+  width: 1.5rem;
+  height: 1.5rem;
+  flex-shrink: 0;
+  stroke: rgba(var(--color-foreground), 0.4);
+}
+
+/* --- Urgency / low-stock badge inline --- */
+.product__urgency-note {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #b45309;
+  background: rgba(180, 83, 9, 0.07);
+  border-radius: 2px;
+  padding: 0.35rem 0.75rem;
+  margin-top: 0.4rem;
+}
+
+/* --- Price: tighten badge vertical alignment --- */
+.price .badge {
+  vertical-align: 2px;
 }
 
 /* --- Reduce Motion --- */

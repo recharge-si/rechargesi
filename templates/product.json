@@ -63,11 +63,11 @@
       "block_order": [
         "vendor",
         "title",
-        "barcode_token",
         "price",
         "variant_picker",
         "quantity_selector",
         "buy_buttons",
+        "barcode_token",
         "description",
         "share"
       ],
