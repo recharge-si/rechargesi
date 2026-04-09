@@ -97,3 +97,48 @@
 .collection__view-all a:not(.link) {
   margin-top: 1rem;
 }
+
+/* ── Brand "View all" button ── */
+.collection__view-all .button {
+  background-color: var(--color-brand-primary);
+  color: #fff;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  font-weight: 600;
+  font-size: 1.3rem;
+  padding: 0 3.6rem;
+  min-height: 4.8rem;
+  border-radius: 0;
+  position: relative;
+  overflow: hidden;
+  transition: color 0.3s ease;
+  z-index: 0;
+}
+
+/* Accent sweep — same pattern as nav hover */
+.collection__view-all .button::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.15);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: -1;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.collection__view-all .button:not([disabled]):hover::after {
+  transform: scaleX(1);
+  box-shadow: none;
+  --border-offset: 0;
+}
+
+.collection__view-all .button::before {
+  display: none;
+}
+
+.collection__view-all .button:focus-visible {
+  box-shadow: 0 0 0 0.3rem rgb(var(--color-background)), 0 0 0 0.5rem var(--color-brand-primary);
+}
