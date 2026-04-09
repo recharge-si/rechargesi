@@ -1484,9 +1484,9 @@ a.product__text {
   }
 
   .product-media-container.constrain-height {
-    /* Increased from 170px to account for the two-row header (logo row + nav row ≈ 170px)
-       plus section top padding, so the image stays within the viewport */
-    --viewport-offset: 300px;
+    /* Small offset so image can overflow the fold slightly — portrait images
+       fill more of the column width and the gap to the info panel shrinks */
+    --viewport-offset: 100px;
     --constrained-min-height: 400px;
   }
 
