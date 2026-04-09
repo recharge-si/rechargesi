@@ -825,6 +825,12 @@
   color: rgb(var(--color-background));
 }
 
+/* --- Uniform card image ratio — override "adapt" so all cards crop to 1:1 --- */
+.product-card-wrapper .card.ratio,
+.product-card-wrapper .card .card__inner.ratio {
+  --ratio-percent: 100% !important;
+}
+
 /* --- Subtle vignette on hover for image depth --- */
 @media screen and (min-width: 990px) {
   .product-card-wrapper .card__media .media::after {
