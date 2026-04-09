@@ -86,7 +86,7 @@
     min-width: auto;
   }
 
-  /* Trigger button — matches .facets__summary / variant pill style */
+  /* Trigger button — matches .facets__summary / nav item style */
   .sbs__trigger {
     all: unset;
     box-sizing: border-box;
@@ -95,23 +95,42 @@
     gap: 0.5rem;
     width: 100%;
     padding: 1rem 1.6rem;
-    border: 1px solid rgba(var(--color-foreground), 0.25);
+    border: none;
     border-radius: 0;
-    background: rgb(var(--color-background));
-    color: rgb(var(--color-foreground));
+    background: none;
+    color: rgba(var(--color-foreground), 0.75);
     font-size: 1.4rem;
     font-weight: 400;
     letter-spacing: 0.1rem;
     line-height: 1;
     cursor: pointer;
-    transition: border-color 0.2s ease, color 0.2s ease, background 0.2s ease;
+    transition: color 0.3s ease, background 0.3s ease;
     white-space: nowrap;
     user-select: none;
     -webkit-user-select: none;
+    position: relative;
+  }
+
+  /* Accent sweep — matching nav + filter chips */
+  .sbs__trigger::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: var(--color-brand-primary);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
   }
 
   .sbs__trigger:hover {
-    border-color: rgb(var(--color-foreground));
+    color: rgb(var(--color-foreground));
+  }
+
+  .sbs__trigger:hover::after {
+    transform: scaleX(1);
   }
 
   .sbs__trigger:focus-visible {
@@ -119,9 +138,12 @@
   }
 
   .sbs__trigger[aria-expanded="true"] {
-    border-color: var(--color-brand-primary);
     color: #fff;
     background: var(--color-brand-primary);
+  }
+
+  .sbs__trigger[aria-expanded="true"]::after {
+    transform: scaleX(0);
   }
 
   .sbs__trigger[aria-expanded="true"] .sbs__caret {
@@ -162,8 +184,10 @@
     /* hidden state */
     opacity: 0;
     visibility: hidden;
-    transform: translateY(-0.4rem);
-    transition: opacity 0.15s ease, transform 0.15s ease, visibility 0.15s;
+    transform: translateY(-0.8rem);
+    transition: opacity 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+                transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+                visibility 0.35s;
     pointer-events: none;
   }
 
@@ -187,7 +211,8 @@
   }
 
   .sbs__option:hover {
-    background: rgba(var(--color-foreground), 0.05);
+    color: var(--color-brand-primary);
+    background: rgba(var(--color-foreground), 0.03);
   }
 
   .sbs__option.is-selected {

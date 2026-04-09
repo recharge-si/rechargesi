@@ -38,21 +38,52 @@ class HeaderMenu extends DetailsDisclosure {
     this.header = document.querySelector('.header-wrapper');
     this.summary = this.mainDetailsToggle.querySelector('summary');
     this._onDocumentClick = this.onDocumentClick.bind(this);
+    this._closeTimeout = null;
 
     if (this.summary && this.summary.dataset.url) {
+      // Click always navigates — hover handles open/close
       this.summary.addEventListener('click', this.onSummaryClick.bind(this));
     }
+
+    // Hover-to-open on desktop
+    this.addEventListener('mouseenter', this.onMouseEnter.bind(this));
+    this.addEventListener('mouseleave', this.onMouseLeave.bind(this));
   }
 
   onSummaryClick(event) {
     event.preventDefault();
-    if (this.mainDetailsToggle.hasAttribute('open')) {
+    // Always navigate on click — the menu opens on hover
+    if (this.summary.dataset.url) {
       window.location.href = this.summary.dataset.url;
-    } else {
+    }
+  }
+
+  onMouseEnter() {
+    // Cancel any pending close
+    if (this._closeTimeout) {
+      clearTimeout(this._closeTimeout);
+      this._closeTimeout = null;
+    }
+
+    // Close other open menus first
+    document.querySelectorAll('header-menu').forEach((menu) => {
+      if (menu !== this && menu.mainDetailsToggle.hasAttribute('open')) {
+        menu.close();
+      }
+    });
+
+    if (!this.mainDetailsToggle.hasAttribute('open')) {
       this.mainDetailsToggle.setAttribute('open', '');
       this.onToggle();
       document.addEventListener('click', this._onDocumentClick);
     }
+  }
+
+  onMouseLeave() {
+    // Small delay so the menu doesn't flicker when moving between items
+    this._closeTimeout = setTimeout(() => {
+      this.close();
+    }, 150);
   }
 
   onDocumentClick(event) {
@@ -63,6 +94,10 @@ class HeaderMenu extends DetailsDisclosure {
   }
 
   close() {
+    if (this._closeTimeout) {
+      clearTimeout(this._closeTimeout);
+      this._closeTimeout = null;
+    }
     super.close();
     document.removeEventListener('click', this._onDocumentClick);
   }

@@ -6,39 +6,45 @@
   user-select: none;
 }
 
+/* Hover on mega-menu summary — inherit base hover (accent sweep + full-opacity text) */
 .mega-menu > summary.header__menu-item:hover span {
   text-decoration: none;
   color: inherit;
 }
 
+/* Open state — solid brand-red fill with white text */
 .mega-menu[open] > summary.header__menu-item,
 .mega-menu[open]:hover > summary.header__menu-item {
-  color: var(--color-brand-primary);
-  background: none;
+  color: #fff;
+  background: var(--color-brand-primary);
   text-decoration: none;
 }
 
 .mega-menu[open] > summary.header__menu-item span,
 .mega-menu[open]:hover > summary.header__menu-item span {
-  color: var(--color-brand-primary);
+  color: #fff;
   text-decoration: none;
 }
 
 .mega-menu[open] > summary.header__menu-item .icon-caret {
-  filter: none;
+  filter: brightness(0) invert(1);
 }
 
+/* Kill accent sweep when panel is open */
+.mega-menu[open] > summary.header__menu-item::after {
+  transform: scaleX(0);
+}
+
+/* Plain links (non-mega) hover — accent sweep handles it, just kill underline */
 a.header__menu-item:hover {
-  color: var(--color-brand-primary);
-  background: none;
   text-decoration: none;
 }
 
 a.header__menu-item:hover span {
-  color: var(--color-brand-primary);
   text-decoration: none;
 }
 
+/* ---- Mega Menu Panel ---- */
 .mega-menu__content {
   background-color: rgb(var(--color-background));
   border-radius: 0;
@@ -52,6 +58,7 @@ a.header__menu-item:hover span {
   right: 0;
 }
 
+/* Brand-red top accent bar — matches header bottom border */
 .mega-menu__content::before {
   content: '';
   position: absolute;
@@ -68,10 +75,12 @@ a.header__menu-item:hover span {
   max-height: calc(100vh - var(--header-bottom-position-desktop, 20rem) - 4rem);
 }
 
-
+/* Panel entrance — premium easing from card animations */
 .js .mega-menu__content {
   opacity: 0;
-  transform: translateY(-1.5rem);
+  transform: translateY(-0.8rem);
+  transition: opacity 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+              transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .mega-menu[open] .mega-menu__content {
@@ -79,6 +88,7 @@ a.header__menu-item:hover span {
   transform: translateY(0);
 }
 
+/* ---- Dropdown Link List ---- */
 .mega-menu__list {
   columns: 4;
   column-gap: 4rem;
@@ -91,13 +101,14 @@ a.header__menu-item:hover span {
 }
 
 .mega-menu__link {
-  color: rgba(var(--color-foreground), 0.75);
+  color: rgba(var(--color-foreground), 0.65);
   display: block;
   line-height: calc(1 + 0.3 / var(--font-body-scale));
-  padding: 0.6rem 0.8rem;
+  padding: 0.5rem 0.6rem;
   text-decoration: none;
-  transition: background-color var(--duration-short) ease, color var(--duration-short) ease;
+  transition: color 0.25s ease, background-color 0.25s ease;
   word-wrap: break-word;
+  position: relative;
 }
 
 .mega-menu__link--level-2 {
@@ -113,20 +124,21 @@ a.header__menu-item:hover span {
   columns: 4;
 }
 
+/* Dropdown link hover — brand red text + subtle left accent, not harsh inverted fill */
 .mega-menu__link:hover {
-  background-color: rgba(var(--color-foreground), 0.75);
-  color: rgb(var(--color-background));
+  color: var(--color-brand-primary);
+  background-color: rgba(var(--color-foreground), 0.03);
   text-decoration: none;
 }
 
 .mega-menu__link--active {
-  color: rgb(var(--color-foreground));
+  color: var(--color-brand-primary);
   text-decoration: none;
 }
 
 .mega-menu__link--active:hover {
-  background-color: rgba(var(--color-foreground), 0.75);
-  color: rgb(var(--color-background));
+  color: var(--color-brand-primary);
+  background-color: rgba(var(--color-foreground), 0.03);
 }
 
 .mega-menu .mega-menu__list--condensed {
