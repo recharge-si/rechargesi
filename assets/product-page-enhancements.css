@@ -1,0 +1,410 @@
+/* ============================================================
+   Product Page UI/UX Enhancements
+   Bold editorial aesthetic with brand-red accents
+   ============================================================ */
+
+/* --- Entrance Animations --- */
+@keyframes fadeSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Staggered reveal for info blocks */
+.product__info-container > * {
+  animation: fadeSlideUp 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.product__info-container > *:nth-child(1) { animation-delay: 0.08s; }
+.product__info-container > *:nth-child(2) { animation-delay: 0.14s; }
+.product__info-container > *:nth-child(3) { animation-delay: 0.20s; }
+.product__info-container > *:nth-child(4) { animation-delay: 0.26s; }
+.product__info-container > *:nth-child(5) { animation-delay: 0.32s; }
+.product__info-container > *:nth-child(6) { animation-delay: 0.38s; }
+.product__info-container > *:nth-child(7) { animation-delay: 0.42s; }
+.product__info-container > *:nth-child(8) { animation-delay: 0.46s; }
+.product__info-container > *:nth-child(9) { animation-delay: 0.50s; }
+.product__info-container > *:nth-child(10) { animation-delay: 0.54s; }
+
+/* Gallery fade-in */
+.product__media-wrapper {
+  animation: fadeIn 0.6s cubic-bezier(0.22, 1, 0.36, 1) 0.1s both;
+}
+
+/* --- Vendor Name (text block with uppercase style) --- */
+.product__text.caption-with-letter-spacing {
+  font-size: 1.1rem;
+  letter-spacing: 0.18rem;
+  text-transform: uppercase;
+  color: var(--color-brand-primary);
+  font-weight: 600;
+  margin-bottom: 0.4rem !important;
+  position: relative;
+  display: inline-block;
+}
+
+/* --- Product Title --- */
+.product__title h1,
+.product__title .h1 {
+  font-size: 2.8rem;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  font-weight: 700;
+  margin: 0;
+  transition: color 0.2s ease;
+}
+
+@media screen and (min-width: 750px) {
+  .product__title h1,
+  .product__title .h1 {
+    font-size: 3.4rem;
+  }
+}
+
+@media screen and (min-width: 990px) {
+  .product__title h1,
+  .product__title .h1 {
+    font-size: 3.8rem;
+  }
+}
+
+/* --- Price Enhancements --- */
+.price--large .price-item--regular,
+.price--large .price-item--sale {
+  font-size: 2.2rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+@media screen and (min-width: 750px) {
+  .price--large .price-item--regular,
+  .price--large .price-item--sale {
+    font-size: 2.6rem;
+  }
+}
+
+/* Sale price in brand red */
+.price--on-sale .price-item--sale {
+  color: var(--color-brand-primary);
+}
+
+/* Compare-at price — lighter, with clear strikethrough */
+.price--on-sale .price-item--regular {
+  font-size: 1.5rem;
+  opacity: 0.5;
+  font-weight: 400;
+}
+
+/* Sale badge — bold red pill */
+.price--on-sale .badge {
+  background-color: var(--color-brand-primary);
+  color: #fff;
+  border: none;
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.08rem;
+  text-transform: uppercase;
+  padding: 0.3rem 0.9rem;
+  border-radius: 2px;
+}
+
+/* --- Spacing & Visual Rhythm --- */
+.product__info-container > * + * {
+  margin-top: 1.8rem;
+}
+
+.product__info-container > .product__title {
+  margin-bottom: 0.6rem;
+}
+
+/* Divider after price block */
+.product__info-container > [id^="price-"] {
+  padding-bottom: 2rem;
+  border-bottom: 1px solid rgba(var(--color-foreground), 0.08);
+}
+
+/* Divider before buy buttons */
+.product__info-container > .product-form {
+  padding-top: 0.5rem;
+}
+
+/* --- Variant Picker Enhancements --- */
+/* Selected variant pill gets brand-red ring */
+.product-form__input input[type='radio']:checked + label {
+  border-color: var(--color-brand-primary) !important;
+  box-shadow: 0 0 0 1px var(--color-brand-primary);
+  color: var(--color-brand-primary);
+  font-weight: 600;
+}
+
+/* Variant pill hover */
+.product-form__input label:hover {
+  border-color: rgba(var(--color-foreground), 0.6);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+/* Variant section label */
+.product-form__group-name {
+  font-size: 1.2rem;
+  letter-spacing: 0.1rem;
+  text-transform: uppercase;
+  font-weight: 600;
+  margin-bottom: 0.8rem;
+}
+
+/* --- Quantity Selector Polish --- */
+.quantity {
+  border-radius: 0;
+  border-color: rgba(var(--color-foreground), 0.15);
+  transition: border-color 0.2s ease;
+}
+
+.quantity:hover,
+.quantity:focus-within {
+  border-color: rgba(var(--color-foreground), 0.4);
+}
+
+.quantity__label.form__label {
+  font-size: 1.2rem;
+  letter-spacing: 0.1rem;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+/* --- Add to Cart Button — Brand Red CTA --- */
+.product-form__submit.button--primary {
+  background-color: var(--color-brand-primary);
+  color: #fff;
+  border: none;
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: 0.12rem;
+  text-transform: uppercase;
+  min-height: 5.2rem;
+  transition: background-color 0.25s ease, transform 0.2s ease, box-shadow 0.25s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.product-form__submit.button--primary::before,
+.product-form__submit.button--primary::after {
+  content: none;
+}
+
+.product-form__submit.button--primary:hover {
+  background-color: #a50f14;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(189, 18, 24, 0.3);
+}
+
+.product-form__submit.button--primary:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(189, 18, 24, 0.2);
+}
+
+/* Sold-out state — muted */
+.product-form__submit[disabled] {
+  background-color: rgba(var(--color-foreground), 0.08) !important;
+  color: rgba(var(--color-foreground), 0.35) !important;
+  box-shadow: none !important;
+  transform: none !important;
+  cursor: not-allowed;
+}
+
+/* Dynamic checkout button (secondary) — clean outline */
+.product-form__submit.button--secondary {
+  border: 2px solid var(--color-brand-primary);
+  color: var(--color-brand-primary);
+  background: transparent;
+  font-weight: 700;
+  letter-spacing: 0.1rem;
+  text-transform: uppercase;
+  min-height: 5.2rem;
+  transition: background-color 0.25s ease, color 0.25s ease, transform 0.2s ease;
+}
+
+.product-form__submit.button--secondary::before,
+.product-form__submit.button--secondary::after {
+  content: none;
+}
+
+.product-form__submit.button--secondary:hover {
+  background-color: var(--color-brand-primary);
+  color: #fff;
+  transform: translateY(-1px);
+}
+
+/* --- Thumbnail Active State — Brand Red --- */
+.thumbnail-list .thumbnail[aria-current='true'] {
+  box-shadow: 0 0 0 2px var(--color-brand-primary) !important;
+}
+
+.thumbnail-list .thumbnail:hover {
+  opacity: 1;
+  box-shadow: 0 0 0 1px rgba(var(--color-foreground), 0.3);
+  transition: box-shadow 0.15s ease, opacity 0.15s ease;
+}
+
+/* --- Gallery Main Image Polish --- */
+.product__media-item.is-active .product-media-container {
+  transition: opacity 0.3s ease;
+}
+
+/* Subtle shadow on main image container */
+@media screen and (min-width: 750px) {
+  .product--thumbnail_slider .product__media-item .product-media-container {
+    border-radius: 2px;
+  }
+}
+
+/* --- Accordion / Collapsible Tabs --- */
+.product__accordion summary {
+  padding: 1.6rem 0;
+  transition: color 0.2s ease;
+}
+
+.product__accordion summary:hover {
+  color: var(--color-brand-primary);
+}
+
+.product__accordion summary:hover .accordion__title {
+  color: var(--color-brand-primary);
+}
+
+.product__accordion .accordion__title {
+  font-size: 1.4rem;
+  font-weight: 600;
+  letter-spacing: 0.04rem;
+  transition: color 0.2s ease;
+}
+
+.product__accordion details[open] summary {
+  border-bottom-color: transparent;
+}
+
+.product__accordion details[open] .accordion__content {
+  animation: fadeSlideUp 0.3s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* Accordion icon rotation — smoother */
+.product__accordion summary .icon-caret {
+  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* --- Description Block --- */
+.product__description {
+  font-size: 1.45rem;
+  line-height: 1.7;
+  color: rgba(var(--color-foreground), 0.7);
+}
+
+.product__description p + p {
+  margin-top: 1.2rem;
+}
+
+/* --- Share Button — Subtle Integration --- */
+.product__info-container .share-button {
+  opacity: 0.6;
+  transition: opacity 0.2s ease;
+}
+
+.product__info-container .share-button:hover {
+  opacity: 1;
+}
+
+/* --- Tax / Shipping Note --- */
+.product__tax {
+  font-size: 1.1rem;
+  color: rgba(var(--color-foreground), 0.5);
+  margin-top: 0.6rem !important;
+}
+
+.product__tax a {
+  color: rgba(var(--color-foreground), 0.5);
+  text-decoration-color: rgba(var(--color-foreground), 0.25);
+  transition: color 0.2s ease, text-decoration-color 0.2s ease;
+}
+
+.product__tax a:hover {
+  color: var(--color-brand-primary);
+  text-decoration-color: var(--color-brand-primary);
+}
+
+/* --- Inventory Status --- */
+.product__inventory {
+  font-size: 1.2rem;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* --- Pickup Availability --- */
+.pickup-availability-preview {
+  padding: 1.4rem 0;
+  border-top: 1px solid rgba(var(--color-foreground), 0.08);
+  margin-top: 1.2rem;
+}
+
+/* --- Product Form Spacing --- */
+.product-form__buttons {
+  gap: 1rem;
+}
+
+/* --- Hover-to-Zoom Cursor Enhancement --- */
+.product__modal-opener--image:hover .product__media {
+  transition: transform 0.3s ease;
+}
+
+/* --- Mobile Refinements --- */
+@media screen and (max-width: 749px) {
+  .product__info-container {
+    padding: 0 0.5rem;
+  }
+
+  .product__title h1,
+  .product__title .h1 {
+    font-size: 2.4rem;
+  }
+
+  .price--large .price-item--regular,
+  .price--large .price-item--sale {
+    font-size: 2rem;
+  }
+
+  .product-form__submit.button--primary,
+  .product-form__submit.button--secondary {
+    min-height: 5rem;
+    font-size: 1.4rem;
+  }
+
+  /* Full-bleed gallery on mobile */
+  .product__media-wrapper {
+    margin: 0 -1.5rem;
+    width: calc(100% + 3rem);
+  }
+}
+
+/* --- Reduce Motion --- */
+@media (prefers-reduced-motion: reduce) {
+  .product__info-container > *,
+  .product__media-wrapper,
+  .product__accordion details[open] .accordion__content {
+    animation: none;
+  }
+
+  .product-form__submit.button--primary:hover,
+  .product-form__submit.button--secondary:hover {
+    transform: none;
+  }
+}
