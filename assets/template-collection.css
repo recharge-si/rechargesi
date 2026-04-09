@@ -98,6 +98,41 @@
   margin-top: 1rem;
 }
 
+/* ── Infinite scroll sentinel ── */
+#InfiniteScrollSentinel {
+  display: flex;
+  justify-content: center;
+  padding: 3rem 0 1rem;
+}
+
+#InfiniteScrollSentinel .infinite-scroll-spinner .loading__spinner {
+  width: 3.6rem;
+  height: 3.6rem;
+}
+
+#InfiniteScrollSentinel .infinite-scroll-spinner .spinner {
+  animation: rotator 1.4s linear infinite;
+}
+
+#InfiniteScrollSentinel .infinite-scroll-spinner .path {
+  stroke: var(--color-brand-primary);
+  stroke-dasharray: 187;
+  stroke-dashoffset: 0;
+  transform-origin: center;
+  animation: dash 1.4s ease-in-out infinite;
+}
+
+@keyframes rotator {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes dash {
+  0% { stroke-dashoffset: 187; }
+  50% { stroke-dashoffset: 46.75; transform: rotate(135deg); }
+  100% { stroke-dashoffset: 187; transform: rotate(450deg); }
+}
+
 /* ── Brand "View all" button ── */
 .collection__view-all .button {
   background-color: var(--color-brand-primary);

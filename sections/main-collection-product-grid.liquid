@@ -1,6 +1,7 @@
 {{ 'template-collection.css' | asset_url | stylesheet_tag }}
 {{ 'component-card.css' | asset_url | stylesheet_tag }}
 {{ 'component-price.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'infinite-scroll.js' | asset_url }}" defer="defer"></script>
 
 {% if section.settings.image_shape == 'blob' %}
   {{ 'mask-blobs.css' | asset_url | stylesheet_tag }}
@@ -161,7 +162,27 @@
             </ul>
 
             {%- if paginate.pages > 1 -%}
-              {% render 'pagination', paginate: paginate, anchor: '' %}
+              <div
+                id="InfiniteScrollSentinel"
+                data-next-url="{% if paginate.next %}{{ paginate.next.url }}{% endif %}"
+                data-current-page="{{ paginate.current_page }}"
+                data-total-pages="{{ paginate.pages }}"
+                data-section-id="{{ section.id }}"
+              >
+                <div class="infinite-scroll-spinner hidden">
+                  <div class="loading__spinner">
+                    <svg
+                      aria-hidden="true"
+                      focusable="false"
+                      class="spinner"
+                      viewBox="0 0 66 66"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <circle class="path" fill="none" stroke-width="6" cx="33" cy="33" r="30"></circle>
+                    </svg>
+                  </div>
+                </div>
+              </div>
             {%- endif -%}
           </div>
         {%- endif -%}

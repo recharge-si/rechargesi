@@ -33,30 +33,59 @@
   width: 100%;
   padding: 0;
   text-decoration: none;
+  font-weight: 600;
+  font-size: 1.3rem;
+  letter-spacing: 0.1em;
+  border: 2px solid transparent;
+  transition: border-color 0.25s ease, color 0.25s ease, background-color 0.25s ease;
 }
 
-a.pagination__item:hover::after {
-  height: 0.1rem;
+/* Current page — brand red fill */
+.pagination__item--current {
+  background-color: var(--color-brand-primary);
+  color: #fff;
+  border-color: var(--color-brand-primary);
+}
+
+/* Hover — red border outline */
+a.pagination__item:hover {
+  border-color: var(--color-brand-primary);
+  color: var(--color-brand-primary);
+}
+
+/* Remove default Dawn underline bars */
+a.pagination__item:hover::after,
+.pagination__item--current::after,
+.pagination__item:hover::after {
+  display: none;
 }
 
 .pagination__item .icon-caret {
   height: 0.6rem;
 }
 
-.pagination__item--current::after {
-  height: 0.1rem;
+/* Prev/next arrows — match product page slider buttons */
+.pagination__item--next,
+.pagination__item--prev {
+  background: var(--color-brand-primary);
+  border-color: var(--color-brand-primary);
+  color: #fff;
+  transition: background-color 0.15s ease, opacity 0.15s ease;
+  opacity: 0.9;
 }
 
-.pagination__item--current::after,
-.pagination__item:hover::after {
-  content: '';
-  display: block;
-  width: 2rem;
-  position: absolute;
-  bottom: 8px;
-  left: 50%;
-  transform: translateX(-50%);
-  background-color: currentColor;
+.pagination__item--next:hover,
+.pagination__item--prev:hover {
+  background: #a00f14;
+  border-color: #a00f14;
+  color: #fff;
+  opacity: 1;
+}
+
+.pagination__item--next .icon,
+.pagination__item--prev .icon {
+  color: #fff;
+  height: 0.6rem;
 }
 
 .pagination__item--next .icon {
@@ -66,6 +95,7 @@ a.pagination__item:hover::after {
 
 .pagination__item--next:hover .icon {
   transform: rotate(90deg) scale(1.07);
+  color: #fff;
 }
 
 .pagination__item--prev .icon {
@@ -75,6 +105,7 @@ a.pagination__item:hover::after {
 
 .pagination__item--prev:hover .icon {
   transform: rotate(-90deg) scale(1.07);
+  color: #fff;
 }
 
 .pagination__item-arrow:hover::after {
