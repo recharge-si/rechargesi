@@ -86,7 +86,7 @@
     min-width: auto;
   }
 
-  /* Trigger button — matches .facets__summary pill */
+  /* Trigger button — matches .facets__summary / variant pill style */
   .sbs__trigger {
     all: unset;
     box-sizing: border-box;
@@ -94,30 +94,34 @@
     align-items: center;
     gap: 0.5rem;
     width: 100%;
-    padding: 0.55rem 1.2rem 0.55rem 1rem;
-    border: 0.1rem solid rgba(var(--color-foreground), 0.18);
-    border-radius: 3rem;
-    background: transparent;
+    padding: 1rem 1.6rem;
+    border: 1px solid rgba(var(--color-foreground), 0.25);
+    border-radius: 0;
+    background: rgb(var(--color-background));
     color: rgb(var(--color-foreground));
-    font-weight: 500;
+    font-size: 1.4rem;
+    font-weight: 400;
+    letter-spacing: 0.1rem;
+    line-height: 1;
     cursor: pointer;
-    transition: border-color 0.15s ease, color 0.15s ease, background 0.15s ease;
+    transition: border-color 0.2s ease, color 0.2s ease, background 0.2s ease;
     white-space: nowrap;
+    user-select: none;
+    -webkit-user-select: none;
   }
 
   .sbs__trigger:hover {
-    border-color: rgba(var(--color-foreground), 0.4);
+    border-color: rgb(var(--color-foreground));
   }
 
   .sbs__trigger:focus-visible {
-    outline: 0.2rem solid var(--color-brand-primary);
-    outline-offset: 0.2rem;
+    box-shadow: 0 0 0 0.3rem rgb(var(--color-background)), 0 0 0 0.5rem rgba(var(--color-foreground), 0.55);
   }
 
   .sbs__trigger[aria-expanded="true"] {
     border-color: var(--color-brand-primary);
-    color: var(--color-brand-primary);
-    background: rgba(189, 18, 24, 0.04);
+    color: #fff;
+    background: var(--color-brand-primary);
   }
 
   .sbs__trigger[aria-expanded="true"] .sbs__caret {
@@ -151,9 +155,9 @@
     left: 0;
     min-width: 100%;
     background: rgb(var(--color-background));
-    border: 0.1rem solid rgba(var(--color-foreground), 0.12);
-    border-radius: 0.6rem;
-    box-shadow: 0 0.8rem 2.4rem rgba(0, 0, 0, 0.1), 0 0.2rem 0.6rem rgba(0, 0, 0, 0.06);
+    border: 1px solid rgba(var(--color-foreground), 0.15);
+    border-radius: 0;
+    box-shadow: 0 0.4rem 1.6rem rgba(0, 0, 0, 0.08), 0 0.1rem 0.4rem rgba(0, 0, 0, 0.04);
     z-index: 100;
     /* hidden state */
     opacity: 0;
@@ -187,7 +191,7 @@
   }
 
   .sbs__option.is-selected {
-    color: var(--color-brand-primary);
+    color: rgb(var(--color-foreground));
     font-weight: 600;
   }
 
@@ -209,8 +213,8 @@
     display: block;
     width: 0.5rem;
     height: 0.9rem;
-    border-right: 0.2rem solid var(--color-brand-primary);
-    border-bottom: 0.2rem solid var(--color-brand-primary);
+    border-right: 0.2rem solid rgb(var(--color-foreground));
+    border-bottom: 0.2rem solid rgb(var(--color-foreground));
     transform: rotate(45deg) scale(0);
     transition: transform 0.15s ease;
     margin-top: -0.15rem;

@@ -388,15 +388,6 @@
   color: rgba(var(--color-foreground), 0.65);
 }
 
-/* --- Share Button --- */
-.product__info-container .share-button {
-  opacity: 0.5;
-  transition: opacity 0.2s ease;
-}
-
-.product__info-container .share-button:hover {
-  opacity: 1;
-}
 
 /* --- Inventory --- */
 .product__inventory {

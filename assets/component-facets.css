@@ -37,7 +37,7 @@
   grid-column: 2;
   grid-row: 1;
   padding-left: 2.5rem;
-  border-left: 0.1rem solid rgba(var(--color-foreground), 0.1);
+  border-left: none;
 }
 
 @media screen and (min-width: 990px) {
@@ -48,12 +48,12 @@
 
 .facet-filters__label {
   display: block;
-  color: rgba(var(--color-foreground), 0.5);
-  font-size: 1.1rem;
-  font-weight: 500;
-  letter-spacing: 0.09em;
+  color: rgba(var(--color-foreground), 0.85);
+  font-size: 1.2rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
-  margin: 0 1.4rem 0 0;
+  margin: 0 1.2rem 0 0;
   white-space: nowrap;
 }
 
@@ -171,10 +171,10 @@
   display: grid;
   gap: 0 3.5rem;
   grid-template-columns: 1fr max-content max-content;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0;
   align-items: center;
-  padding: 1rem 0;
-  border-bottom: 0.1rem solid rgba(var(--color-foreground), 0.08);
+  padding: 1.2rem 0;
+  border-bottom: none;
 }
 
 .facets__wrapper {
@@ -189,12 +189,12 @@
 
 .facets__heading {
   display: block;
-  color: rgba(var(--color-foreground), 0.5);
-  font-size: 1.1rem;
-  font-weight: 500;
-  letter-spacing: 0.09em;
+  color: rgba(var(--color-foreground), 0.85);
+  font-size: 1.2rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
-  margin: 0 1rem 0 0;
+  margin: 0 1.2rem 0 0;
   white-space: nowrap;
 }
 
@@ -208,15 +208,19 @@
 
 .facets__summary {
   color: rgb(var(--color-foreground));
-  font-size: 1.3rem;
-  font-weight: 500;
-  padding: 0.55rem 1.2rem 0.55rem 1rem;
+  font-size: 1.4rem;
+  font-weight: 400;
+  letter-spacing: 0.1rem;
+  padding: 1rem 1.6rem;
   margin-bottom: 0;
-  border: 0.1rem solid rgba(var(--color-foreground), 0.18);
-  border-radius: 3rem;
-  transition: border-color 0.15s ease, color 0.15s ease, background 0.15s ease;
-  background: transparent;
+  border: 1px solid rgba(var(--color-foreground), 0.25);
+  border-radius: 0;
+  transition: border-color 0.2s ease, color 0.2s ease, background 0.2s ease;
+  background: rgb(var(--color-background));
   white-space: nowrap;
+  line-height: 1;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 .facets__summary > div {
@@ -255,12 +259,12 @@
 
 .facets__disclosure[open] .facets__summary {
   border-color: var(--color-brand-primary);
-  color: var(--color-brand-primary);
-  background: rgba(189, 18, 24, 0.04);
+  color: #fff;
+  background: var(--color-brand-primary);
 }
 
 .facets__summary:hover {
-  border-color: rgba(var(--color-foreground), 0.4);
+  border-color: rgb(var(--color-foreground));
   color: rgb(var(--color-foreground));
 }
 
@@ -313,12 +317,9 @@
 }
 
 .facets__display {
-  border-width: var(--popup-border-width);
-  border-style: solid;
-  border-color: rgba(var(--color-foreground), var(--popup-border-opacity));
-  border-radius: var(--popup-corner-radius);
-  box-shadow: var(--popup-shadow-horizontal-offset) var(--popup-shadow-vertical-offset) var(--popup-shadow-blur-radius)
-    rgba(var(--color-shadow), var(--popup-shadow-opacity));
+  border: 1px solid rgba(var(--color-foreground), 0.15);
+  border-radius: 0;
+  box-shadow: 0 0.4rem 1.6rem rgba(0, 0, 0, 0.08), 0 0.1rem 0.4rem rgba(0, 0, 0, 0.04);
   background-color: rgb(var(--color-background));
   position: absolute;
   top: calc(100% + 0.5rem);
@@ -329,11 +330,11 @@
 }
 
 .facets__header {
-  border-bottom: 1px solid rgba(var(--color-foreground), 0.2);
-  padding: 1.5rem 2rem;
+  border-bottom: 1px solid rgba(var(--color-foreground), 0.08);
+  padding: 1.2rem 1.6rem;
   display: flex;
   justify-content: space-between;
-  font-size: 1.4rem;
+  font-size: 1.3rem;
   position: sticky;
   top: 0;
   background-color: rgb(var(--color-background));
@@ -639,14 +640,16 @@ button.facets__button {
 
 span.active-facets__button-inner {
   color: rgb(var(--color-foreground));
-  box-shadow: 0 0 0 0.1rem rgb(var(--color-foreground));
-  border-radius: 2.6rem;
-  font-size: 1rem;
+  box-shadow: 0 0 0 1px rgba(var(--color-foreground), 0.25);
+  border-radius: 0;
+  font-size: 1.2rem;
+  letter-spacing: 0.05rem;
   min-height: 0;
   min-width: 0;
-  padding: 0.25rem 1.25rem;
+  padding: 0.6rem 1.2rem;
   display: flex;
   align-items: center;
+  background: rgb(var(--color-background));
 }
 
 span.active-facets__button-inner:before,
@@ -1149,12 +1152,13 @@ input.mobile-facets__checkbox {
   position: relative;
   text-align: right;
   white-space: nowrap;
-  color: rgba(var(--color-foreground), 0.5);
+  color: rgba(var(--color-foreground), 0.45);
 }
 
 .product-count__text {
-  font-size: 1.3rem;
-  font-weight: 400;
+  font-size: 1.2rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
   line-height: calc(1 + 0.5 / var(--font-body-scale));
   margin: 0;
 }

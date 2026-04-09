@@ -23,30 +23,23 @@
       {{ block.settings.share_label | escape }}
     </summary>
     <div class="share-button__fallback motion-reduce">
-      <div class="field">
-        <span id="ShareMessage-{{ section.id }}" class="share-button__message hidden" role="status"> </span>
-        <input
-          type="text"
-          class="field__input"
-          id="ShareUrl-{{ section.id }}"
-          value="{{ share_link }}"
-          placeholder="{{ 'general.share.share_url' | t }}"
-          onclick="this.select();"
-          readonly
-        >
-        <label class="field__label" for="ShareUrl-{{ section.id }}">{{ 'general.share.share_url' | t }}</label>
-      </div>
+      <span id="ShareMessage-{{ section.id }}" class="share-button__message hidden" role="status"></span>
+      <input
+        type="text"
+        class="share-button__url-input"
+        id="ShareUrl-{{ section.id }}"
+        value="{{ share_link }}"
+        placeholder="{{ 'general.share.share_url' | t }}"
+        onclick="this.select();"
+        readonly
+      >
       <button class="share-button__close hidden">
-        <span class="svg-wrapper">
-          {{- 'icon-close.svg' | inline_asset_content -}}
-        </span>
+        <span class="svg-wrapper">{{- 'icon-close.svg' | inline_asset_content -}}</span>
         <span class="visually-hidden">{{ 'general.share.close' | t }}</span>
       </button>
       <button class="share-button__copy">
-        <span class="svg-wrapper">
-          {{- 'icon-copy.svg' | inline_asset_content -}}
-        </span>
-        <span class="visually-hidden">{{ 'general.share.copy_to_clipboard' | t }}</span>
+        <span>{{ 'general.share.copy_to_clipboard' | t }}</span>
+        <span class="svg-wrapper">{{- 'icon-copy.svg' | inline_asset_content -}}</span>
       </button>
     </div>
   </details>
