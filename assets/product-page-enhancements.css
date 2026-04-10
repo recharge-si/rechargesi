@@ -37,6 +37,26 @@ a.product-breadcrumb__segment:hover {
   color: var(--color-brand-primary);
 }
 
+/* Mobile: overflow + tap targets */
+@media screen and (max-width: 749px) {
+  .product-breadcrumb {
+    overflow-x: auto;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding-bottom: 1.2rem;
+  }
+
+  .product-breadcrumb::-webkit-scrollbar {
+    display: none;
+  }
+
+  .product-breadcrumb a,
+  .product-breadcrumb span {
+    padding: 0.4rem 0;
+  }
+}
+
 .product-breadcrumb__current {
   color: rgba(var(--color-foreground), 0.6);
 }
