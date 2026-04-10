@@ -99,7 +99,7 @@ details[open].menu-opening > .menu-drawer__submenu {
 }
 
 .menu-drawer__menu-item {
-  padding: 1.3rem 3rem;
+  padding: 1.5rem 3rem;
   text-decoration: none;
   font-size: 1.4rem;
   text-transform: uppercase;
@@ -268,29 +268,6 @@ details[open].menu-opening > .menu-drawer__submenu {
   flex-shrink: 0;
 }
 
-/* Menu items — uppercase + letter-spacing to match desktop nav */
-.menu-drawer__menu-item {
-  text-transform: uppercase;
-  letter-spacing: 0.1rem;
-  font-weight: 600;
-  font-size: 1.4rem;
-  padding: 1.3rem 3rem;
-  position: relative;
-  transition: color 0.25s ease, background-color 0.25s ease;
-}
-
-.menu-drawer summary.menu-drawer__menu-item {
-  padding-right: 5.2rem;
-}
-
-/* Hover/focus — brand red left accent + subtle bg, matching mega-menu link hover */
-.menu-drawer__menu-item--active,
-.menu-drawer__menu-item:focus,
-.menu-drawer__menu-item:hover {
-  color: var(--color-brand-primary);
-  background-color: rgba(189, 18, 24, 0.04);
-}
-
 /* Active page item — solid brand-red fill with white text (matches desktop open state) */
 .menu-drawer__menu-item[aria-current="page"],
 a.menu-drawer__menu-item.menu-drawer__menu-item--active {
@@ -309,24 +286,6 @@ a.menu-drawer__menu-item.menu-drawer__menu-item--active:hover {
 .menu-drawer__menu-item:hover > .svg-wrapper,
 .menu-drawer__menu-item:focus > .svg-wrapper {
   color: var(--color-brand-primary);
-}
-
-/* Back button — cleaner, brand-aware */
-.menu-drawer__close-button {
-  text-transform: uppercase;
-  letter-spacing: 0.08rem;
-  font-weight: 600;
-  font-size: 1.3rem;
-  padding: 1.4rem 2.6rem 1.4rem 3rem;
-  margin-top: 0;
-  border-bottom: 1px solid rgba(var(--color-foreground), 0.08);
-  margin-bottom: 0.5rem;
-}
-
-.menu-drawer__close-button:hover,
-.menu-drawer__close-button:focus {
-  color: var(--color-brand-primary);
-  background-color: rgba(189, 18, 24, 0.04);
 }
 
 /* Utility links section — subtle top border for separation */
