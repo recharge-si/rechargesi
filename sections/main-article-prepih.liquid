@@ -1,0 +1,314 @@
+{{ 'section-article-prepih.css' | asset_url | stylesheet_tag }}
+
+<article class="article-prepih" itemscope itemtype="http://schema.org/BlogPosting">
+  {%- for block in section.blocks -%}
+    {%- case block.type -%}
+
+      {%- when 'title' -%}
+        {%- liquid
+          assign word_count = article.content | strip_html | split: ' ' | size
+          assign read_minutes = word_count | divided_by: 200
+          if read_minutes < 1
+            assign read_minutes = 1
+          endif
+        -%}
+        <nav class="article-prepih__breadcrumb page-width" aria-label="Breadcrumb">
+          <a href="/">Domov</a>
+          <span class="article-prepih__breadcrumb-sep" aria-hidden="true">/</span>
+          <a href="{{ blog.url }}">{{ blog.title | escape }}</a>
+          <span class="article-prepih__breadcrumb-sep" aria-hidden="true">/</span>
+          <span class="article-prepih__breadcrumb-current">{{ article.title | truncate: 40 }}</span>
+        </nav>
+        <header
+          class="article-prepih__header page-width{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--fade-in{% endif %}"
+          {{ block.shopify_attributes }}
+        >
+          <h1 class="article-prepih__title" itemprop="headline">
+            {{ article.title | escape }}
+          </h1>
+          <div class="article-prepih__meta-bar">
+            <div class="article-prepih__meta-left">
+              {%- if block.settings.blog_show_author -%}
+                <div class="article-prepih__author-badge" itemprop="author">
+                  <span class="article-prepih__author-initial">{{ article.author | slice: 0 }}</span>
+                  <span class="article-prepih__author-name">{{ article.author }}</span>
+                </div>
+              {%- endif -%}
+              <div class="article-prepih__meta-details">
+                {%- if block.settings.blog_show_date -%}
+                  <time class="article-prepih__date" datetime="{{ article.published_at | date: '%Y-%m-%d' }}" itemprop="datePublished">
+                    {{ article.published_at | date: '%d. %B %Y' }}
+                  </time>
+                {%- endif -%}
+                <span class="article-prepih__meta-divider" aria-hidden="true"></span>
+                <span class="article-prepih__read-time">{{ read_minutes }} min branja</span>
+                {%- if article.comments_count > 0 -%}
+                  <span class="article-prepih__meta-divider" aria-hidden="true"></span>
+                  <a href="#comments" class="article-prepih__comment-count">{{ article.comments_count }} {% if article.comments_count == 1 %}komentar{% else %}komentarjev{% endif %}</a>
+                {%- endif -%}
+              </div>
+            </div>
+          </div>
+        </header>
+
+      {%- when 'share' -%}
+        <div
+          class="article-prepih__share page-width{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--slide-in{% endif %}"
+          {{ block.shopify_attributes }}
+        >
+          {% assign share_url = request.origin | append: article.url %}
+          {% render 'share-button', block: block, share_link: share_url %}
+        </div>
+
+      {%- when 'content' -%}
+        <div
+          class="article-prepih__content page-width rte{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--slide-in{% endif %}"
+          itemprop="articleBody"
+          {{ block.shopify_attributes }}
+        >
+          {{ article.content }}
+        </div>
+
+    {%- endcase -%}
+  {%- endfor -%}
+
+  {%- if article.tags.size > 0 -%}
+    <div class="article-prepih__tags page-width{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--slide-in{% endif %}">
+      <span class="article-prepih__tags-label">Oznake</span>
+      {%- for tag in article.tags -%}
+        <a href="{{ blog.url }}/tagged/{{ tag | handle }}" class="article-prepih__tag">{{ tag }}</a>
+      {%- endfor -%}
+    </div>
+  {%- endif -%}
+
+  <div class="article-prepih__footer-bar page-width{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--slide-in{% endif %}">
+    <a href="{{ blog.url }}" class="article-prepih__back-link">
+      <span class="article-prepih__back-arrow" aria-hidden="true">&larr;</span>
+      {{ 'blogs.article.back_to_blog' | t: title: blog.title | escape }}
+    </a>
+  </div>
+
+  {%- if blog.comments_enabled? -%}
+    <div class="article-prepih__comments-wrapper">
+      <div class="article-prepih__comments-inner page-width" id="comments">
+        {%- if article.comments_count > 0 -%}
+          {%- assign anchorId = '#Comments-' | append: article.id -%}
+          <h2 id="Comments-{{ article.id }}" tabindex="-1">
+            {{ 'blogs.article.comments' | t: count: article.comments_count }}
+          </h2>
+          {% paginate article.comments by 5 %}
+            <div class="article-prepih__comments">
+              {%- if comment.status == 'pending' and comment.content -%}
+                <article id="{{ comment.id }}" class="article-prepih__comment">
+                  {{ comment.content }}
+                  <footer>
+                    <span>{{ comment.author }}</span>
+                  </footer>
+                </article>
+              {%- endif -%}
+              {%- for comment in article.comments -%}
+                <article id="{{ comment.id }}" class="article-prepih__comment">
+                  {{ comment.content }}
+                  <footer>
+                    <span>{{ comment.author }}</span>
+                    <span> &middot; </span>
+                    <span>{{ comment.created_at | date: '%d.%m.%Y' }}</span>
+                  </footer>
+                </article>
+              {%- endfor -%}
+              {% render 'pagination', paginate: paginate, anchor: anchorId %}
+            </div>
+          {% endpaginate %}
+        {%- endif -%}
+
+        <div class="article-prepih__comment-form">
+          {% form 'new_comment', article %}
+            {%- liquid
+              assign post_message = 'blogs.article.success'
+              if blog.moderated? and comment.status == 'unapproved'
+                assign post_message = 'blogs.article.success_moderated'
+              endif
+            -%}
+            <h2>{{ 'blogs.article.comment_form_title' | t }}</h2>
+            {%- if form.errors -%}
+              <div class="form__message" role="alert">
+                <h3 class="form-status caption-large text-body" tabindex="-1" autofocus>
+                  <span class="svg-wrapper">{{ 'icon-error.svg' | inline_asset_content }}</span>
+                  {{ 'templates.contact.form.error_heading' | t }}
+                </h3>
+              </div>
+              <ul class="form-status-list caption-large">
+                {%- for field in form.errors -%}
+                  <li>
+                    <a href="#CommentForm-{{ field }}" class="link">
+                      {%- if form.errors.translated_fields[field] contains 'author' -%}
+                        {{ 'blogs.article.name' | t }}
+                      {%- elsif form.errors.translated_fields[field] contains 'body' -%}
+                        {{ 'blogs.article.message' | t }}
+                      {%- else -%}
+                        {{ form.errors.translated_fields[field] }}
+                      {%- endif -%}
+                      {{ form.errors.messages[field] }}
+                    </a>
+                  </li>
+                {%- endfor -%}
+              </ul>
+            {%- elsif form.posted_successfully? -%}
+              <div class="form-status-list form__message" role="status">
+                <h3 class="form-status" tabindex="-1" autofocus>
+                  <span class="svg-wrapper">{{ 'icon-success.svg' | inline_asset_content }}</span>
+                  {{ post_message | t }}
+                </h3>
+              </div>
+            {%- endif -%}
+
+            <div class="article-prepih__comment-fields">
+              <div class="field field--with-error">
+                <input
+                  type="text"
+                  name="comment[author]"
+                  id="CommentForm-author"
+                  class="field__input"
+                  autocomplete="name"
+                  value="{{ form.author }}"
+                  aria-required="true"
+                  required
+                  {% if form.errors contains 'author' %}
+                    aria-invalid="true"
+                    aria-describedby="CommentForm-author-error"
+                  {% endif %}
+                  placeholder="{{ 'blogs.article.name' | t }}"
+                >
+                <label class="field__label" for="CommentForm-author">
+                  {{ 'blogs.article.name' | t }} <span aria-hidden="true">*</span>
+                </label>
+                {%- if form.errors contains 'author' -%}
+                  <small id="CommentForm-author-error">
+                    <span class="form__message">
+                      <span class="svg-wrapper">{{ 'icon-error.svg' | inline_asset_content }}</span>
+                      {{ 'blogs.article.name' | t }} {{ form.errors.messages.author }}.
+                    </span>
+                  </small>
+                {%- endif -%}
+              </div>
+              <div class="field field--with-error">
+                <input
+                  type="email"
+                  name="comment[email]"
+                  id="CommentForm-email"
+                  autocomplete="email"
+                  class="field__input"
+                  value="{{ form.email }}"
+                  autocorrect="off"
+                  autocapitalize="off"
+                  aria-required="true"
+                  required
+                  {% if form.errors contains 'email' %}
+                    aria-invalid="true"
+                    aria-describedby="CommentForm-email-error"
+                  {% endif %}
+                  placeholder="{{ 'blogs.article.email' | t }}"
+                >
+                <label class="field__label" for="CommentForm-email">
+                  {{ 'blogs.article.email' | t }} <span aria-hidden="true">*</span>
+                </label>
+                {%- if form.errors contains 'email' -%}
+                  <small id="CommentForm-email-error">
+                    <span class="form__message">
+                      <span class="svg-wrapper">{{ 'icon-error.svg' | inline_asset_content }}</span>
+                      {{ 'blogs.article.email' | t }} {{ form.errors.messages.email }}.
+                    </span>
+                  </small>
+                {%- endif -%}
+              </div>
+            </div>
+            <div class="field field--with-error">
+              <textarea
+                rows="5"
+                name="comment[body]"
+                id="CommentForm-body"
+                class="text-area field__input"
+                aria-required="true"
+                required
+                {% if form.errors contains 'body' %}
+                  aria-invalid="true"
+                  aria-describedby="CommentForm-body-error"
+                {% endif %}
+                placeholder="{{ 'blogs.article.message' | t }}"
+              >{{ form.body }}</textarea>
+              <label class="form__label field__label" for="CommentForm-body">
+                {{ 'blogs.article.message' | t }} <span aria-hidden="true">*</span>
+              </label>
+            </div>
+            {%- if form.errors contains 'body' -%}
+              <small id="CommentForm-body-error">
+                <span class="form__message">
+                  <span class="svg-wrapper">{{ 'icon-error.svg' | inline_asset_content }}</span>
+                  {{ 'blogs.article.message' | t }} {{ form.errors.messages.body }}.
+                </span>
+              </small>
+            {%- endif -%}
+            {%- if blog.moderated? -%}
+              <p class="article-prepih__comment-warning">{{ 'blogs.article.moderated' | t }}</p>
+            {%- endif -%}
+            <input type="submit" class="button" value="{{ 'blogs.article.post' | t }}">
+          {% endform %}
+        </div>
+      </div>
+    </div>
+  {%- endif -%}
+</article>
+
+<script type="application/ld+json">
+  {{ article | structured_data }}
+</script>
+
+{% schema %}
+{
+  "name": "Prepih Article",
+  "tag": "section",
+  "class": "section",
+  "blocks": [
+    {
+      "type": "@app"
+    },
+    {
+      "type": "title",
+      "name": "Title",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "checkbox",
+          "id": "blog_show_date",
+          "default": true,
+          "label": "Show date"
+        },
+        {
+          "type": "checkbox",
+          "id": "blog_show_author",
+          "default": false,
+          "label": "Show author"
+        }
+      ]
+    },
+    {
+      "type": "content",
+      "name": "Content",
+      "limit": 1
+    },
+    {
+      "type": "share",
+      "name": "Share",
+      "limit": 2,
+      "settings": [
+        {
+          "type": "text",
+          "id": "share_label",
+          "label": "Share label",
+          "default": "Share"
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

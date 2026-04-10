@@ -17,6 +17,12 @@
   <div class="color-{{ section.settings.color_scheme }} gradient">
     <div class="page-width section-{{ section.id }}-padding">
 
+      <nav class="blog-prepih__breadcrumb" aria-label="Breadcrumb">
+        <a href="/">Domov</a>
+        <span class="blog-prepih__breadcrumb-sep" aria-hidden="true">/</span>
+        <span class="blog-prepih__breadcrumb-current">{{ blog.title | escape }}</span>
+      </nav>
+
       <div class="blog-prepih__header{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--fade-in{% endif %}">
         <h1 class="blog-prepih__title">{{ blog.title | escape }}</h1>
       </div>
@@ -60,11 +66,22 @@
                 <a href="{{ article.url }}">{{ article.title | escape }}</a>
               </h2>
 
-              {%- if section.settings.show_date -%}
-                <div class="blog-prepih__card-date">
-                  {{ article.published_at | date: '%d.%m.%Y' }}
-                </div>
-              {%- endif -%}
+              {%- liquid
+                assign word_count = article.content | strip_html | split: ' ' | size
+                assign read_minutes = word_count | divided_by: 200
+                if read_minutes < 1
+                  assign read_minutes = 1
+                endif
+              -%}
+              <div class="blog-prepih__card-meta">
+                {%- if section.settings.show_date -%}
+                  <span class="blog-prepih__card-date">{{ article.published_at | date: '%d.%m.%Y' }}</span>
+                {%- endif -%}
+                <span class="blog-prepih__card-meta-dot" aria-hidden="true"></span>
+                <span class="blog-prepih__card-author">{{ article.author }}</span>
+                <span class="blog-prepih__card-meta-dot" aria-hidden="true"></span>
+                <span class="blog-prepih__card-readtime">{{ read_minutes }} min</span>
+              </div>
 
               {%- if section.settings.show_excerpt -%}
                 <p class="blog-prepih__card-excerpt">
