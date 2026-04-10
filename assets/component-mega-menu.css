@@ -44,6 +44,13 @@ a.header__menu-item:hover span {
   text-decoration: none;
 }
 
+/* Hide mega menu below desktop — drawer handles mobile nav */
+@media screen and (max-width: 989px) {
+  .mega-menu__content {
+    display: none !important;
+  }
+}
+
 /* ---- Mega Menu Panel ---- */
 .mega-menu__content {
   background-color: rgb(var(--color-background));

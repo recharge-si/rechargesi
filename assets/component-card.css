@@ -19,9 +19,15 @@
 .card.card--horizontal {
   --text-alignment: left;
   --image-padding: 0rem;
-  flex-direction: row;
+  flex-direction: column;
   align-items: flex-start;
   gap: 1.5rem;
+}
+
+@media screen and (min-width: 750px) {
+  .card.card--horizontal {
+    flex-direction: row;
+  }
 }
 
 .card--horizontal.ratio:before {

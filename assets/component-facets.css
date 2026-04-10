@@ -65,7 +65,7 @@
   cursor: pointer;
   height: 4.5rem;
   padding: 0 1.5rem;
-  min-width: 25rem;
+  min-width: min(25rem, 100%);
   margin-top: 0;
   border: none;
 }
@@ -346,6 +346,7 @@
   top: calc(100% + 0.5rem);
   left: -1.2rem;
   width: 35rem;
+  max-width: calc(100vw - 3rem);
   max-height: 55rem;
   overflow-y: auto;
 }
@@ -838,6 +839,7 @@ a.active-facets__button.focused .active-facets__button-inner {
 
 .mobile-facets__wrapper .disclosure-has-popup[open] > summary::before {
   height: 100vh;
+  height: 100dvh;
   z-index: 3;
 }
 

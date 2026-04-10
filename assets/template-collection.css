@@ -53,8 +53,15 @@
 }
 
 .collection--empty .title-wrapper {
-  margin-top: 10rem;
-  margin-bottom: 15rem;
+  margin-top: 5rem;
+  margin-bottom: 7rem;
+}
+
+@media screen and (min-width: 750px) {
+  .collection--empty .title-wrapper {
+    margin-top: 10rem;
+    margin-bottom: 15rem;
+  }
 }
 
 @media screen and (max-width: 989px) {
