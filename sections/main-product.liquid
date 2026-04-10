@@ -74,6 +74,142 @@
   {%- endif -%}
 
   {% assign variant_images = product.images | where: 'attached_to_variant?', true | map: 'src' %}
+  {%- liquid
+    comment
+      Build a pipe-delimited string of all collection URLs this product belongs to,
+      so we can use "contains" to check menu links against it.
+    endcomment
+    assign product_col_urls = ''
+    for col in product.collections
+      assign product_col_urls = product_col_urls | append: '|' | append: col.url
+    endfor
+    assign product_col_urls = product_col_urls | append: '|'
+
+    assign bc_l1_title = ''
+    assign bc_l1_url = ''
+    assign bc_l2_title = ''
+    assign bc_l2_url = ''
+    assign bc_l3_title = ''
+    assign bc_l3_url = ''
+    assign bc_depth = 0
+
+    assign main_menu = linklists['main-menu']
+
+    comment
+      Walk the menu deepest-first: prefer a 3-level match over 2-level over 1-level.
+      For each menu link that points to a collection URL the product is in, record the branch.
+      Keep going to find the deepest match.
+    endcomment
+
+    for link in main_menu.links
+      assign l1_match = false
+      assign l1_check = '|' | append: link.url | append: '|'
+      if link.type == 'collection_link' and product_col_urls contains l1_check
+        assign l1_match = true
+      endif
+
+      for childlink in link.links
+        assign l2_match = false
+        assign l2_check = '|' | append: childlink.url | append: '|'
+        if childlink.type == 'collection_link' and product_col_urls contains l2_check
+          assign l2_match = true
+        endif
+
+        for grandchildlink in childlink.links
+          assign l3_check = '|' | append: grandchildlink.url | append: '|'
+          if grandchildlink.type == 'collection_link' and product_col_urls contains l3_check
+            assign bc_l1_title = link.title
+            assign bc_l1_url = link.url
+            assign bc_l2_title = childlink.title
+            assign bc_l2_url = childlink.url
+            assign bc_l3_title = grandchildlink.title
+            assign bc_l3_url = grandchildlink.url
+            assign bc_depth = 3
+          endif
+        endfor
+
+        if l2_match and bc_depth < 2
+          assign bc_l1_title = link.title
+          assign bc_l1_url = link.url
+          assign bc_l2_title = childlink.title
+          assign bc_l2_url = childlink.url
+          assign bc_depth = 2
+        endif
+      endfor
+
+      if l1_match and bc_depth < 1
+        assign bc_l1_title = link.title
+        assign bc_l1_url = link.url
+        assign bc_depth = 1
+      endif
+    endfor
+
+    comment
+      Fallback: some menu items may not be type collection_link (e.g. http_link to a collection).
+      Re-check without type restriction if nothing was found.
+    endcomment
+    if bc_depth == 0
+      for link in main_menu.links
+        assign l1_check = '|' | append: link.url | append: '|'
+        assign l1_match = false
+        if product_col_urls contains l1_check
+          assign l1_match = true
+        endif
+
+        for childlink in link.links
+          assign l2_check = '|' | append: childlink.url | append: '|'
+          assign l2_match = false
+          if product_col_urls contains l2_check
+            assign l2_match = true
+          endif
+
+          for grandchildlink in childlink.links
+            assign l3_check = '|' | append: grandchildlink.url | append: '|'
+            if product_col_urls contains l3_check
+              assign bc_l1_title = link.title
+              assign bc_l1_url = link.url
+              assign bc_l2_title = childlink.title
+              assign bc_l2_url = childlink.url
+              assign bc_l3_title = grandchildlink.title
+              assign bc_l3_url = grandchildlink.url
+              assign bc_depth = 3
+            endif
+          endfor
+
+          if l2_match and bc_depth < 2
+            assign bc_l1_title = link.title
+            assign bc_l1_url = link.url
+            assign bc_l2_title = childlink.title
+            assign bc_l2_url = childlink.url
+            assign bc_depth = 2
+          endif
+        endfor
+
+        if l1_match and bc_depth < 1
+          assign bc_l1_title = link.title
+          assign bc_l1_url = link.url
+          assign bc_depth = 1
+        endif
+      endfor
+    endif
+  -%}
+  <nav class="product-breadcrumb page-width" aria-label="Breadcrumb">
+    <a href="/">Domov</a>
+    {%- if bc_depth >= 1 -%}
+      <span class="product-breadcrumb__sep" aria-hidden="true">/</span>
+      <a href="{{ bc_l1_url }}" class="product-breadcrumb__segment">{{ bc_l1_title | escape }}</a>
+    {%- endif -%}
+    {%- if bc_depth >= 2 -%}
+      <span class="product-breadcrumb__sep" aria-hidden="true">/</span>
+      <a href="{{ bc_l2_url }}" class="product-breadcrumb__segment">{{ bc_l2_title | escape }}</a>
+    {%- endif -%}
+    {%- if bc_depth >= 3 -%}
+      <span class="product-breadcrumb__sep" aria-hidden="true">/</span>
+      <a href="{{ bc_l3_url }}" class="product-breadcrumb__segment">{{ bc_l3_title | escape }}</a>
+    {%- endif -%}
+    <span class="product-breadcrumb__sep" aria-hidden="true">/</span>
+    <span class="product-breadcrumb__current">{{ product.title | truncate: 40 }}</span>
+  </nav>
   <div class="page-width">
     {%- comment -%} Full-width header above grid — so image top and price top align {%- endcomment -%}
     <div class="product-page-header">
