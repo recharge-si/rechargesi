@@ -1,0 +1,83 @@
+/* ============================================================
+   Page Transitions — seamless navigation between pages
+   ============================================================ */
+
+/* View Transitions API (Chrome/Edge 111+) */
+::view-transition-old(main-content) {
+  animation: pt-fade-out 0.3s ease-out both;
+}
+
+::view-transition-new(main-content) {
+  animation: pt-fade-in 0.3s ease-in both;
+  animation-delay: 0.1s;
+}
+
+/* Assign the main content to a view-transition-name */
+#MainContent {
+  view-transition-name: main-content;
+}
+
+/* CSS fallback animations for browsers without View Transitions API */
+@keyframes pt-fade-out {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+}
+
+@keyframes pt-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Fallback transition classes (Firefox/Safari) */
+#MainContent.pt-exiting {
+  animation: pt-fade-out 0.3s ease-out both;
+}
+
+#MainContent.pt-entering {
+  animation: pt-fade-in 0.3s ease-in both;
+}
+
+/* Thin progress bar at top of page during fetch */
+.pt-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 3px;
+  background: var(--color-brand-primary, #bd1218);
+  z-index: 9999;
+  transform-origin: left;
+  animation: pt-progress 8s cubic-bezier(0.2, 0.9, 0.3, 1) forwards;
+  pointer-events: none;
+}
+
+.pt-progress--done {
+  animation: none;
+  width: 100%;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+@keyframes pt-progress {
+  0%   { width: 0; }
+  20%  { width: 40%; }
+  50%  { width: 65%; }
+  80%  { width: 85%; }
+  100% { width: 95%; }
+}
+
+/* Prevent scroll during transition */
+html.pt-transitioning {
+  scroll-behavior: auto;
+}
