@@ -54,7 +54,11 @@ class HeaderMenu extends DetailsDisclosure {
     event.preventDefault();
     // Always navigate on click — the menu opens on hover
     if (this.summary.dataset.url) {
-      window.location.href = this.summary.dataset.url;
+      this.close();
+      // Use page transitions if available, otherwise navigate normally
+      window.dispatchEvent(
+        new CustomEvent('page:navigate', { detail: { url: this.summary.dataset.url } })
+      );
     }
   }
 
