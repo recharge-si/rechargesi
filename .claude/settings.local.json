@@ -9,7 +9,8 @@
       "Bash(grep -E \"\\\\.\\(js|ts\\)$\")",
       "Bash(grep:*)",
       "Bash(echo \"EXIT: $?\")",
-      "Bash(node -c assets/page-transitions.js)"
+      "Bash(node -c assets/page-transitions.js)",
+      "Bash(git push:*)"
     ]
   }
 }
