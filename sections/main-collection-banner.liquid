@@ -9,6 +9,72 @@
   }
 {%- endstyle -%}
 
+{%- liquid
+  assign bc_l1_title = ''
+  assign bc_l1_url = ''
+  assign bc_l2_title = ''
+  assign bc_l2_url = ''
+  assign bc_current_title = ''
+  assign bc_found = false
+
+  assign col_url_check = '|' | append: collection.url | append: '|'
+  assign main_menu = linklists['main-menu']
+
+  for link in main_menu.links
+    for childlink in link.links
+      for grandchildlink in childlink.links
+        assign gc_check = '|' | append: grandchildlink.url | append: '|'
+        if gc_check == col_url_check
+          assign bc_l1_title = link.title
+          assign bc_l1_url = link.url
+          assign bc_l2_title = childlink.title
+          assign bc_l2_url = childlink.url
+          assign bc_current_title = grandchildlink.title
+          assign bc_depth = 2
+          assign bc_found = true
+        endif
+      endfor
+
+      unless bc_found
+        assign cl_check = '|' | append: childlink.url | append: '|'
+        if cl_check == col_url_check
+          assign bc_l1_title = link.title
+          assign bc_l1_url = link.url
+          assign bc_current_title = childlink.title
+          assign bc_depth = 1
+          assign bc_found = true
+        endif
+      endunless
+    endfor
+
+    unless bc_found
+      assign l_check = '|' | append: link.url | append: '|'
+      if l_check == col_url_check
+        assign bc_current_title = link.title
+        assign bc_depth = 0
+        assign bc_found = true
+      endif
+    endunless
+  endfor
+
+  if bc_current_title == blank
+    assign bc_current_title = collection.title
+  endif
+-%}
+<nav class="collection-breadcrumb page-width" aria-label="Breadcrumb">
+  <a href="/">Domov</a>
+  {%- if bc_depth >= 1 -%}
+    <span class="collection-breadcrumb__sep" aria-hidden="true">/</span>
+    <a href="{{ bc_l1_url }}" class="collection-breadcrumb__segment">{{ bc_l1_title | escape }}</a>
+  {%- endif -%}
+  {%- if bc_depth >= 2 -%}
+    <span class="collection-breadcrumb__sep" aria-hidden="true">/</span>
+    <a href="{{ bc_l2_url }}" class="collection-breadcrumb__segment">{{ bc_l2_title | escape }}</a>
+  {%- endif -%}
+  <span class="collection-breadcrumb__sep" aria-hidden="true">/</span>
+  <span class="collection-breadcrumb__current">{{ bc_current_title | escape }}</span>
+</nav>
+
 {%- comment -%} Collection title hidden — not needed in this theme {%- endcomment -%}
 <h1 class="visually-hidden">{{ collection.title | escape }}</h1>
 
