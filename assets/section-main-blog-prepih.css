@@ -104,7 +104,8 @@
 }
 
 /* Brand accent stripe — sweeps in on hover */
-.blog-prepih__card-image-wrap::after {
+.blog-prepih__card-image-wrap::after,
+.blog-prepih__card-image-placeholder::after {
   content: '';
   position: absolute;
   bottom: 0;
@@ -118,7 +119,8 @@
   transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.blog-prepih__card:hover .blog-prepih__card-image-wrap::after {
+.blog-prepih__card:hover .blog-prepih__card-image-wrap::after,
+.blog-prepih__card:hover .blog-prepih__card-image-placeholder::after {
   transform: scaleX(1);
 }
 
