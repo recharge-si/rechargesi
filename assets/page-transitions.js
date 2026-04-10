@@ -48,6 +48,43 @@
     return el;
   }
 
+  // ── Mobile drawer close ─────────────────────────────────
+
+  function closeMobileDrawer() {
+    const drawer = document.querySelector('header-drawer');
+    if (!drawer) return;
+
+    const details = drawer.querySelector('details');
+    if (!details || !details.hasAttribute('open')) return;
+
+    // Remove open + animation classes immediately
+    details.classList.remove('menu-opening');
+    details.removeAttribute('open');
+
+    // Close any open submenus
+    details.querySelectorAll('details[open]').forEach((d) => {
+      d.removeAttribute('open');
+      d.classList.remove('menu-opening');
+    });
+    details.querySelectorAll('.submenu-open').forEach((el) => {
+      el.classList.remove('submenu-open');
+    });
+
+    // Unlock scroll
+    document.body.classList.remove('overflow-hidden-mobile', 'overflow-hidden-tablet');
+
+    // Remove header open state
+    const header = document.querySelector('.section-header');
+    if (header) header.classList.remove('menu-open');
+
+    // Reset hamburger aria state
+    const summary = details.querySelector('summary');
+    if (summary) summary.setAttribute('aria-expanded', 'false');
+
+    // Release focus trap
+    if (typeof removeTrapFocus === 'function') removeTrapFocus();
+  }
+
   // ── Progress bar ────────────────────────────────────────
 
   function showProgress() {
@@ -133,6 +170,11 @@
       // Temporarily block hover from reopening during transition
       menu.style.pointerEvents = 'none';
     });
+
+    // Close mobile drawer if open — force-reset all state immediately
+    // (bypasses closeMenuDrawer's 400ms rAF animation that leaves the
+    //  overlay visible while the page content has already swapped)
+    closeMobileDrawer();
 
     currentAbortController = new AbortController();
 
