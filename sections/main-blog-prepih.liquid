@@ -17,8 +17,8 @@
   <div class="color-{{ section.settings.color_scheme }} gradient">
     <div class="page-width section-{{ section.id }}-padding">
 
-      <nav class="blog-prepih__breadcrumb" aria-label="Breadcrumb">
-        <a href="/">Domov</a>
+      <nav class="blog-prepih__breadcrumb" aria-label="{{ 'general.breadcrumbs.aria_label' | t }}">
+        <a href="/">{{ 'general.breadcrumbs.home' | t }}</a>
         <span class="blog-prepih__breadcrumb-sep" aria-hidden="true">/</span>
         <span class="blog-prepih__breadcrumb-current">{{ blog.title | escape }}</span>
       </nav>

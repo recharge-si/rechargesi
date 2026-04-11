@@ -75,7 +75,7 @@
         class="hero-banner-grid__thumb{% if forloop.first %} hero-banner-grid__thumb--active{% endif %}"
         data-index="{{ forloop.index0 }}"
         type="button"
-        aria-label="Show banner {{ forloop.index }}"
+        aria-label="{{ 'sections.hero_banner.show_banner' | t: index: forloop.index }}"
         {{ block.shopify_attributes }}
       >
         {%- if block.settings.image != blank -%}

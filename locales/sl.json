@@ -64,6 +64,10 @@
       "next_slide": "Podrsajte desno",
       "previous_slide": "Podrsajte levo",
       "name": "Drsnik"
+    },
+    "breadcrumbs": {
+      "home": "Domov",
+      "aria_label": "Drobtine"
     }
   },
   "newsletter": {
@@ -99,6 +103,7 @@
       "email": "E-poštni naslov",
       "message": "Komentar",
       "post": "Objavi komentar",
+      "tags": "Oznake",
       "back_to_blog": "Nazaj na spletni dnevnik",
       "share": "Deli članek",
       "success": "Vaš komentar je bil uspešno objavljen. Hvala!",
@@ -181,6 +186,9 @@
       "inventory_out_of_stock": "Ni na zalogi",
       "inventory_out_of_stock_continue_selling": "Na zalogi",
       "sku": "Inventarna številka",
+      "sku_label": "SKU:",
+      "ean_label": "EAN koda:",
+      "select_variant": "Izberite različico izdelka",
       "volume_pricing": {
         "title": "Količinski popust",
         "note": "Na voljo je količinski popust",
@@ -321,6 +329,8 @@
         "quantity": "Količina",
         "image": "Slika izdelka"
       },
+      "order_summary": "Povzetek naročila",
+      "variant": "Različica",
       "login": {
         "title": "Ali imate račun?",
         "paragraph_html": "Za hitrejši zaključek nakupa <a href=\"{{ link }}\" class=\"link underlined-link\">se prijavite</a>."
@@ -335,6 +345,9 @@
       "duties_included_taxes_at_checkout_shipping_at_checkout_without_policy": "Dajatve vključene. Davki, popusti in strošek dostave se obračunajo ob zaključku nakupa.",
       "taxes_at_checkout_shipping_at_checkout_with_policy_html": "Davki, popusti in <a href=\"{{ link }}\">strošek dostave</a> se obračunajo ob zaključku nakupa.",
       "taxes_at_checkout_shipping_at_checkout_without_policy": "Davki, popusti in strošek dostave se obračunajo ob zaključku nakupa."
+    },
+    "hero_banner": {
+      "show_banner": "Prikaži pasico {{ index }}"
     },
     "footer": {
       "payment": "Načini plačila"

@@ -64,6 +64,10 @@
       "next_slide": "Slide right",
       "previous_slide": "Slide left",
       "name": "Slider"
+    },
+    "breadcrumbs": {
+      "home": "Home",
+      "aria_label": "Breadcrumb"
     }
   },
   "newsletter": {
@@ -103,6 +107,7 @@
       "email": "Email",
       "message": "Comment",
       "post": "Post comment",
+      "tags": "Tags",
       "back_to_blog": "Back to blog",
       "share": "Share this article",
       "success": "Your comment was posted successfully! Thank you!",
@@ -126,6 +131,9 @@
       "inventory_out_of_stock": "Out of stock",
       "inventory_out_of_stock_continue_selling": "In stock",
       "sku": "SKU",
+      "sku_label": "SKU:",
+      "ean_label": "EAN code:",
+      "select_variant": "Select product variant",
       "on_sale": "Sale",
       "product_variants": "Product variants",
       "media": {
@@ -319,10 +327,15 @@
         "image": "Product image"
       },
       "update": "Update",
+      "order_summary": "Order summary",
+      "variant": "Variant",
       "login": {
         "title": "Have an account?",
         "paragraph_html": "<a href=\"{{ link }}\" class=\"link underlined-link\">Log in</a> to check out faster."
       }
+    },
+    "hero_banner": {
+      "show_banner": "Show banner {{ index }}"
     },
     "footer": {
       "payment": "Payment methods"

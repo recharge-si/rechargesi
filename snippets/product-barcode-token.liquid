@@ -84,14 +84,14 @@
   data-section-id="{{ section_id }}"
 >
   <div class="pbt-row">
-    <span class="pbt-label">SKU:</span>
+    <span class="pbt-label">{{ 'products.product.sku_label' | t }}</span>
     <span
       class="pbt-value{% if sku_val == blank %} pbt-empty{% endif %}"
       id="PbtSku-{{ section_id }}"
     >{{- sku_val | default: '—' -}}</span>
   </div>
   <div class="pbt-row">
-    <span class="pbt-label">EAN code:</span>
+    <span class="pbt-label">{{ 'products.product.ean_label' | t }}</span>
     <span
       class="pbt-value{% if barcode_val == blank %} pbt-empty{% endif %}"
       id="PbtBarcode-{{ section_id }}"

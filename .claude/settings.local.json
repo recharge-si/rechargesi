@@ -12,7 +12,8 @@
       "Bash(node -c assets/page-transitions.js)",
       "Bash(git push:*)",
       "WebFetch(domain:claude.ai)",
-      "Bash(ls -la /c/Users/grega/Documents/Priv/Grega/Development/shopify/rechargesi/assets/*.css)"
+      "Bash(ls -la /c/Users/grega/Documents/Priv/Grega/Development/shopify/rechargesi/assets/*.css)",
+      "Bash(perl:*)"
     ]
   }
 }

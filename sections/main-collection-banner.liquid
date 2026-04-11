@@ -61,8 +61,8 @@
     assign bc_current_title = collection.title
   endif
 -%}
-<nav class="collection-breadcrumb page-width" aria-label="Breadcrumb">
-  <a href="/">Domov</a>
+<nav class="collection-breadcrumb page-width" aria-label="{{ 'general.breadcrumbs.aria_label' | t }}">
+  <a href="/">{{ 'general.breadcrumbs.home' | t }}</a>
   {%- if bc_depth >= 1 -%}
     <span class="collection-breadcrumb__sep" aria-hidden="true">/</span>
     <a href="{{ bc_l1_url }}" class="collection-breadcrumb__segment">{{ bc_l1_title | escape }}</a>

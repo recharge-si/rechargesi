@@ -193,8 +193,8 @@
       endfor
     endif
   -%}
-  <nav class="product-breadcrumb page-width" aria-label="Breadcrumb">
-    <a href="/">Domov</a>
+  <nav class="product-breadcrumb page-width" aria-label="{{ 'general.breadcrumbs.aria_label' | t }}">
+    <a href="/">{{ 'general.breadcrumbs.home' | t }}</a>
     {%- if bc_depth >= 1 -%}
       <span class="product-breadcrumb__sep" aria-hidden="true">/</span>
       <a href="{{ bc_l1_url }}" class="product-breadcrumb__segment">{{ bc_l1_title | escape }}</a>
