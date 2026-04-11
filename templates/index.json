@@ -49,7 +49,7 @@
       "settings": {
         "collection": "izpostavljeno",
         "products_to_show": 8,
-        "title": "Izpostavljeno",
+        "title": "Featured",
         "heading_size": "h2",
         "description": "",
         "show_description": false,

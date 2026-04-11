@@ -15,28 +15,28 @@
         "pogoji": {
           "type": "link_list",
           "settings": {
-            "heading": "Pogoji poslovanja",
+            "heading": "Terms & Conditions",
             "menu": "pogoji-poslovanja"
           }
         },
         "about": {
           "type": "link_list",
           "settings": {
-            "heading": "O nas",
+            "heading": "About Us",
             "menu": "o-nas"
           }
         },
         "prostor": {
           "type": "text",
           "settings": {
-            "heading": "Naši Recharge prostor",
-            "subtext": "<p>Trenutno naša spletna trgovina seli v ample prostor za Vas, sam prosent namesto zamikam obljubijo.</p><p>Naša vrata bomo ponmenic odpri.</p><p>Če bi nas želeli obiskati, nas prosimo pokličite na 040 245 922 in se bomo dogovorili za termin ekrannja.</p><p>Hvala za razumevanje!</p>"
+            "heading": "Our Recharge Space",
+            "subtext": "<p>Our store is currently moving to a bigger space for you. We promise it will be worth the wait.</p><p>We will reopen our doors soon.</p><p>If you would like to visit us, please call us at 040 245 922 and we will arrange an appointment.</p><p>Thank you for your understanding!</p>"
           }
         },
         "partners": {
           "type": "link_list",
           "settings": {
-            "heading": "Partnerji",
+            "heading": "Partners",
             "menu": "partnerji"
           }
         },
