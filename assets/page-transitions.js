@@ -136,21 +136,50 @@
   }
 
   function updateActiveNav(url) {
-    // Update header nav active states
-    document.querySelectorAll('header a[aria-current]').forEach((a) => {
-      a.removeAttribute('aria-current');
+    const pathname = new URL(url, location.origin).pathname;
+
+    // 1. Clear all existing active states
+    document.querySelectorAll('header [aria-current]').forEach((el) => {
+      el.removeAttribute('aria-current');
+    });
+    document.querySelectorAll('header .header__active-menu-item').forEach((el) => {
+      el.classList.remove('header__active-menu-item');
+    });
+    document.querySelectorAll('header .mega-menu__link--active').forEach((el) => {
+      el.classList.remove('mega-menu__link--active');
     });
 
-    const pathname = new URL(url, location.origin).pathname;
-    document.querySelectorAll('header a[href]').forEach((a) => {
+    // 2. Mark matching child/grandchild links active
+    let activeParentSummary = null;
+    document.querySelectorAll('header .mega-menu__link').forEach((a) => {
       try {
         const linkPath = new URL(a.href, location.origin).pathname;
         if (linkPath === pathname) {
+          a.classList.add('mega-menu__link--active');
           a.setAttribute('aria-current', 'page');
+          // Find parent mega menu summary for child_active styling
+          const megaMenu = a.closest('details.mega-menu');
+          if (megaMenu) {
+            activeParentSummary = megaMenu.querySelector(':scope > summary');
+          }
         }
-      } catch (e) {
-        // skip malformed hrefs
-      }
+      } catch (e) {}
+    });
+
+    // 3. Mark matching top-level items active (both <a> and <summary>)
+    document.querySelectorAll('header .header__menu-item').forEach((item) => {
+      const itemUrl = item.href || item.dataset.url;
+      if (!itemUrl) return;
+      try {
+        const linkPath = new URL(itemUrl, location.origin).pathname;
+        const isMatch = linkPath === pathname;
+        const isChildActive = item === activeParentSummary;
+        if (isMatch || isChildActive) {
+          const span = item.querySelector('span');
+          if (span) span.classList.add('header__active-menu-item');
+          if (isMatch) item.setAttribute('aria-current', 'page');
+        }
+      } catch (e) {}
     });
   }
 
