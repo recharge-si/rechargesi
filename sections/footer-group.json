@@ -1,26 +1,69 @@
-/*
- * ------------------------------------------------------------
- * IMPORTANT: The contents of this file are auto-generated.
- *
- * This file may be updated by the Shopify admin theme editor
- * or related systems. Please exercise caution as any changes
- * made to this file may be overwritten.
- * ------------------------------------------------------------
- */
 {
   "name": "t:sections.footer.name",
   "type": "footer",
   "sections": {
     "footer": {
       "type": "footer",
+      "blocks": {
+        "company_info": {
+          "type": "text",
+          "settings": {
+            "heading": "Recharge d.o.o.",
+            "subtext": "<p>info@recharge.si<br>+386 40 245 922</p>"
+          }
+        },
+        "pogoji": {
+          "type": "link_list",
+          "settings": {
+            "heading": "Pogoji poslovanja",
+            "menu": "pogoji-poslovanja"
+          }
+        },
+        "about": {
+          "type": "link_list",
+          "settings": {
+            "heading": "O nas",
+            "menu": "o-nas"
+          }
+        },
+        "prostor": {
+          "type": "text",
+          "settings": {
+            "heading": "Naši Recharge prostor",
+            "subtext": "<p>Trenutno naša spletna trgovina seli v ample prostor za Vas, sam prosent namesto zamikam obljubijo.</p><p>Naša vrata bomo ponmenic odpri.</p><p>Če bi nas želeli obiskati, nas prosimo pokličite na 040 245 922 in se bomo dogovorili za termin ekrannja.</p><p>Hvala za razumevanje!</p>"
+          }
+        },
+        "partners": {
+          "type": "link_list",
+          "settings": {
+            "heading": "Partnerji",
+            "menu": "partnerji"
+          }
+        },
+        "team": {
+          "type": "link_list",
+          "settings": {
+            "heading": "Team",
+            "menu": "team"
+          }
+        }
+      },
+      "block_order": [
+        "company_info",
+        "pogoji",
+        "about",
+        "prostor",
+        "partners",
+        "team"
+      ],
       "settings": {
         "color_scheme": "scheme-1",
-        "newsletter_enable": true,
-        "newsletter_heading": "Subscribe to our emails",
-        "enable_follow_on_shop": true,
-        "show_social": true,
-        "enable_country_selector": true,
-        "enable_language_selector": true,
+        "newsletter_enable": false,
+        "newsletter_heading": "",
+        "enable_follow_on_shop": false,
+        "show_social": false,
+        "enable_country_selector": false,
+        "enable_language_selector": false,
         "payment_enable": true,
         "show_policy": true,
         "margin_top": 0,
