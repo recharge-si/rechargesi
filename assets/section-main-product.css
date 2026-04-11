@@ -1090,7 +1090,7 @@ a.product__text {
   }
 
   .thumbnail-slider .slider-button:not([disabled]):hover {
-    background-color: #a00f14;
+    background-color: var(--color-brand-primary-dark);
     color: rgb(255 255 255);
   }
 
@@ -1300,7 +1300,7 @@ a.product__text {
   }
 
   .product--thumbnail_slider slider-component:not(.thumbnail-slider) .slider-button:hover {
-    background: #a00f14;
+    background: var(--color-brand-primary-dark);
     box-shadow: none;
     transform: none;
     opacity: 1;

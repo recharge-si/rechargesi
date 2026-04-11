@@ -69,3 +69,12 @@
 .newsletter-form__button .icon {
   width: 1.5rem;
 }
+
+/* --- Recharge brand overrides --- */
+.newsletter-form__button:hover {
+  color: var(--color-brand-primary);
+}
+
+.newsletter-form__field-wrapper .field__input:focus {
+  box-shadow: 0 0 0 calc(0.1rem + var(--inputs-border-width)) var(--color-brand-primary);
+}

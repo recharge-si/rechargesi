@@ -553,7 +553,7 @@
 }
 
 .article-prepih__comment-form input[type="submit"]:hover {
-  background: #a00f14;
+  background: var(--color-brand-primary-dark);
 }
 
 /* Mobile: full-width submit button */

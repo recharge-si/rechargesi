@@ -223,3 +223,17 @@ predictive-search[loading] .predictive-search__results-groups-wrapper ~ .predict
   object-fit: contain;
   font-family: 'object-fit: contain';
 }
+
+/* --- Recharge brand overrides --- */
+.predictive-search__item--link:hover .predictive-search__item-heading,
+.predictive-search__item--term a:hover {
+  color: var(--color-brand-primary);
+}
+
+.predictive-search__item--link:hover {
+  background-color: rgba(189, 18, 24, 0.03);
+}
+
+.predictive-search a.predictive-search__results-groups-wrapper-link:hover {
+  color: var(--color-brand-primary);
+}

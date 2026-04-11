@@ -1,5 +1,5 @@
 .footer {
-  border-top: 0.1rem solid rgba(var(--color-foreground), 0.08);
+  border-top: 3px solid var(--color-brand-primary);
 }
 
 .footer:not(.color-scheme-1) {
@@ -153,6 +153,9 @@
   margin-bottom: 2rem;
   margin-top: 0;
   font-size: calc(var(--font-heading-scale) * 1.6rem);
+  text-transform: uppercase;
+  letter-spacing: 0.1rem;
+  font-weight: 600;
 }
 
 @media screen and (min-width: 990px) {
@@ -348,7 +351,7 @@
 @media screen and (min-width: 750px) {
   .footer-block__details-content .list-menu__item--link:hover,
   .copyright__content a:hover {
-    color: rgb(var(--color-foreground));
+    color: var(--color-brand-primary);
     text-decoration: underline;
     text-underline-offset: 0.3rem;
   }
@@ -486,6 +489,24 @@
     opacity: 1;
     transform: translateY(-1rem);
   }
+}
+
+/* --- Recharge brand overrides --- */
+.footer .list-social__link:hover {
+  color: var(--color-brand-primary);
+}
+
+.footer .newsletter-form__button:hover {
+  color: var(--color-brand-primary);
+}
+
+.footer .footer__payment .list-payment .svg-wrapper {
+  opacity: 0.6;
+  transition: opacity 0.2s ease;
+}
+
+.footer .footer__payment .list-payment .svg-wrapper:hover {
+  opacity: 1;
 }
 
 /* check for flexbox gap in older Safari versions */

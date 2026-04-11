@@ -72,3 +72,16 @@ input::-webkit-search-decoration {
 .template-search__results {
   position: relative;
 }
+
+/* --- Recharge brand overrides --- */
+.search__input.field__input:focus {
+  box-shadow: 0 0 0 calc(0.1rem + var(--inputs-border-width)) var(--color-brand-primary);
+}
+
+.search__button:hover .icon {
+  color: var(--color-brand-primary);
+}
+
+.reset__button:hover .icon {
+  color: var(--color-brand-primary);
+}

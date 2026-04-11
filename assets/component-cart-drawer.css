@@ -22,6 +22,7 @@
   padding: 0 1.5rem;
   border: 0.1rem solid rgba(var(--color-foreground), 0.2);
   border-right: 0;
+  border-top: 3px solid var(--color-brand-primary);
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -78,6 +79,9 @@ cart-drawer:not(.is-empty) .cart-drawer__collection {
 
 .drawer__heading {
   margin: 0 0 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08rem;
+  font-weight: 600;
 }
 
 .drawer__close {
@@ -411,4 +415,31 @@ cart-drawer-items::-webkit-scrollbar-track-piece {
   .cart-drawer .cart-item__error {
     margin-left: 0;
   }
+}
+
+/* --- Recharge brand overrides --- */
+.cart-drawer .cart__checkout-button {
+  background-color: var(--color-brand-primary);
+  color: #fff;
+  text-transform: uppercase;
+  letter-spacing: 0.08rem;
+  font-weight: 600;
+  border-radius: 0;
+}
+
+.cart-drawer .cart__checkout-button:hover {
+  background-color: var(--color-brand-primary-dark);
+}
+
+.cart-drawer .cart__checkout-button::before,
+.cart-drawer .cart__checkout-button::after {
+  content: none;
+}
+
+.cart-drawer cart-remove-button .button:hover {
+  color: var(--color-brand-primary);
+}
+
+.drawer__close:hover {
+  color: var(--color-brand-primary);
 }

@@ -190,6 +190,29 @@ cart-items {
 
 .cart__checkout-button {
   max-width: 36rem;
+  background-color: var(--color-brand-primary);
+  color: #fff;
+  text-transform: uppercase;
+  letter-spacing: 0.08rem;
+  font-weight: 600;
+  border-radius: 0;
+}
+
+.cart__checkout-button:hover {
+  background-color: var(--color-brand-primary-dark);
+}
+
+.cart__checkout-button::before,
+.cart__checkout-button::after {
+  content: none;
+}
+
+cart-items a:hover {
+  color: var(--color-brand-primary);
+}
+
+cart-remove-button .button:hover {
+  color: var(--color-brand-primary);
 }
 
 .cart__ctas {

@@ -1,22 +1,85 @@
 <style type="text/css">
-  .template-404 .title + * {
-    margin-top: 1rem;
+  .template-404 {
+    padding: 6rem 0 8rem;
+  }
+
+  .template-404__code {
+    font-size: 12rem;
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: -0.04em;
+    color: rgba(var(--color-foreground), 0.06);
+    margin-bottom: 0;
+  }
+
+  .template-404 .title {
+    margin-top: -2rem;
+    position: relative;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1rem;
+  }
+
+  .template-404 .title::after {
+    content: '';
+    display: block;
+    width: 4rem;
+    height: 3px;
+    background: var(--color-brand-primary);
+    margin: 1.2rem auto 0;
+  }
+
+  .template-404 p {
+    margin-top: 1.5rem;
+    color: rgba(var(--color-foreground), 0.6);
+    max-width: 40rem;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .template-404 .button {
+    margin-top: 2.5rem;
+    background-color: var(--color-brand-primary);
+    color: #fff;
+    text-transform: uppercase;
+    letter-spacing: 0.08rem;
+    font-weight: 600;
+    border-radius: 0;
+    padding: 1.2rem 3rem;
+  }
+
+  .template-404 .button::before,
+  .template-404 .button::after {
+    content: none;
+  }
+
+  .template-404 .button:hover {
+    background-color: var(--color-brand-primary-dark);
   }
 
   @media screen and (min-width: 750px) {
-    .template-404 .title + * {
-      margin-top: 2rem;
+    .template-404 {
+      padding: 8rem 0 12rem;
+    }
+
+    .template-404__code {
+      font-size: 18rem;
+    }
+
+    .template-404 .title {
+      margin-top: -3rem;
     }
   }
 </style>
 
 <div class="template-404 page-width page-margin center">
-  <p>
-    {{ 'templates.404.subtext' | t }}
-  </p>
+  <p class="template-404__code" aria-hidden="true">404</p>
   <h1 class="title">
     {{ 'templates.404.title' | t }}
   </h1>
+  <p>
+    {{ 'templates.404.subtext' | t }}
+  </p>
   <a href="{{ routes.all_products_collection_url }}" class="button">
     {{ 'general.continue_shopping' | t }}
   </a>

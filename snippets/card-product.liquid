@@ -92,16 +92,6 @@
                   assign variant_images = card_product.images | where: 'attached_to_variant?', true | map: 'src'
 
                   comment
-                    Build debug string for ALL images (separate loop so break doesnt cut it short).
-                  endcomment
-                  assign debug_images = ''
-                  for image in card_product.images
-                    assign img_info = image.src | split: '/' | last | split: '?' | first
-                    assign atv = image.attached_to_variant?
-                    assign debug_images = debug_images | append: img_info | append: '(atv=' | append: atv | append: ') '
-                  endfor
-
-                  comment
                     Find hover image: first general image that is NOT a filename
                     duplicate of a variant image. Shopify adds _1/_2 suffixes when
                     the same file is uploaded twice, so we strip those before comparing.
@@ -144,14 +134,8 @@
                     assign hover_media = card_product.images[1]
                   endif
 
-                  assign hover_src_debug = hover_media.src | split: '/' | last | split: '?' | first
                 -%}
                 <img
-                  data-hover-debug-product="{{ card_product.handle }}"
-                  data-hover-debug-reason="{{ hover_reason }}"
-                  data-hover-debug-picked="{{ hover_src_debug }}"
-                  data-hover-debug-images="{{ debug_images | strip }}"
-                  data-hover-debug-total="{{ card_product.images.size }}"
                   srcset="
                     {%- if hover_media.width >= 165 -%}{{ hover_media | image_url: width: 165 }} 165w,{%- endif -%}
                     {%- if hover_media.width >= 360 -%}{{ hover_media | image_url: width: 360 }} 360w,{%- endif -%}

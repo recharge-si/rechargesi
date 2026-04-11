@@ -62,10 +62,14 @@ Templates (`templates/*.json`) declare which sections appear and in what order. 
 
 ### Brand Colors
 
-Defined in `assets/base.css` `:root` block — always use these variables, never hardcode hex values:
+Defined in `assets/base.css` `:root` block �� always use these variables, never hardcode hex values:
 
 ```css
---color-brand-primary: #bd1218;  /* brand red */
+--color-brand-primary: #bd1218;        /* brand red */
+--color-brand-primary-dark: #a00f14;   /* hover state */
+--color-brand-primary-darker: #8f0d12; /* active/pressed state */
+--color-success: #1a7a3c;             /* success green */
+--color-urgency: #b45309;             /* urgency/low-stock amber */
 ```
 
 ### Navbar / Mega Menu
@@ -130,8 +134,6 @@ Stock Dawn just shows `media[1]` on hover, which is another variant's identical-
 3. Skips general images that are filename duplicates of variant images (strips Shopify `_1`/`_2`/`_3` suffixes before comparing)
 4. Picks the first genuinely different general image (angle/detail shot)
 5. Falls back to: first non-featured image → `images[1]` as last resort
-
-**Debug attributes** (temporary — remove before production): The hover `<img>` tag includes `data-hover-debug-*` attributes showing the product handle, selection reason, picked filename, all images with `attached_to_variant?` values, and total count. Inspect the second `<img>` inside `.media--hover-effect` in browser dev tools.
 
 **Enabled via section settings:** `show_secondary_image: true` in both `templates/collection.json` and `templates/index.json` (featured collection "Izpostavljeno").
 

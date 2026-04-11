@@ -76,8 +76,8 @@ a.pagination__item:hover::after,
 
 .pagination__item--next:hover,
 .pagination__item--prev:hover {
-  background: #a00f14;
-  border-color: #a00f14;
+  background: var(--color-brand-primary-dark);
+  border-color: var(--color-brand-primary-dark);
   color: #fff;
   opacity: 1;
 }

@@ -752,3 +752,65 @@ li[data-address] > h2 {
 .addresses form > div:nth-of-type(7) + div[id] {
   margin-top: 1.5rem;
 }
+
+/* --- Recharge brand overrides --- */
+.customer > h1,
+.customer__title,
+:is(.account, .order) h1 {
+  font-weight: 600;
+  letter-spacing: 0.04rem;
+}
+
+.customer button,
+.customer .button {
+  background-color: var(--color-brand-primary);
+  color: #fff;
+  text-transform: uppercase;
+  letter-spacing: 0.08rem;
+  font-weight: 600;
+  border-radius: 0;
+}
+
+.customer button:hover,
+.customer .button:hover {
+  background-color: var(--color-brand-primary-dark);
+}
+
+.customer button::before,
+.customer button::after,
+.customer .button::before,
+.customer .button::after {
+  content: none;
+}
+
+.activate button[name='decline'],
+.addresses li > button,
+.addresses form button[type] {
+  background-color: transparent;
+  color: var(--color-brand-primary);
+  border: 1px solid var(--color-brand-primary);
+}
+
+.activate button[name='decline']:hover,
+.addresses li > button:hover,
+.addresses form button[type]:hover {
+  background-color: var(--color-brand-primary);
+  color: #fff;
+}
+
+.customer a:not(.button) {
+  transition: color 0.2s ease;
+}
+
+.customer a:not(.button):hover {
+  color: var(--color-brand-primary);
+}
+
+.login a[href='#recover'],
+.login .field + a {
+  color: var(--color-brand-primary);
+}
+
+.account table td:first-of-type a:hover {
+  box-shadow: 0 0 0 0.2rem var(--color-brand-primary);
+}
