@@ -150,17 +150,17 @@
 }
 
 .footer-block__heading {
-  margin-bottom: 2rem;
+  margin-bottom: 1.6rem;
   margin-top: 0;
-  font-size: calc(var(--font-heading-scale) * 1.6rem);
+  font-size: calc(var(--font-heading-scale) * 1.4rem);
   text-transform: uppercase;
-  letter-spacing: 0.1rem;
+  letter-spacing: 0.06em;
   font-weight: 600;
 }
 
 @media screen and (min-width: 990px) {
   .footer-block__heading {
-    font-size: calc(var(--font-heading-scale) * 1.8rem);
+    font-size: calc(var(--font-heading-scale) * 1.5rem);
   }
 }
 
@@ -507,6 +507,52 @@
 
 .footer .footer__payment .list-payment .svg-wrapper:hover {
   opacity: 1;
+}
+
+/* --- Recharge footer editorial layout --- */
+
+/* Arrow prefix on footer menu links */
+.footer-block--menu .list-menu__item--link::before {
+  content: '>';
+  margin-right: 0.6rem;
+  font-weight: 400;
+  color: rgba(var(--color-foreground), 0.5);
+}
+
+/* Tighter link spacing for clean editorial look */
+.footer-block__details-content .list-menu__item--link {
+  padding-top: 0.4rem;
+  padding-bottom: 0.4rem;
+  font-size: 1.4rem;
+  line-height: 1.6;
+}
+
+@media screen and (max-width: 989px) {
+  .footer-block__details-content .list-menu__item--link {
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+  }
+}
+
+/* Company info text block styling */
+.footer-block__details-content.rte {
+  font-size: 1.4rem;
+  line-height: 1.8;
+  color: rgba(var(--color-foreground), 0.75);
+}
+
+.footer-block__details-content.rte p {
+  margin-bottom: 0.4rem;
+}
+
+/* Minimal bottom bar */
+.footer__content-bottom {
+  border-top: solid 1px rgba(var(--color-foreground), 0.12);
+  padding-top: 2rem;
+}
+
+.footer__copyright {
+  margin-top: 1rem;
 }
 
 /* check for flexbox gap in older Safari versions */
