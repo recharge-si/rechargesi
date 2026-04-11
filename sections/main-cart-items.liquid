@@ -27,24 +27,38 @@
 
 <cart-items class="gradient color-{{ section.settings.color_scheme }} isolate{% if cart == empty %} is-empty{% else %} section-{{ section.id }}-padding{% endif %}">
   <div class="page-width">
-    <div class="title-wrapper-with-link">
-      <h1 class="title title--primary">{{ 'sections.cart.title' | t }}</h1>
-      <a href="{{ routes.all_products_collection_url }}" class="underlined-link">
-        {{- 'general.continue_shopping' | t -}}
-      </a>
+    <nav class="cart-breadcrumb" aria-label="Breadcrumb">
+      <a href="/">Home</a>
+      <span class="cart-breadcrumb__sep" aria-hidden="true">/</span>
+      <span class="cart-breadcrumb__current">{{ 'sections.cart.title' | t }}</span>
+    </nav>
+
+    <div class="cart-header">
+      <h1 class="cart-header__title">{{ 'sections.cart.title' | t }}</h1>
     </div>
 
     <div class="cart__warnings">
-      <h1 class="cart__empty-text">{{ 'sections.cart.empty' | t }}</h1>
-      <a href="{{ routes.all_products_collection_url }}" class="button">
-        {{ 'general.continue_shopping' | t }}
-      </a>
+      <div class="cart-empty">
+        <div class="cart-empty__icon">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="48" height="48">
+            <circle cx="9" cy="21" r="1"/>
+            <circle cx="20" cy="21" r="1"/>
+            <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+          </svg>
+        </div>
+        <h1 class="cart-empty__title">{{ 'sections.cart.empty' | t }}</h1>
+        <a href="{{ routes.all_products_collection_url }}" class="cart-empty__button button">
+          {{ 'general.continue_shopping' | t }}
+        </a>
+      </div>
 
       {%- if shop.customer_accounts_enabled and customer == null -%}
-        <h2 class="cart__login-title">{{ 'sections.cart.login.title' | t }}</h2>
-        <p class="cart__login-paragraph">
-          {{ 'sections.cart.login.paragraph_html' | t: link: routes.account_login_url }}
-        </p>
+        <div class="cart-empty__login">
+          <h2 class="cart__login-title">{{ 'sections.cart.login.title' | t }}</h2>
+          <p class="cart__login-paragraph">
+            {{ 'sections.cart.login.paragraph_html' | t: link: routes.account_login_url }}
+          </p>
+        </div>
       {%- endif -%}
     </div>
 
