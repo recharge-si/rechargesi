@@ -140,3 +140,39 @@ Stock Dawn just shows `media[1]` on hover, which is another variant's identical-
 Key files:
 - `snippets/card-product.liquid` — hover image selection logic (lines ~86–140)
 - `assets/component-card.css` — CSS hover transition (fade out primary, fade in + scale secondary)
+
+### Cart Page
+
+**Redesigned** away from stock Dawn to match the brand identity (specifically the `blog.prepih` template pattern).
+
+**Header:** Breadcrumb nav + large uppercase title + 3px red accent bar via `::after`.
+- CSS values are copied from `assets/section-main-blog-prepih.css` — that file is the source of truth for spacing/typography.
+- Breadcrumb: `font-size: 1.2rem`, `letter-spacing: 0.06em`, `margin-bottom: 2rem`
+- Title: `clamp(2.2rem, calc(var(--font-heading-scale) * 3rem), 4rem)`, `font-weight: 700`, `letter-spacing: -0.02em`
+- Red bar: `width: 4rem`, `height: 3px`, `margin-top: 1.2rem`
+
+**Cart items table brand touches:**
+- Table headers: uppercase, `letter-spacing: 0.08em`, `font-weight: 600`
+- Product images: subtle 1px border, darker on row hover
+- Product names: brand red on hover (no underline)
+- Row separators: 1px borders between items (mobile + desktop)
+- Quantity buttons: brand red hover; remove button: 0.4 opacity → brand red on hover
+- Sale prices: brand red, bolder weight
+
+**Cart footer / order summary:**
+- "Order summary" heading with red accent bar, total row with flex label/value layout
+- Larger price: `2.2rem` mobile, `2.6rem` desktop
+
+**Empty cart state:** Cart SVG icon (muted), uppercase title, brand-red CTA button.
+
+**Hardcoded strings** (not using translation keys):
+- `"Home"` — breadcrumb in `main-cart-items.liquid`
+- `"Order summary"` — heading in `main-cart-footer.liquid`
+- `"Variant"` — replaces `option.name == 'Title'` in cart item details (temporary fix; products imported via CSV use "Title" as variant option name)
+
+Key files:
+- `sections/main-cart-items.liquid` — cart header, items table, empty state
+- `sections/main-cart-footer.liquid` — order summary, checkout button
+- `assets/component-cart.css` — breadcrumb, header, empty state, checkout button styles
+- `assets/component-cart-items.css` — table, image, quantity, price brand styling
+- `assets/component-totals.css` — order summary totals layout
