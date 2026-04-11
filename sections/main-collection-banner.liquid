@@ -75,8 +75,9 @@
   <span class="collection-breadcrumb__current">{{ bc_current_title | escape }}</span>
 </nav>
 
-{%- comment -%} Collection title hidden — not needed in this theme {%- endcomment -%}
-<h1 class="visually-hidden">{{ collection.title | escape }}</h1>
+<div class="collection-header page-width">
+  <h1 class="collection-header__title">{{ bc_current_title | escape }}</h1>
+</div>
 
 {%- if section.settings.show_collection_description and collection.description != blank -%}
   <div class="collection-hero color-{{ section.settings.color_scheme }} gradient">
