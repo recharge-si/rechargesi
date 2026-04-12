@@ -53,12 +53,6 @@
     letter-spacing: 0.04em;
     font-feature-settings: 'tnum';
     font-variant-numeric: tabular-nums;
-    transition: opacity 0.15s ease, transform 0.12s ease;
-  }
-
-  .pbt-value.pbt-updating {
-    opacity: 0;
-    transform: translateY(2px);
   }
 
   .pbt-value.pbt-empty {
@@ -67,16 +61,6 @@
     font-weight: 400;
   }
 </style>
-
-<script>
-  window.__pbt = window.__pbt || {};
-  {% for v in product.variants %}
-  window.__pbt[{{ v.id | json }}] = {
-    sku:     {{ v.sku | default: '' | json }},
-    barcode: {{ v.barcode | default: '' | json }}
-  };
-  {% endfor %}
-</script>
 
 <div
   class="pbt-wrap"
@@ -98,33 +82,3 @@
     >{{- barcode_val | default: '—' -}}</span>
   </div>
 </div>
-
-<script>
-  document.addEventListener('DOMContentLoaded', function () {
-    var sectionId = {{ section_id | json }};
-    var skuEl     = document.getElementById('PbtSku-' + sectionId);
-    var barcodeEl = document.getElementById('PbtBarcode-' + sectionId);
-
-    if (!skuEl || !barcodeEl) return;
-
-    function updateField(el, value) {
-      el.classList.add('pbt-updating');
-      setTimeout(function () {
-        var v = value && value.toString().trim();
-        el.textContent = v || '—';
-        el.classList.toggle('pbt-empty', !v);
-        el.classList.remove('pbt-updating');
-      }, 150);
-    }
-
-    subscribe(PUB_SUB_EVENTS.variantChange, function (event) {
-      var data = event.data;
-      if (!data || data.sectionId !== sectionId) return;
-      var variant = data.variant;
-      if (!variant) return;
-      var pbt = (window.__pbt && window.__pbt[variant.id]) || {};
-      updateField(skuEl,     pbt.sku     || variant.sku     || '');
-      updateField(barcodeEl, pbt.barcode || variant.barcode || '');
-    });
-  });
-</script>
