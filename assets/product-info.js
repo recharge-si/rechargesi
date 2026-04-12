@@ -157,6 +157,9 @@ if (!customElements.get('product-info')) {
       updateOptionValues(html) {
         const variantSelects = html.querySelector('variant-selects');
         if (variantSelects) {
+          // Prevent entrance animations from replaying on the swapped element
+          variantSelects.style.animation = 'none';
+          variantSelects.querySelectorAll('*').forEach((el) => (el.style.animation = 'none'));
           HTMLUpdateUtility.viewTransition(this.variantSelectors, variantSelects, this.preProcessHtmlCallbacks);
         }
       }
