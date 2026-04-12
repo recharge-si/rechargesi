@@ -1,3 +1,12 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
 {
   "name": "t:sections.footer.name",
   "type": "footer",
@@ -12,52 +21,21 @@
             "subtext": "<p>info@recharge.si<br>+386 40 245 922</p>"
           }
         },
-        "pogoji": {
-          "type": "link_list",
-          "settings": {
-            "heading": "Policies and Rules",
-            "menu": "pogoji-poslovanja"
-          }
-        },
-        "about": {
-          "type": "link_list",
-          "settings": {
-            "heading": "About Us",
-            "menu": "o-nas"
-          }
-        },
         "prostor": {
           "type": "text",
           "settings": {
             "heading": "Our Recharge Space",
             "subtext": "<p>Our store is currently moving to a bigger space for you. We promise it will be worth the wait.</p><p>We will reopen our doors soon.</p><p>If you would like to visit us, please call us at 040 245 922 and we will arrange an appointment.</p><p>Thank you for your understanding!</p>"
           }
-        },
-        "partners": {
-          "type": "link_list",
-          "settings": {
-            "heading": "Partners",
-            "menu": "partnerji"
-          }
-        },
-        "team": {
-          "type": "link_list",
-          "settings": {
-            "heading": "Team",
-            "menu": "team"
-          }
         }
       },
       "block_order": [
         "company_info",
-        "pogoji",
-        "about",
-        "prostor",
-        "partners",
-        "team"
+        "prostor"
       ],
       "settings": {
         "color_scheme": "scheme-1",
+        "footer_menu": "footer",
         "newsletter_enable": false,
         "newsletter_heading": "",
         "enable_follow_on_shop": false,

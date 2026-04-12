@@ -14,7 +14,9 @@
       "WebFetch(domain:claude.ai)",
       "Bash(ls -la /c/Users/grega/Documents/Priv/Grega/Development/shopify/rechargesi/assets/*.css)",
       "Bash(perl:*)",
-      "Bash(ls:*)"
+      "Bash(ls:*)",
+      "WebFetch(domain:tomblanchard.co.uk)",
+      "WebFetch(domain:shopify.dev)"
     ]
   }
 }
