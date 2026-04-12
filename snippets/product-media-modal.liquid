@@ -9,7 +9,7 @@
   {% render 'product-media-modal' %}
 {% endcomment %}
 
-<product-modal id="ProductModal-{{ section.id }}" class="product-media-modal media-modal">
+<product-modal id="ProductModal-{{ section.id }}" class="product-media-modal media-modal" style="visibility:hidden; position:fixed; top:0; left:0; opacity:0; z-index:-1">
   <div
     class="product-media-modal__dialog color-{{ section.settings.color_scheme }} gradient"
     role="dialog"
