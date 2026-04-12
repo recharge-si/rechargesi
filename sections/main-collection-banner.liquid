@@ -18,7 +18,7 @@
   assign bc_found = false
 
   assign col_url_check = '|' | append: collection.url | append: '|'
-  assign main_menu = linklists['main-menu']
+  assign main_menu = linklists['recharge-menu']
 
   for link in main_menu.links
     for childlink in link.links
