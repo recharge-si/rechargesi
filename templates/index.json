@@ -47,7 +47,7 @@
     "featured_collection": {
       "type": "featured-collection",
       "settings": {
-        "collection": "izpostavljeno",
+        "collection": "windsurf-boards-freestyle-wave",
         "products_to_show": 8,
         "title": "Featured",
         "heading_size": "h2",
