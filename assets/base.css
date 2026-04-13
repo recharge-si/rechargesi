@@ -2491,8 +2491,35 @@ input[type='checkbox'] {
 
 .header__heading-logo-wrapper {
   width: 100%;
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  gap: 1.6rem;
   transition: width 0.3s cubic-bezier(0.52, 0, 0.61, 0.99);
+}
+
+/* Brand accent stripe beside the logo */
+.header__heading-logo-wrapper::before {
+  content: '';
+  width: 3px;
+  align-self: stretch;
+  background: var(--color-brand-primary);
+  border-radius: 2px;
+  flex-shrink: 0;
+  opacity: 0.85;
+  transition: opacity 0.3s ease, height 0.3s ease;
+}
+
+.header__heading-link:hover .header__heading-logo-wrapper::before {
+  opacity: 1;
+}
+
+/* Subtle hover lift on the logo */
+.header__heading-logo-wrapper .header__heading-logo {
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), filter 0.35s ease;
+}
+
+.header__heading-link:hover .header__heading-logo {
+  transform: scale(1.03);
 }
 
 @media screen and (max-width: 989px) {
@@ -2501,10 +2528,25 @@ input[type='checkbox'] {
     text-align: center;
   }
 
+  /* Hide accent stripe on mobile — logo is centered */
+  .header__heading-logo-wrapper::before {
+    display: none;
+  }
+
+  /* Cap logo size on mobile for balanced proportions */
+  .header__heading-logo-wrapper {
+    max-width: 120px;
+    justify-content: center;
+  }
+
   .header--mobile-left .header__heading,
   .header--mobile-left .header__heading-link {
     text-align: left;
     justify-self: start;
+  }
+
+  .header--mobile-left .header__heading-logo-wrapper {
+    justify-content: flex-start;
   }
 
   .header--mobile-left {
@@ -2516,6 +2558,8 @@ input[type='checkbox'] {
   .header--middle-left .header__heading-link,
   .header--top-left .header__heading-link {
     margin-left: -0.75rem;
+    padding-top: 0.4rem;
+    padding-bottom: 0.4rem;
   }
 
   .header__heading,
