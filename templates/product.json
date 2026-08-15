@@ -38,6 +38,17 @@
           "type": "barcode_token",
           "settings": {}
         },
+        "stock_locations": {
+          "type": "stock_locations",
+          "settings": {
+            "manual_locations": "Ljubljana | 12 | Dunajska cesta 5 · Prevzem isti dan\nMaribor | 2 | Partizanska cesta 12\nKoper | 0 | Pristaniška ulica 8\nOsrednje skladišče | 47 | Dostava 1–2 delovna dneva",
+            "metafield_namespace": "custom",
+            "metafield_key": "stock_by_location",
+            "show_address": true,
+            "low_stock_threshold": 3,
+            "full_stock_threshold": 10
+          }
+        },
         "quantity_selector": {
           "type": "quantity_selector",
           "settings": {}
@@ -68,6 +79,7 @@
         "quantity_selector",
         "buy_buttons",
         "barcode_token",
+        "stock_locations",
         "description",
         "share"
       ],

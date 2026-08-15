@@ -368,6 +368,14 @@
                 </p>
               {%- when 'barcode_token' -%}
                 {%- render 'product-barcode-token', product: product, section_id: section.id -%}
+              {%- when 'stock_locations' -%}
+                <div class="quick-add-hidden" {{ block.shopify_attributes }}>
+                  {%- render 'product-stock-locations',
+                    product: product,
+                    block: block,
+                    section_id: section.id
+                  -%}
+                </div>
               {%- when 'custom_liquid' -%}
                 {{ block.settings.custom_liquid }}
               {%- when 'collapsible_tab' -%}
@@ -984,6 +992,62 @@
       "type": "barcode_token",
       "name": "Barcode & Token",
       "limit": 1
+    },
+    {
+      "type": "stock_locations",
+      "name": "Stock by location",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "paragraph",
+          "content": "Three sources, first one with data wins: (1) a JSON metafield with real counts, (2) the locations you type below, (3) pickup availability, which covers only locations with local pickup on and shows no counts."
+        },
+        {
+          "type": "textarea",
+          "id": "manual_locations",
+          "label": "Locations",
+          "info": "One per line: Name | quantity | detail. Shows every location listed, but the same numbers on every product — replace with the metafield before going live.",
+          "default": "Ljubljana | 12 | Dunajska cesta 5 · Prevzem isti dan\nMaribor | 2 | Partizanska cesta 12\nKoper | 0 | Pristaniška ulica 8\nOsrednje skladišče | 47 | Dostava 1–2 delovna dneva"
+        },
+        {
+          "type": "text",
+          "id": "metafield_namespace",
+          "label": "Metafield namespace",
+          "default": "custom"
+        },
+        {
+          "type": "text",
+          "id": "metafield_key",
+          "label": "Metafield key",
+          "default": "stock_by_location",
+          "info": "JSON list of objects: name, quantity, and optionally address and note."
+        },
+        {
+          "type": "checkbox",
+          "id": "show_address",
+          "label": "Show address and pickup note",
+          "default": true
+        },
+        {
+          "type": "range",
+          "id": "low_stock_threshold",
+          "label": "Low stock at or below",
+          "min": 1,
+          "max": 20,
+          "step": 1,
+          "default": 3
+        },
+        {
+          "type": "range",
+          "id": "full_stock_threshold",
+          "label": "Full gauge at",
+          "min": 1,
+          "max": 100,
+          "step": 1,
+          "default": 10,
+          "info": "Quantity that fills all five gauge ticks."
+        }
+      ]
     },
     {
       "type": "inventory",

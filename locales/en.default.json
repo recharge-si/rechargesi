@@ -133,6 +133,17 @@
       "sku": "SKU",
       "sku_label": "SKU:",
       "ean_label": "EAN code:",
+      "stock_locations": {
+        "title": "Stock by location",
+        "caption": "Stock for {{ product }} at each location",
+        "col_location": "Location",
+        "col_status": "Status",
+        "col_quantity": "Qty",
+        "in_stock": "In stock",
+        "low_stock": "Last few",
+        "out_of_stock": "Out of stock",
+        "total": "Total in stock"
+      },
       "select_variant": "Select product variant",
       "on_sale": "Sale",
       "product_variants": "Product variants",

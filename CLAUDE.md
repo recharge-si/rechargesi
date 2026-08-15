@@ -176,3 +176,27 @@ Key files:
 - `assets/component-cart.css` — breadcrumb, header, empty state, checkout button styles
 - `assets/component-cart-items.css` — table, image, quantity, price brand styling
 - `assets/component-totals.css` — order summary totals layout
+
+### Stock by Location (Product Page)
+
+**Block:** `stock_locations` in `main-product.liquid`, placed after `barcode_token` in `templates/product.json`. Renders a "Zaloga po lokacijah" table in the product info column.
+
+**Critical constraint:** Shopify's storefront Liquid **cannot read per-location inventory quantities**. `variant.store_availabilities` returns only an `available` boolean per location (and only for locations with local pickup enabled); `variant.inventory_quantity` is the aggregate. Real counts must be pushed in from the Admin API.
+
+**Three data sources — first one with data wins:**
+
+1. **Metafield** (`custom.stock_by_location`, variant-level then product-level, configurable on the block). JSON list of `{name, quantity, address?, note?}`. Only `name`/`quantity` required. Populate from Admin API `inventoryItem.inventoryLevels`. This is the production source.
+2. **Manual** — the block's `manual_locations` textarea, one line per location: `Name | quantity | detail`. Shows every location listed with no setup, but the same numbers on every product and variant. Preview/demo only — must be cleared before the metafield goes live, or it will mask nothing but still be wrong if the metafield is empty.
+3. **Pickup availability** — `store_availabilities`. Real and variant-accurate, but no counts, so the quantity column is dropped and `.stock-locations__table--no-counts` is applied.
+
+**Row states** (`low_stock_threshold`, default 3): `stock-row--in` (`--color-success`), `--low` (`--color-urgency`), `--out` (muted, hollow dot). Out-of-stock uses a hollow ring rather than colour alone, so state survives colourblindness.
+
+**Signature element:** a five-tick gauge in `--color-brand-primary` beside each number, filled by `quantity / full_stock_threshold` (default 10). Red is the material (quantity); green/amber are the signal (status) — the two never mix in one mark. The rise animation is **scale-only, never opacity** — the block re-renders on every variant change, and a fade would blink the ticks out each time.
+
+**No JS.** Dawn re-renders the whole product info container on variant change, so the table updates for free.
+
+Key files:
+- `snippets/product-stock-locations.liquid` — source selection, totals, table shell
+- `snippets/product-stock-location-row.liquid` — one row; shared by all three sources
+- `assets/component-stock-locations.css` — all styles; verified no overflow down to a 300px container
+- Locale keys: `products.product.stock_locations.*` in `en.default.json` + `sl.json` only

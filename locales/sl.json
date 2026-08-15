@@ -188,6 +188,17 @@
       "sku": "Inventarna številka",
       "sku_label": "SKU:",
       "ean_label": "EAN koda:",
+      "stock_locations": {
+        "title": "Zaloga po lokacijah",
+        "caption": "Zaloga izdelka {{ product }} po posameznih lokacijah",
+        "col_location": "Lokacija",
+        "col_status": "Stanje",
+        "col_quantity": "Kol.",
+        "in_stock": "Na zalogi",
+        "low_stock": "Zadnji kosi",
+        "out_of_stock": "Ni na zalogi",
+        "total": "Skupaj na zalogi"
+      },
       "select_variant": "Izberite različico izdelka",
       "volume_pricing": {
         "title": "Količinski popust",

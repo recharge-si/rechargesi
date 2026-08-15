@@ -1,0 +1,236 @@
+{% comment %}
+  Renders a per-location stock table for the selected variant.
+
+  Three data sources, in priority order. The first one with data wins.
+
+  1. METAFIELD — real counts, kept in sync automatically.
+     A JSON metafield, variant-level first then product-level. Namespace and
+     key are configurable on the block, defaulting to `custom.stock_by_location`.
+     Expected shape — a list of objects:
+
+       [
+         { "name": "Ljubljana", "quantity": 12,
+           "address": "Dunajska cesta 5", "note": "Prevzem isti dan" },
+         { "name": "Maribor", "quantity": 2 }
+       ]
+
+     Only `name` and `quantity` are required. Populate it from the Admin API
+     (`inventoryItem.inventoryLevels`) — the storefront cannot read per-location
+     quantities on its own.
+
+  2. MANUAL — typed into the block's "Locations" setting in the theme editor,
+     one location per line: `Name | quantity | detail`. Shows every location
+     listed, needs no metafield and no app, but the numbers are the same on
+     every product and every variant until source 1 takes over. Fine for a
+     first look; not something to leave running on a live store.
+
+  3. PICKUP AVAILABILITY — `variant.store_availabilities`, which Shopify exposes
+     only for locations with local pickup enabled. Real and variant-accurate,
+     but gives in-stock / out-of-stock with no counts, so the quantity column
+     is dropped.
+
+  Renders nothing when no source has data.
+
+  Accepts:
+    - product:    {Object} Product Liquid object
+    - block:      {Object} Block object, for settings
+    - section_id: {String} Section ID for unique element IDs
+
+  Usage:
+    {%- render 'product-stock-locations', product: product, block: block, section_id: section.id -%}
+{% endcomment %}
+
+{%- liquid
+  assign variant = product.selected_or_first_available_variant
+
+  assign ns = block.settings.metafield_namespace | default: 'custom'
+  assign mkey = block.settings.metafield_key | default: 'stock_by_location'
+  assign low_threshold = block.settings.low_stock_threshold
+  assign full_threshold = block.settings.full_stock_threshold
+  if full_threshold < 1
+    assign full_threshold = 1
+  endif
+
+  assign source = ''
+
+  comment
+    Source 1 — metafield with real counts.
+  endcomment
+  assign entries = variant.metafields[ns][mkey].value
+  if entries == blank
+    assign entries = product.metafields[ns][mkey].value
+  endif
+  if entries.size > 0 and entries.first.name != blank
+    assign source = 'metafield'
+  endif
+
+  comment
+    Source 2 — locations typed into the theme editor, one per line.
+  endcomment
+  assign manual_lines = ''
+  if source == blank and block.settings.manual_locations != blank
+    assign manual_lines = block.settings.manual_locations | strip | newline_to_br | split: '<br />'
+    if manual_lines.size > 0
+      assign source = 'manual'
+    endif
+  endif
+
+  comment
+    Source 3 — pickup availability, no counts.
+  endcomment
+  assign availabilities = variant.store_availabilities
+  if source == blank and availabilities.size > 0
+    assign source = 'availability'
+  endif
+
+  assign has_counts = false
+  if source == 'metafield' or source == 'manual'
+    assign has_counts = true
+  endif
+
+  comment
+    Total on hand, matched to whichever source is in play.
+  endcomment
+  assign total = 0
+  assign show_total = true
+  case source
+    when 'metafield'
+      for entry in entries
+        assign total = total | plus: entry.quantity
+      endfor
+    when 'manual'
+      for line in manual_lines
+        assign parts = line | split: '|'
+        assign line_qty = parts[1] | strip | plus: 0
+        assign total = total | plus: line_qty
+      endfor
+    when 'availability'
+      assign total = variant.inventory_quantity
+      unless variant.inventory_management == 'shopify'
+        assign show_total = false
+      endunless
+  endcase
+-%}
+
+{%- if source != blank -%}
+  {{ 'component-stock-locations.css' | asset_url | stylesheet_tag }}
+
+  <div class="stock-locations" id="StockLocations-{{ section_id }}">
+    <h3 class="stock-locations__title">
+      {{- 'products.product.stock_locations.title' | t -}}
+    </h3>
+
+    <table class="stock-locations__table{% unless has_counts %} stock-locations__table--no-counts{% endunless %}">
+      <caption class="visually-hidden">
+        {{ 'products.product.stock_locations.caption' | t: product: product.title }}
+      </caption>
+      <thead>
+        <tr>
+          <th scope="col" class="stock-locations__col-location">
+            {{- 'products.product.stock_locations.col_location' | t -}}
+          </th>
+          <th scope="col" class="stock-locations__col-status">
+            {{- 'products.product.stock_locations.col_status' | t -}}
+          </th>
+          {%- if has_counts -%}
+            <th scope="col" class="stock-locations__col-qty">
+              {{- 'products.product.stock_locations.col_quantity' | t -}}
+            </th>
+          {%- endif -%}
+        </tr>
+      </thead>
+
+      <tbody>
+        {%- case source -%}
+          {%- when 'metafield' -%}
+            {%- for entry in entries -%}
+              {%- liquid
+                assign detail = ''
+                if block.settings.show_address
+                  assign detail = entry.address | default: ''
+                  if entry.note != blank
+                    if detail != blank
+                      assign detail = detail | append: ' · '
+                    endif
+                    assign detail = detail | append: entry.note
+                  endif
+                endif
+              -%}
+              {%- render 'product-stock-location-row',
+                name: entry.name,
+                detail: detail,
+                has_counts: true,
+                quantity: entry.quantity,
+                low_threshold: low_threshold,
+                full_threshold: full_threshold
+              -%}
+            {%- endfor -%}
+
+          {%- when 'manual' -%}
+            {%- for line in manual_lines -%}
+              {%- liquid
+                assign parts = line | split: '|'
+                assign line_name = parts[0] | strip
+                assign line_qty = parts[1] | strip | plus: 0
+                assign detail = ''
+                if block.settings.show_address
+                  assign detail = parts[2] | strip
+                endif
+              -%}
+              {%- if line_name != blank -%}
+                {%- render 'product-stock-location-row',
+                  name: line_name,
+                  detail: detail,
+                  has_counts: true,
+                  quantity: line_qty,
+                  low_threshold: low_threshold,
+                  full_threshold: full_threshold
+                -%}
+              {%- endif -%}
+            {%- endfor -%}
+
+          {%- when 'availability' -%}
+            {%- for availability in availabilities -%}
+              {%- liquid
+                assign detail = ''
+                if block.settings.show_address
+                  assign detail = availability.location.address.address1 | default: ''
+                  if availability.location.address.city != blank
+                    if detail != blank
+                      assign detail = detail | append: ', '
+                    endif
+                    assign detail = detail | append: availability.location.address.city
+                  endif
+                  if availability.pick_up_enabled and availability.available and availability.pick_up_time != blank
+                    if detail != blank
+                      assign detail = detail | append: ' · '
+                    endif
+                    assign detail = detail | append: availability.pick_up_time
+                  endif
+                endif
+              -%}
+              {%- render 'product-stock-location-row',
+                name: availability.location.name,
+                detail: detail,
+                has_counts: false,
+                available: availability.available
+              -%}
+            {%- endfor -%}
+        {%- endcase -%}
+      </tbody>
+
+      {%- if show_total -%}
+        <tfoot>
+          <tr>
+            <th scope="row" colspan="{% if has_counts %}2{% else %}1{% endif %}">
+              {{- 'products.product.stock_locations.total' | t -}}
+            </th>
+            <td{% unless has_counts %} class="stock-locations__total-solo"{% endunless %}>
+              <span class="stock-qty stock-qty--total">{{ total }}</span>
+            </td>
+          </tr>
+        </tfoot>
+      {%- endif -%}
+    </table>
+  </div>
+{%- endif -%}

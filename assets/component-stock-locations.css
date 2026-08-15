@@ -1,0 +1,260 @@
+/* ============================================================
+   Stock by Location — depot ledger for the product info column
+   Reads as a warehouse manifest: hairline rules, uppercase
+   micro-labels, tabular numerals, and a five-tick stock gauge
+   drawn in brand red.
+   ============================================================ */
+
+.stock-locations {
+  --sl-rule: rgba(var(--color-foreground), 0.08);
+  --sl-rule-strong: rgba(var(--color-foreground), 0.18);
+  --sl-label: rgba(var(--color-foreground), 0.4);
+  --sl-value: rgba(var(--color-foreground), 0.82);
+  --sl-muted: rgba(var(--color-foreground), 0.48);
+  --sl-track: rgba(var(--color-foreground), 0.11);
+
+  margin: 2.4rem 0;
+}
+
+/* --- Heading + brand rule --- */
+.stock-locations__title {
+  margin: 0 0 1.4rem;
+  font-size: 1.2rem;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(var(--color-foreground), 0.72);
+}
+
+.stock-locations__title::after {
+  content: '';
+  display: block;
+  width: 3.2rem;
+  height: 3px;
+  margin-top: 0.9rem;
+  background: var(--color-brand-primary);
+}
+
+/* --- Table shell --- */
+.stock-locations__table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: auto;
+}
+
+.stock-locations__table thead th {
+  padding: 0 0 0.7rem;
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--sl-label);
+  text-align: left;
+  white-space: nowrap;
+  border-bottom: 1px solid var(--sl-rule-strong);
+}
+
+.stock-locations__col-status {
+  padding-left: 1.2rem !important;
+}
+
+.stock-locations__col-qty {
+  text-align: right !important;
+  padding-left: 1.2rem !important;
+}
+
+/* --- Rows --- */
+.stock-row > th,
+.stock-row > td {
+  padding: 1.1rem 0;
+  border-bottom: 1px solid var(--sl-rule);
+  vertical-align: baseline;
+}
+
+.stock-row:last-child > th,
+.stock-row:last-child > td {
+  border-bottom: 1px solid var(--sl-rule-strong);
+}
+
+.stock-row__location {
+  text-align: left;
+  font-weight: 400;
+  padding-right: 1.2rem;
+}
+
+.stock-row__name {
+  display: block;
+  font-size: 1.4rem;
+  font-weight: 600;
+  line-height: 1.25;
+  letter-spacing: 0.005em;
+  color: var(--sl-value);
+}
+
+.stock-row__meta {
+  display: block;
+  margin-top: 0.35rem;
+  font-size: 1.05rem;
+  line-height: 1.35;
+  color: var(--sl-label);
+  overflow-wrap: anywhere;
+}
+
+/* --- Status --- */
+.stock-row__status {
+  padding-left: 1.2rem;
+  font-size: 1.15rem;
+  font-weight: 600;
+  line-height: 1.3;
+  white-space: nowrap;
+  color: var(--sl-muted);
+}
+
+.stock-dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  margin-right: 0.7rem;
+  border-radius: 50%;
+  background: currentColor;
+  vertical-align: 0.12em;
+}
+
+.stock-row--in .stock-row__status {
+  color: var(--color-success);
+}
+
+.stock-row--low .stock-row__status {
+  color: var(--color-urgency);
+}
+
+.stock-row--out .stock-row__status {
+  color: var(--sl-muted);
+}
+
+.stock-row--out .stock-dot {
+  background: transparent;
+  box-shadow: inset 0 0 0 1.5px currentColor;
+}
+
+/* --- Quantity readout + gauge --- */
+.stock-row__qty {
+  padding-left: 1.2rem;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.stock-meter {
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 3px;
+  margin-right: 0.9rem;
+  vertical-align: -0.05em;
+}
+
+.stock-meter__seg {
+  width: 3px;
+  height: 13px;
+  background: var(--sl-track);
+  transform-origin: bottom center;
+  animation: stockSegRise 0.28s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: calc(0.12s + var(--seg-index, 0) * 0.045s);
+}
+
+.stock-meter__seg.is-filled {
+  background: var(--color-brand-primary);
+}
+
+/* Scale only — never fade. The gauge re-renders on every variant change,
+   and an opacity ramp would blink the ticks out each time. */
+@keyframes stockSegRise {
+  from {
+    transform: scaleY(0.18);
+  }
+  to {
+    transform: scaleY(1);
+  }
+}
+
+.stock-qty {
+  display: inline-block;
+  min-width: 2.2ch;
+  font-size: 1.6rem;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--sl-value);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
+}
+
+.stock-row--out .stock-qty {
+  color: rgba(var(--color-foreground), 0.35);
+  font-weight: 500;
+}
+
+/* --- Total --- */
+.stock-locations__table tfoot th,
+.stock-locations__table tfoot td {
+  padding: 1.1rem 0 0;
+}
+
+.stock-locations__table tfoot th {
+  text-align: left;
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--sl-label);
+}
+
+.stock-locations__table tfoot td {
+  text-align: right;
+  padding-left: 1.2rem;
+}
+
+.stock-qty--total {
+  font-size: 1.8rem;
+  color: rgba(var(--color-foreground), 0.92);
+}
+
+/* --- Availability-only fallback (no per-location counts) --- */
+.stock-locations__table--no-counts .stock-row__status,
+.stock-locations__table--no-counts .stock-locations__col-status,
+.stock-locations__table--no-counts .stock-locations__total-solo {
+  text-align: right;
+}
+
+.stock-locations__table--no-counts .stock-dot {
+  margin-right: 0.6rem;
+}
+
+/* --- Narrow product info column / small screens --- */
+@media screen and (max-width: 420px) {
+  .stock-row__name {
+    font-size: 1.3rem;
+  }
+
+  .stock-row__status {
+    font-size: 1.05rem;
+    padding-left: 0.8rem;
+  }
+
+  .stock-row__qty {
+    padding-left: 0.8rem;
+  }
+
+  .stock-meter {
+    margin-right: 0.6rem;
+  }
+
+  .stock-qty {
+    font-size: 1.45rem;
+  }
+}
+
+@media screen and (prefers-reduced-motion: reduce) {
+  .stock-meter__seg {
+    animation: none;
+  }
+}
