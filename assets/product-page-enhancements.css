@@ -6,7 +6,7 @@
 /* --- Breadcrumb --- */
 .product-breadcrumb {
   padding-top: 0;
-  padding-bottom: 1.6rem;
+  padding-bottom: 1rem;
   font-size: 1.2rem;
   letter-spacing: 0.06em;
   color: rgba(var(--color-foreground), 0.4);
@@ -97,7 +97,7 @@ a.product-breadcrumb__segment:hover {
 
 @media screen and (min-width: 750px) {
   .product-page-header {
-    margin-bottom: 2rem;
+    margin-bottom: 1.2rem;
   }
 }
 
@@ -114,7 +114,7 @@ a.product-breadcrumb__segment:hover {
 
 /* --- Product Title --- */
 .product__title {
-  padding-bottom: 1.6rem;
+  padding-bottom: 0.8rem;
 }
 
 .product__title::after {
@@ -123,7 +123,7 @@ a.product-breadcrumb__segment:hover {
   width: 32px;
   height: 3px;
   background: var(--color-brand-primary);
-  margin-top: 1.2rem;
+  margin-top: 0.9rem;
 }
 
 .product__title h1,
@@ -246,9 +246,12 @@ a.product-breadcrumb__segment:hover {
   margin-top: 1.2rem;
 }
 
+/* Columns are as many equal tracks as fit, given a minimum wide enough for the
+   longest option value (--pill-min, set per option in product-variant-picker.liquid).
+   Long size names like "5'11 - 90L" get a wider track instead of wrapping mid-label. */
 .variant-pills-grid {
   display: grid;
-  grid-template-columns: repeat(var(--pill-cols, 5), 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, var(--pill-min, 8rem)), 1fr));
   gap: 0.5rem;
 }
 
@@ -269,9 +272,10 @@ a.product-breadcrumb__segment:hover {
   align-items: center;
   justify-content: center;
   text-align: center;
+  white-space: nowrap;
   width: 100% !important;
   margin: 0 !important;
-  padding: 0.4rem 0.6rem !important;
+  padding: 0.4rem 0.8rem !important;
 }
 
 /* Selected state — solid brand fill */
@@ -626,5 +630,37 @@ a.product-breadcrumb__segment:hover {
   .product--thumbnail .product__media-item,
   .product--thumbnail_slider .product__media-item {
     transition: none !important;
+  }
+}
+
+/* ============================================================
+   Media column tracks the image width
+   media-gallery.js sets --media-column-width to the height-capped
+   image width (floored so the info column can't outgrow 600px).
+   The info column absorbs the freed width, so image and price panel
+   stay anchored to the page edges with a constant gutter between them.
+   ============================================================ */
+@media screen and (min-width: 990px) {
+  .product.grid.product--large:not(.product--no-media) .product__media-wrapper {
+    width: var(--media-column-width, calc(58% - var(--grid-desktop-horizontal-spacing) / 2));
+    max-width: var(--media-column-width, 58%);
+    flex: 0 0 auto;
+  }
+
+  /* flex-basis must be 0, not auto: `.grid` wraps, and an auto basis makes this
+     column demand its max-content width and drop onto its own line. */
+  .product.grid.product--large:not(.product--no-media) .product__info-wrapper {
+    width: auto;
+    max-width: none;
+    min-width: 0;
+    flex: 1 1 0;
+  }
+
+  /* Dawn caps these at 44rem. Left as-is they stop short of the widened column
+     while the price rule spans it, which leaves the right edge ragged. */
+  .product__info-container .product-form__input,
+  .product__info-container .product-form__buttons,
+  .product__info-container .recipient-form {
+    max-width: 100%;
   }
 }

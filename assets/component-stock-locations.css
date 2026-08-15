@@ -1,8 +1,11 @@
 /* ============================================================
-   Stock by Location — depot ledger for the product info column
-   Reads as a warehouse manifest: hairline rules, uppercase
-   micro-labels, tabular numerals, and a five-tick stock gauge
-   drawn in brand red.
+   Stock by Location — the availability matrix in the product
+   info column. Locations across the top, variants down the left.
+
+   Flat by design, like the rest of the info column: an uppercase
+   micro-label under a brand rule, hairline separators, no panel or
+   card. Binary states — a cell is in stock or it isn't — carried by
+   colour and by dot shape, so they survive colourblindness.
    ============================================================ */
 
 .stock-locations {
@@ -10,8 +13,6 @@
   --sl-rule-strong: rgba(var(--color-foreground), 0.18);
   --sl-label: rgba(var(--color-foreground), 0.4);
   --sl-value: rgba(var(--color-foreground), 0.82);
-  --sl-muted: rgba(var(--color-foreground), 0.48);
-  --sl-track: rgba(var(--color-foreground), 0.11);
 
   margin: 2.4rem 0;
 }
@@ -36,79 +37,174 @@
   background: var(--color-brand-primary);
 }
 
-/* --- Table shell --- */
-.stock-locations__table {
-  width: 100%;
-  border-collapse: collapse;
-  table-layout: auto;
+/* A third location, or a long note, scrolls inside the block rather than
+   widening the info column. */
+.stock-locations__scroll {
+  overflow-x: auto;
 }
 
-.stock-locations__table thead th {
-  padding: 0 0 0.7rem;
-  font-size: 1rem;
-  font-weight: 600;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--sl-label);
+.stock-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+/* --- Column heads --- */
+.stock-table thead th {
+  padding: 0 0 0.9rem;
   text-align: left;
-  white-space: nowrap;
+  vertical-align: bottom;
+  font-weight: 700;
   border-bottom: 1px solid var(--sl-rule-strong);
 }
 
-.stock-locations__col-status {
-  padding-left: 1.2rem !important;
+.stock-table__corner {
+  font-size: 1.05rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--sl-label);
 }
 
-.stock-locations__col-qty {
-  text-align: right !important;
-  padding-left: 1.2rem !important;
+/* The variant column absorbs the slack; status columns hug their content and
+   sit together on the right, keeping the label-left/value-right rhythm the
+   rest of the info column uses. */
+.stock-table__location {
+  width: 1%;
+  white-space: nowrap;
+  padding-left: 1.6rem !important;
+}
+
+.stock-table__location-name {
+  display: block;
+  font-size: 1.05rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--sl-label);
+}
+
+/* Free text from the block setting — what this location means for delivery. */
+.stock-table__location-note {
+  display: block;
+  margin-top: 0.3rem;
+  font-size: 1.05rem;
+  font-weight: 500;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--sl-label);
 }
 
 /* --- Rows --- */
-.stock-row > th,
-.stock-row > td {
+.stock-table tbody th,
+.stock-table tbody td {
   padding: 1.1rem 0;
+  text-align: left;
+  vertical-align: middle;
   border-bottom: 1px solid var(--sl-rule);
-  vertical-align: baseline;
 }
 
-.stock-row:last-child > th,
-.stock-row:last-child > td {
+.stock-table tbody tr:last-child > * {
   border-bottom: 1px solid var(--sl-rule-strong);
 }
 
-.stock-row__location {
-  text-align: left;
-  font-weight: 400;
-  padding-right: 1.2rem;
-}
-
-.stock-row__name {
-  display: block;
+.stock-table__variant {
   font-size: 1.4rem;
   font-weight: 600;
   line-height: 1.25;
-  letter-spacing: 0.005em;
   color: var(--sl-value);
+  overflow-wrap: anywhere;
 }
 
-.stock-row__meta {
-  display: block;
-  margin-top: 0.35rem;
+/* --- Single-variant shape: one row per location, status on the right --- */
+.stock-locations__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--sl-rule-strong);
+}
+
+.stock-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1.2rem;
+  padding: 1.1rem 0;
+  border-bottom: 1px solid var(--sl-rule);
+}
+
+.stock-row:last-child {
+  border-bottom: 1px solid var(--sl-rule-strong);
+}
+
+/* Same treatment as the matrix's column heads, so a location reads the same
+   whichever shape the block is in. */
+.stock-row__name {
   font-size: 1.05rem;
-  line-height: 1.35;
+  font-weight: 700;
+  line-height: 1.3;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
   color: var(--sl-label);
   overflow-wrap: anywhere;
 }
 
-/* --- Status --- */
+.stock-row__note {
+  display: block;
+  margin-top: 0.3rem;
+  font-size: 1.05rem;
+  font-weight: 500;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--sl-label);
+}
+
 .stock-row__status {
-  padding-left: 1.2rem;
+  flex: 0 0 auto;
   font-size: 1.15rem;
   font-weight: 600;
   line-height: 1.3;
   white-space: nowrap;
-  color: var(--sl-muted);
+  text-align: right;
+}
+
+.stock-row--in .stock-row__status {
+  color: var(--color-success);
+}
+
+.stock-row--out .stock-row__status {
+  color: var(--color-brand-primary);
+}
+
+.stock-row--out .stock-dot {
+  background: transparent;
+  box-shadow: inset 0 0 0 1.5px currentColor;
+}
+
+/* --- Selected variant — ties the row to the chosen pill above.
+   Weight and a neutral tint, so brand red keeps one meaning here. --- */
+.stock-table__row--selected > * {
+  background: rgba(var(--color-foreground), 0.04);
+}
+
+.stock-table__row--selected .stock-table__variant {
+  font-weight: 700;
+  color: rgb(var(--color-foreground));
+}
+
+/* --- Cells --- */
+.stock-cell {
+  width: 1%;
+  padding-left: 1.6rem !important;
+  font-size: 1.15rem;
+  font-weight: 600;
+  line-height: 1.3;
+  white-space: nowrap;
+}
+
+.stock-cell--in {
+  color: var(--color-success);
+}
+
+.stock-cell--out {
+  color: var(--color-brand-primary);
 }
 
 .stock-dot {
@@ -121,140 +217,108 @@
   vertical-align: 0.12em;
 }
 
-.stock-row--in .stock-row__status {
-  color: var(--color-success);
-}
-
-.stock-row--low .stock-row__status {
-  color: var(--color-urgency);
-}
-
-.stock-row--out .stock-row__status {
-  color: var(--sl-muted);
-}
-
-.stock-row--out .stock-dot {
+/* Hollow ring, so the out-of-stock state reads without relying on colour. */
+.stock-cell--out .stock-dot {
   background: transparent;
   box-shadow: inset 0 0 0 1.5px currentColor;
 }
 
-/* --- Quantity readout + gauge --- */
-.stock-row__qty {
-  padding-left: 1.2rem;
-  text-align: right;
+/* --- Disclosure: collapsed shows only the selected variant's row ---
+   CSS-only, so the block keeps its no-JS promise. The input stays in the
+   layout (not display:none) so it remains focusable and announces its state. */
+.stock-toggle {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
   white-space: nowrap;
 }
 
-.stock-meter {
+.stock-toggle:not(:checked) ~ .stock-locations__scroll .stock-table__row:not(.stock-table__row--near) {
+  display: none;
+}
+
+/* Collapsed, the window's last row is the visible last one — give it the
+   closing rule that `tbody tr:last-child` carries when expanded. */
+.stock-toggle:not(:checked) ~ .stock-locations__scroll .stock-table__row--near-last > * {
+  border-bottom: 1px solid var(--sl-rule-strong);
+}
+
+.stock-toggle__label {
   display: inline-flex;
-  align-items: flex-end;
-  gap: 3px;
-  margin-right: 0.9rem;
-  vertical-align: -0.05em;
-}
-
-.stock-meter__seg {
-  width: 3px;
-  height: 13px;
-  background: var(--sl-track);
-  transform-origin: bottom center;
-  animation: stockSegRise 0.28s cubic-bezier(0.22, 1, 0.36, 1) both;
-  animation-delay: calc(0.12s + var(--seg-index, 0) * 0.045s);
-}
-
-.stock-meter__seg.is-filled {
-  background: var(--color-brand-primary);
-}
-
-/* Scale only — never fade. The gauge re-renders on every variant change,
-   and an opacity ramp would blink the ticks out each time. */
-@keyframes stockSegRise {
-  from {
-    transform: scaleY(0.18);
-  }
-  to {
-    transform: scaleY(1);
-  }
-}
-
-.stock-qty {
-  display: inline-block;
-  min-width: 2.2ch;
-  font-size: 1.6rem;
+  align-items: center;
+  gap: 0.6rem;
+  margin-top: 1.1rem;
+  font-size: 1.1rem;
   font-weight: 700;
-  line-height: 1;
-  color: var(--sl-value);
-  font-variant-numeric: tabular-nums;
-  font-feature-settings: 'tnum';
-}
-
-.stock-row--out .stock-qty {
-  color: rgba(var(--color-foreground), 0.35);
-  font-weight: 500;
-}
-
-/* --- Total --- */
-.stock-locations__table tfoot th,
-.stock-locations__table tfoot td {
-  padding: 1.1rem 0 0;
-}
-
-.stock-locations__table tfoot th {
-  text-align: left;
-  font-size: 1rem;
-  font-weight: 600;
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--sl-label);
+  cursor: pointer;
+  transition: color 0.15s ease;
 }
 
-.stock-locations__table tfoot td {
-  text-align: right;
-  padding-left: 1.2rem;
+.stock-toggle__label:hover {
+  color: var(--color-brand-primary);
 }
 
-.stock-qty--total {
-  font-size: 1.8rem;
-  color: rgba(var(--color-foreground), 0.92);
+.stock-toggle:focus-visible ~ .stock-toggle__label {
+  outline: 2px solid var(--color-brand-primary);
+  outline-offset: 3px;
 }
 
-/* --- Availability-only fallback (no per-location counts) --- */
-.stock-locations__table--no-counts .stock-row__status,
-.stock-locations__table--no-counts .stock-locations__col-status,
-.stock-locations__table--no-counts .stock-locations__total-solo {
-  text-align: right;
+.stock-toggle__caret {
+  width: 10px;
+  height: auto;
+  transition: transform 0.2s ease;
 }
 
-.stock-locations__table--no-counts .stock-dot {
-  margin-right: 0.6rem;
+.stock-toggle:not(:checked) ~ .stock-toggle__label .stock-toggle__text--less,
+.stock-toggle:checked ~ .stock-toggle__label .stock-toggle__text--more {
+  display: none;
+}
+
+.stock-toggle:checked ~ .stock-toggle__label .stock-toggle__caret {
+  transform: rotate(180deg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stock-toggle__caret {
+    transition: none;
+  }
+}
+
+/* --- Diagnostics, theme-editor only --- */
+.stock-locations__debug {
+  margin: 1.2rem 0 0;
+  padding: 1rem;
+  overflow-x: auto;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 1.05rem;
+  line-height: 1.5;
+  white-space: pre;
+  color: rgba(var(--color-foreground), 0.7);
+  background: rgba(var(--color-foreground), 0.04);
+  border-left: 3px solid var(--color-urgency);
 }
 
 /* --- Narrow product info column / small screens --- */
-@media screen and (max-width: 420px) {
-  .stock-row__name {
+@media screen and (max-width: 480px) {
+  .stock-table__variant {
     font-size: 1.3rem;
   }
 
-  .stock-row__status {
+  .stock-table__location,
+  .stock-cell {
+    padding-left: 1rem !important;
+  }
+
+  .stock-cell {
     font-size: 1.05rem;
-    padding-left: 0.8rem;
-  }
-
-  .stock-row__qty {
-    padding-left: 0.8rem;
-  }
-
-  .stock-meter {
-    margin-right: 0.6rem;
-  }
-
-  .stock-qty {
-    font-size: 1.45rem;
-  }
-}
-
-@media screen and (prefers-reduced-motion: reduce) {
-  .stock-meter__seg {
-    animation: none;
   }
 }

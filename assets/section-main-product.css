@@ -1460,6 +1460,8 @@ a.product__text {
   --viewport-offset: 400px;
   --constrained-min-height: 300px;
   --constrained-height: max(var(--constrained-min-height), calc(100vh - var(--viewport-offset)));
+  /* Left-aligned so the image lines up with the title and its red bar. The column
+     itself shrinks to the image instead — see --media-column-width. */
   margin-right: auto;
   margin-left: 0;
 }
@@ -1500,9 +1502,10 @@ a.product__text {
   }
 
   .product-media-container.constrain-height {
-    /* Small offset so image can overflow the fold slightly — portrait images
-       fill more of the column width and the gap to the info panel shrinks */
-    --viewport-offset: 100px;
+    /* Fallback for no-JS: everything above the gallery (header, breadcrumb, title)
+       plus a strip of thumbnails peeking below the fold. media-gallery.js replaces
+       this with the measured value, which adapts to header height and zoom level. */
+    --viewport-offset: 380px;
     --constrained-min-height: 400px;
   }
 

@@ -134,15 +134,12 @@
       "sku_label": "SKU:",
       "ean_label": "EAN code:",
       "stock_locations": {
-        "title": "Stock by location",
-        "caption": "Stock for {{ product }} at each location",
-        "col_location": "Location",
-        "col_status": "Status",
-        "col_quantity": "Qty",
+        "title": "Availability",
         "in_stock": "In stock",
-        "low_stock": "Last few",
         "out_of_stock": "Out of stock",
-        "total": "Total in stock"
+        "selected": "selected",
+        "show_all": "All sizes",
+        "show_less": "Show less"
       },
       "select_variant": "Select product variant",
       "on_sale": "Sale",
@@ -155,7 +152,8 @@
         "image_available": "Image {{ index }} is now available in gallery view",
         "open_media": "Open media {{ index }} in modal",
         "play_model": "Play 3D Viewer",
-        "play_video": "Play video"
+        "play_video": "Play video",
+        "no_image": "Photo coming soon"
       },
       "nested_label": "{{ title }} for {{ parent_title }}",
       "quantity": {

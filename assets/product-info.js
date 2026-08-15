@@ -195,6 +195,9 @@ if (!customElements.get('product-info')) {
           updateSourceFromDestination('Volume');
           updateSourceFromDestination('Price-Per-Item', ({ classList }) => classList.contains('hidden'));
           updateSourceFromDestination('ProductBarcodeToken');
+          // Availability matrix: the selected row and the window of sizes around it
+          // are resolved in Liquid, so it has to be swapped like the blocks above.
+          updateSourceFromDestination('StockLocations');
 
           this.updateQuantityRules(this.sectionId, html);
           this.querySelector(`#Quantity-Rules-${this.dataset.section}`)?.classList.remove('hidden');

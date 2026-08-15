@@ -43,11 +43,28 @@
           %}
         </fieldset>
       {%- elsif picker_type == 'button' -%}
-        {%- assign pill_cols = option.values.size | at_most: 5 -%}
+        {%- comment -%}
+          Minimum pill width is derived from the longest option value so labels never
+          wrap mid-word. 0.75rem per character covers the widest real values measured
+          on this store (uppercase SKU-style codes run ~0.73rem/char), plus 1.8rem of
+          horizontal padding. The grid then fits as many equal columns as that minimum
+          allows — see .variant-pills-grid in product-page-enhancements.css.
+        {%- endcomment -%}
+        {%- assign longest_value = 0 -%}
+        {%- for value in option.values -%}
+          {%- assign value_length = value.name | size -%}
+          {%- if value_length > longest_value -%}
+            {%- assign longest_value = value_length -%}
+          {%- endif -%}
+        {%- endfor -%}
+        {%- assign pill_min = longest_value | times: 75 | plus: 180 | divided_by: 100.0 -%}
+        {%- if pill_min < 6 -%}
+          {%- assign pill_min = 6 -%}
+        {%- endif -%}
         {%- assign grid_id = section.id | append: '-opt' | append: option.position -%}
         <fieldset class="js product-form__input product-form__input--pill">
           <legend class="form__label">{%- if option.name == 'Title' -%}{{ 'products.product.select_variant' | t }}{%- else -%}{{ option.name }}{%- endif -%}</legend>
-          <div class="variant-pills-grid" data-grid="{{ grid_id }}" style="--pill-cols: {{ pill_cols }}">
+          <div class="variant-pills-grid" data-grid="{{ grid_id }}" style="--pill-min: {{ pill_min }}rem">
             {% render 'product-variant-options',
               product: product,
               option: option,
@@ -56,32 +73,6 @@
             %}
           </div>
         </fieldset>
-        {%- comment -%}
-          Per-item column spans: long names get wider cells so text stays on one line.
-          Thresholds are based on approx char width at 12px in a 5-col grid (~72px/col):
-            >10 chars → span 2 (~144px), >20 chars → span 3 (~216px).
-          Only applied for grids with 3+ columns — narrower grids have wide-enough columns.
-        {%- endcomment -%}
-        {%- if pill_cols >= 3 -%}
-          {%- capture span_styles -%}
-            {%- for value in option.values -%}
-              {%- assign char_count = value.name | size -%}
-              {%- if char_count > 20 -%}
-                {%- assign item_span = 3 | at_most: pill_cols -%}
-              {%- elsif char_count > 10 -%}
-                {%- assign item_span = 2 | at_most: pill_cols -%}
-              {%- else -%}
-                {%- assign item_span = 0 -%}
-              {%- endif -%}
-              {%- if item_span >= 2 -%}
-                input[data-option-value-id="{{ value.id }}"] + label { grid-column: span {{ item_span }}; }
-              {%- endif -%}
-            {%- endfor -%}
-          {%- endcapture -%}
-          {%- if span_styles != blank -%}
-            <style>{{ span_styles }}</style>
-          {%- endif -%}
-        {%- endif -%}
       {%- else -%}
         <div class="product-form__input product-form__input--dropdown">
           <label class="form__label" for="Option-{{ section.id }}-{{ forloop.index0 }}">

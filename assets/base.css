@@ -1163,6 +1163,23 @@ summary::-webkit-details-marker {
   transition: opacity 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
+/* Stand-in for products with no image. The `.media > *` rule above already sizes
+   this to fill the aspect box, so the icon is centred by position rather than flex —
+   overriding that rule's display would need a four-class selector. */
+.media-placeholder {
+  background-color: rgba(var(--color-foreground), 0.045);
+}
+
+.media-placeholder__icon {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: clamp(3.2rem, 22%, 7.2rem);
+  height: auto;
+  color: rgba(var(--color-foreground), 0.22);
+}
+
 .media--square {
   padding-bottom: 100%;
 }

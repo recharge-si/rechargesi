@@ -231,9 +231,24 @@
         {%- endunless -%}
       {%- endfor -%}
     </div>
-    <div class="product product--{{ section.settings.media_size }} product--{{ section.settings.media_position }} product--{{ section.settings.gallery_layout }} product--mobile-{{ section.settings.mobile_thumbnails }} grid grid--1-col {% if product.media.size > 0 %}grid--2-col-tablet{% else %}product--no-media{% endif %}">
+    <div class="product product--{{ section.settings.media_size }} product--{{ section.settings.media_position }} product--{{ section.settings.gallery_layout }} product--mobile-{{ section.settings.mobile_thumbnails }} grid grid--1-col grid--2-col-tablet">
       <div class="grid__item product__media-wrapper">
-        {% render 'product-media-gallery', variant_images: variant_images %}
+        {%- if product.media.size > 0 -%}
+          {% render 'product-media-gallery', variant_images: variant_images %}
+        {%- else -%}
+          {%- comment -%}
+            No media: keep the two-column layout and show the placeholder, so a product
+            awaiting photography reads the same here as it does on a collection card.
+          {%- endcomment -%}
+          <div
+            class="product-media-container media-type-image media-fit-contain global-media-settings gradient{% if section.settings.constrain_to_viewport %} constrain-height{% endif %}"
+            style="--ratio: 1; --preview-ratio: 1; --aspect-ratio: 1"
+          >
+            <div class="media media--transparent">
+              {% render 'media-placeholder' %}
+            </div>
+          </div>
+        {%- endif -%}
       </div>
       <div class="product__info-wrapper grid__item{% if settings.page_width > 1400 and section.settings.media_size == "small" %} product__info-wrapper--extra-padding{% endif %}{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--slide-in{% endif %}">
         <section
@@ -1000,14 +1015,29 @@
       "settings": [
         {
           "type": "paragraph",
-          "content": "Three sources, first one with data wins: (1) a JSON metafield with real counts, (2) the locations you type below, (3) pickup availability, which covers only locations with local pickup on and shows no counts."
+          "content": "A matrix of variants against locations — in stock / out of stock, no quantities. Products with one variant show a single row. Data comes from the custom.stock_by_location metafield, kept up to date by a Shopify Flow. Setup is in scripts/flow-stock-by-location.md."
         },
         {
           "type": "textarea",
-          "id": "manual_locations",
+          "id": "locations",
           "label": "Locations",
-          "info": "One per line: Name | quantity | detail. Shows every location listed, but the same numbers on every product — replace with the metafield before going live.",
-          "default": "Ljubljana | 12 | Dunajska cesta 5 · Prevzem isti dan\nMaribor | 2 | Partizanska cesta 12\nKoper | 0 | Pristaniška ulica 8\nOsrednje skladišče | 47 | Dostava 1–2 delovna dneva"
+          "info": "One per line: Shopify location name | column heading | note. The Shopify name must match Settings → Locations exactly. Order here is the order shown. The note is optional free text under the heading — use it to say what that location means for delivery, e.g. \"Ready to collect\".",
+          "default": "Recharge | Our stock\nPartner Supply | Partner stock"
+        },
+        {
+          "type": "checkbox",
+          "id": "debug",
+          "label": "Show diagnostics",
+          "default": false,
+          "info": "Temporary. Prints what Shopify actually reported for this variant, so you can see why a row reads out of stock. Visible to customers — turn off when done."
+        },
+        {
+          "type": "header",
+          "content": "Metafield"
+        },
+        {
+          "type": "paragraph",
+          "content": "Where the sync script writes. JSON list of objects with a name matching the lines above, plus quantity (or available true/false). Change only if you moved the metafield."
         },
         {
           "type": "text",
@@ -1019,33 +1049,7 @@
           "type": "text",
           "id": "metafield_key",
           "label": "Metafield key",
-          "default": "stock_by_location",
-          "info": "JSON list of objects: name, quantity, and optionally address and note."
-        },
-        {
-          "type": "checkbox",
-          "id": "show_address",
-          "label": "Show address and pickup note",
-          "default": true
-        },
-        {
-          "type": "range",
-          "id": "low_stock_threshold",
-          "label": "Low stock at or below",
-          "min": 1,
-          "max": 20,
-          "step": 1,
-          "default": 3
-        },
-        {
-          "type": "range",
-          "id": "full_stock_threshold",
-          "label": "Full gauge at",
-          "min": 1,
-          "max": 100,
-          "step": 1,
-          "default": 10,
-          "info": "Quantity that fills all five gauge ticks."
+          "default": "stock_by_location"
         }
       ]
     },

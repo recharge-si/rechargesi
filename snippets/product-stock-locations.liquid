@@ -1,35 +1,73 @@
 {% comment %}
-  Renders a per-location stock table for the selected variant.
+  Renders where this product is in stock, in one of two shapes.
 
-  Three data sources, in priority order. The first one with data wins.
+  MANY VARIANTS — a matrix. Locations run across the top, variants down the left,
+  so a customer can pick a size *because* it is available rather than finding out
+  after clicking Add to cart. Collapsed it shows a three-row window around the
+  selected variant (one either side, or the nearest three at the ends), so the
+  block stays about as tall as the list it replaced; a toggle reveals the rest.
 
-  1. METAFIELD — real counts, kept in sync automatically.
-     A JSON metafield, variant-level first then product-level. Namespace and
-     key are configurable on the block, defaulting to `custom.stock_by_location`.
-     Expected shape — a list of objects:
+  ONE VARIANT — a list, one row per location, status on the right. There is no
+  size to compare, so a matrix would be a table with a single meaningless row.
 
-       [
-         { "name": "Ljubljana", "quantity": 12,
-           "address": "Dunajska cesta 5", "note": "Prevzem isti dan" },
-         { "name": "Maribor", "quantity": 2 }
-       ]
+  Status only in both — no quantities, no "last few" state.
 
-     Only `name` and `quantity` are required. Populate it from the Admin API
-     (`inventoryItem.inventoryLevels`) — the storefront cannot read per-location
-     quantities on its own.
+  The locations shown, their order, their customer-facing labels and an optional
+  note all come from the block's "Locations" setting, one per line:
 
-  2. MANUAL — typed into the block's "Locations" setting in the theme editor,
-     one location per line: `Name | quantity | detail`. Shows every location
-     listed, needs no metafield and no app, but the numbers are the same on
-     every product and every variant until source 1 takes over. Fine for a
-     first look; not something to leave running on a live store.
+      Recharge | Our stock | Ships today
+      Partner Supply | Partner stock
 
-  3. PICKUP AVAILABILITY — `variant.store_availabilities`, which Shopify exposes
-     only for locations with local pickup enabled. Real and variant-accurate,
-     but gives in-stock / out-of-stock with no counts, so the quantity column
-     is dropped.
+  Field 1 is the location name exactly as it reads in Shopify admin (Settings →
+  Locations). Field 2 is the label shown to the customer; omit it and the Shopify
+  name is used. Field 3 is an optional second line — use it to say what that
+  location means for delivery. It is free text and never inferred, so nothing is
+  promised that the shop hasn't promised.
 
-  Renders nothing when no source has data.
+  Availability for each variant/location pair, first hit wins:
+
+  1. METAFIELD — a JSON list on the variant, then the product. Namespace and key
+     are configurable, defaulting to `custom.stock_by_location`. Each object is
+     matched to a configured location by `name`, and read as in stock when
+     `available` is true, or when `quantity` is above zero:
+
+       [{ "name": "Recharge", "quantity": 4 },
+        { "name": "Partner Supply", "quantity": 0 }]
+
+     **This is the live source on this store.** A Shopify Flow writes it within
+     seconds of any inventory change — see `scripts/flow-stock-by-location.md`
+     for the trigger, the mutation, and its Liquid template.
+
+  2. STORE AVAILABILITY — `variant.store_availabilities`, a fallback that needs
+     no sync at all, but which Shopify populates only when a location has local
+     pickup enabled. Pickup is deliberately off on this store — it would show
+     customers a pickup option at checkout — so in practice this array is always
+     empty here and source 1 does all the work. Left in place because it costs
+     nothing and starts working by itself if pickup is ever turned on. Note that
+     the matrix reads it once per variant, so switching pickup on turns this into
+     N lookups per page; the metafield stays the fast path either way.
+
+  The resolution loop is written out twice, once per shape. Liquid has no way to
+  share it — `render` gets a fresh scope and can't hand a value back — and a
+  captured string would be worse to read than the duplication.
+
+  Every configured location is always shown, on every product, whether or not
+  either source had anything to say about it. A location neither source resolves
+  reads as out of stock — Shopify omits a location from `store_availabilities`
+  entirely when it doesn't stock the variant, which for display purposes is the
+  same thing. So there is no need to stock every product at every location.
+
+  The consequence of always rendering: if the metafield is empty store-wide —
+  the backfill never ran, or the Flow is switched off — every cell reads "out of
+  stock" on every product. That is a deliberate trade, since the block is meant
+  to be a fixed part of the page and a missing one would read as a bug. If the
+  whole catalogue goes out of stock at once, check the Flow before suspecting
+  the theme. The `debug` setting prints what actually arrived.
+
+  The outer element's id is swapped by `assets/product-info.js`
+  (`updateSourceFromDestination('StockLocations')`) on variant change — Dawn only
+  refreshes a fixed list of ids, so renaming the id silently freezes this block
+  on the first variant.
 
   Accepts:
     - product:    {Object} Product Liquid object
@@ -41,78 +79,70 @@
 {% endcomment %}
 
 {%- liquid
-  assign variant = product.selected_or_first_available_variant
+  assign selected_variant = product.selected_or_first_available_variant
 
   assign ns = block.settings.metafield_namespace | default: 'custom'
   assign mkey = block.settings.metafield_key | default: 'stock_by_location'
-  assign low_threshold = block.settings.low_stock_threshold
-  assign full_threshold = block.settings.full_stock_threshold
-  if full_threshold < 1
-    assign full_threshold = 1
-  endif
 
-  assign source = ''
+  assign product_entries = product.metafields[ns][mkey].value
+
+  assign config_lines = block.settings.locations | strip | newline_to_br | split: '<br />'
 
   comment
-    Source 1 — metafield with real counts.
+    The matrix only earns its keep when there is a real choice to make. A
+    default-variant product would otherwise get a column headed "Default Title".
   endcomment
-  assign entries = variant.metafields[ns][mkey].value
-  if entries == blank
-    assign entries = product.metafields[ns][mkey].value
-  endif
-  if entries.size > 0 and entries.first.name != blank
-    assign source = 'metafield'
-  endif
-
-  comment
-    Source 2 — locations typed into the theme editor, one per line.
-  endcomment
-  assign manual_lines = ''
-  if source == blank and block.settings.manual_locations != blank
-    assign manual_lines = block.settings.manual_locations | strip | newline_to_br | split: '<br />'
-    if manual_lines.size > 0
-      assign source = 'manual'
+  assign show_variants = false
+  unless product.has_only_default_variant
+    if product.variants.size > 1
+      assign show_variants = true
     endif
+  endunless
+
+  comment
+    The left-hand column is headed by the option name when there is exactly one
+    option ("Size"), and left blank otherwise — a matrix corner needs no label,
+    and joined option names read as noise.
+  endcomment
+  assign variant_heading = ''
+  if show_variants and product.options.size == 1
+    assign variant_heading = product.options.first
   endif
 
   comment
-    Source 3 — pickup availability, no counts.
+    Neighbours are what a customer reaches for when their size is out, so the
+    collapsed window answers "what else is close?" without expanding anything.
   endcomment
-  assign availabilities = variant.store_availabilities
-  if source == blank and availabilities.size > 0
-    assign source = 'availability'
-  endif
+  assign variant_count = product.variants.size
 
-  assign has_counts = false
-  if source == 'metafield' or source == 'manual'
-    assign has_counts = true
-  endif
+  assign selected_index = 0
+  for v in product.variants
+    if v.id == selected_variant.id
+      assign selected_index = forloop.index0
+      break
+    endif
+  endfor
 
-  comment
-    Total on hand, matched to whichever source is in play.
-  endcomment
-  assign total = 0
-  assign show_total = true
-  case source
-    when 'metafield'
-      for entry in entries
-        assign total = total | plus: entry.quantity
-      endfor
-    when 'manual'
-      for line in manual_lines
-        assign parts = line | split: '|'
-        assign line_qty = parts[1] | strip | plus: 0
-        assign total = total | plus: line_qty
-      endfor
-    when 'availability'
-      assign total = variant.inventory_quantity
-      unless variant.inventory_management == 'shopify'
-        assign show_total = false
-      endunless
-  endcase
+  assign window_start = selected_index | minus: 1
+  if window_start < 0
+    assign window_start = 0
+  endif
+  assign max_start = variant_count | minus: 3
+  if max_start < 0
+    assign max_start = 0
+  endif
+  if window_start > max_start
+    assign window_start = max_start
+  endif
+  assign window_end = window_start | plus: 2
+
+  assign show_toggle = false
+  if show_variants and variant_count > 3
+    assign show_toggle = true
+  endif
 -%}
 
-{%- if source != blank -%}
+{%- if config_lines.size > 0 -%}
   {{ 'component-stock-locations.css' | asset_url | stylesheet_tag }}
 
   <div class="stock-locations" id="StockLocations-{{ section_id }}">
@@ -120,117 +150,272 @@
       {{- 'products.product.stock_locations.title' | t -}}
     </h3>
 
-    <table class="stock-locations__table{% unless has_counts %} stock-locations__table--no-counts{% endunless %}">
-      <caption class="visually-hidden">
-        {{ 'products.product.stock_locations.caption' | t: product: product.title }}
-      </caption>
-      <thead>
-        <tr>
-          <th scope="col" class="stock-locations__col-location">
-            {{- 'products.product.stock_locations.col_location' | t -}}
-          </th>
-          <th scope="col" class="stock-locations__col-status">
-            {{- 'products.product.stock_locations.col_status' | t -}}
-          </th>
-          {%- if has_counts -%}
-            <th scope="col" class="stock-locations__col-qty">
-              {{- 'products.product.stock_locations.col_quantity' | t -}}
-            </th>
-          {%- endif -%}
-        </tr>
-      </thead>
-
-      <tbody>
-        {%- case source -%}
-          {%- when 'metafield' -%}
-            {%- for entry in entries -%}
-              {%- liquid
-                assign detail = ''
-                if block.settings.show_address
-                  assign detail = entry.address | default: ''
-                  if entry.note != blank
-                    if detail != blank
-                      assign detail = detail | append: ' · '
-                    endif
-                    assign detail = detail | append: entry.note
-                  endif
-                endif
-              -%}
-              {%- render 'product-stock-location-row',
-                name: entry.name,
-                detail: detail,
-                has_counts: true,
-                quantity: entry.quantity,
-                low_threshold: low_threshold,
-                full_threshold: full_threshold
-              -%}
-            {%- endfor -%}
-
-          {%- when 'manual' -%}
-            {%- for line in manual_lines -%}
-              {%- liquid
-                assign parts = line | split: '|'
-                assign line_name = parts[0] | strip
-                assign line_qty = parts[1] | strip | plus: 0
-                assign detail = ''
-                if block.settings.show_address
-                  assign detail = parts[2] | strip
-                endif
-              -%}
-              {%- if line_name != blank -%}
-                {%- render 'product-stock-location-row',
-                  name: line_name,
-                  detail: detail,
-                  has_counts: true,
-                  quantity: line_qty,
-                  low_threshold: low_threshold,
-                  full_threshold: full_threshold
-                -%}
-              {%- endif -%}
-            {%- endfor -%}
-
-          {%- when 'availability' -%}
-            {%- for availability in availabilities -%}
-              {%- liquid
-                assign detail = ''
-                if block.settings.show_address
-                  assign detail = availability.location.address.address1 | default: ''
-                  if availability.location.address.city != blank
-                    if detail != blank
-                      assign detail = detail | append: ', '
-                    endif
-                    assign detail = detail | append: availability.location.address.city
-                  endif
-                  if availability.pick_up_enabled and availability.available and availability.pick_up_time != blank
-                    if detail != blank
-                      assign detail = detail | append: ' · '
-                    endif
-                    assign detail = detail | append: availability.pick_up_time
-                  endif
-                endif
-              -%}
-              {%- render 'product-stock-location-row',
-                name: availability.location.name,
-                detail: detail,
-                has_counts: false,
-                available: availability.available
-              -%}
-            {%- endfor -%}
-        {%- endcase -%}
-      </tbody>
-
-      {%- if show_total -%}
-        <tfoot>
-          <tr>
-            <th scope="row" colspan="{% if has_counts %}2{% else %}1{% endif %}">
-              {{- 'products.product.stock_locations.total' | t -}}
-            </th>
-            <td{% unless has_counts %} class="stock-locations__total-solo"{% endunless %}>
-              <span class="stock-qty stock-qty--total">{{ total }}</span>
-            </td>
-          </tr>
-        </tfoot>
+    {%- if show_variants -%}
+      {%- comment -%}
+        CSS-only disclosure, so the block keeps its no-JS promise. Known wart:
+        product-info.js replaces this element's contents on variant change, so an
+        expanded table collapses again when a different size is picked.
+      {%- endcomment -%}
+      {%- if show_toggle -%}
+        <input type="checkbox" class="stock-toggle" id="StockAllSizes-{{ section_id }}">
       {%- endif -%}
-    </table>
+
+      <div class="stock-locations__scroll">
+        <table class="stock-table">
+          <thead>
+            <tr>
+              <th scope="col" class="stock-table__corner">{{ variant_heading | escape }}</th>
+              {%- for line in config_lines -%}
+                {%- liquid
+                  assign parts = line | split: '|'
+                  assign loc_name = parts[0] | strip
+                  if loc_name == blank
+                    continue
+                  endif
+                  assign loc_label = parts[1] | strip
+                  if loc_label == blank
+                    assign loc_label = loc_name
+                  endif
+                  assign loc_note = parts[2] | strip
+                -%}
+                <th scope="col" class="stock-table__location">
+                  <span class="stock-table__location-name">{{ loc_label | escape }}</span>
+                  {%- if loc_note != blank -%}
+                    <span class="stock-table__location-note">{{ loc_note | escape }}</span>
+                  {%- endif -%}
+                </th>
+              {%- endfor -%}
+            </tr>
+          </thead>
+
+          <tbody>
+            {%- for row_variant in product.variants -%}
+              {%- liquid
+                assign entries = row_variant.metafields[ns][mkey].value
+                if entries == blank
+                  assign entries = product_entries
+                endif
+                assign availabilities = row_variant.store_availabilities
+
+                assign row_classes = 'stock-table__row'
+                if row_variant.id == selected_variant.id
+                  assign row_classes = row_classes | append: ' stock-table__row--selected'
+                  assign is_selected = true
+                else
+                  assign is_selected = false
+                endif
+                if show_toggle
+                  if forloop.index0 >= window_start and forloop.index0 <= window_end
+                    assign row_classes = row_classes | append: ' stock-table__row--near'
+                    if forloop.index0 == window_end
+                      assign row_classes = row_classes | append: ' stock-table__row--near-last'
+                    endif
+                  endif
+                endif
+              -%}
+              <tr class="{{ row_classes }}">
+                <th scope="row" class="stock-table__variant">
+                  {{- row_variant.title | escape -}}
+                  {%- if is_selected -%}
+                    <span class="visually-hidden">
+                      ({{ 'products.product.stock_locations.selected' | t }})
+                    </span>
+                  {%- endif -%}
+                </th>
+
+                {%- for line in config_lines -%}
+                  {%- liquid
+                    assign parts = line | split: '|'
+                    assign loc_name = parts[0] | strip
+                    if loc_name == blank
+                      continue
+                    endif
+                    assign loc_key = loc_name | downcase
+
+                    assign in_stock = false
+                    assign found = false
+
+                    for entry in entries
+                      assign entry_key = entry.name | strip | downcase
+                      if entry_key != loc_key
+                        continue
+                      endif
+                      assign found = true
+                      if entry.available == true or entry.available == false
+                        assign in_stock = entry.available
+                      else
+                        assign entry_qty = entry.quantity | plus: 0
+                        if entry_qty > 0
+                          assign in_stock = true
+                        endif
+                      endif
+                      break
+                    endfor
+
+                    unless found
+                      for availability in availabilities
+                        assign availability_key = availability.location.name | strip | downcase
+                        if availability_key != loc_key
+                          continue
+                        endif
+                        assign in_stock = availability.available
+                        break
+                      endfor
+                    endunless
+
+                    if in_stock
+                      assign state = 'in'
+                      assign state_label = 'products.product.stock_locations.in_stock' | t
+                    else
+                      assign state = 'out'
+                      assign state_label = 'products.product.stock_locations.out_of_stock' | t
+                    endif
+                  -%}
+                  <td class="stock-cell stock-cell--{{ state }}">
+                    <span class="stock-dot" aria-hidden="true"></span>
+                    <span class="stock-cell__label">{{ state_label }}</span>
+                  </td>
+                {%- endfor -%}
+              </tr>
+            {%- endfor -%}
+          </tbody>
+        </table>
+      </div>
+
+      {%- if show_toggle -%}
+        <label class="stock-toggle__label" for="StockAllSizes-{{ section_id }}">
+          <span class="stock-toggle__text stock-toggle__text--more">
+            {{- 'products.product.stock_locations.show_all' | t -}}
+          </span>
+          <span class="stock-toggle__text stock-toggle__text--less">
+            {{- 'products.product.stock_locations.show_less' | t -}}
+          </span>
+          <svg
+            class="stock-toggle__caret"
+            viewBox="0 0 12 8"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.6"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+            focusable="false"
+          >
+            <path d="M1 1.5 6 6.5l5-5" />
+          </svg>
+        </label>
+      {%- endif -%}
+
+    {%- else -%}
+      {%- comment -%}
+        Single variant — one row per location.
+      {%- endcomment -%}
+      {%- liquid
+        assign entries = selected_variant.metafields[ns][mkey].value
+        if entries == blank
+          assign entries = product_entries
+        endif
+        assign availabilities = selected_variant.store_availabilities
+      -%}
+      <ul class="stock-locations__list" role="list">
+        {%- for line in config_lines -%}
+          {%- liquid
+            assign parts = line | split: '|'
+            assign loc_name = parts[0] | strip
+            if loc_name == blank
+              continue
+            endif
+            assign loc_key = loc_name | downcase
+            assign loc_label = parts[1] | strip
+            if loc_label == blank
+              assign loc_label = loc_name
+            endif
+            assign loc_note = parts[2] | strip
+
+            assign in_stock = false
+            assign found = false
+
+            for entry in entries
+              assign entry_key = entry.name | strip | downcase
+              if entry_key != loc_key
+                continue
+              endif
+              assign found = true
+              if entry.available == true or entry.available == false
+                assign in_stock = entry.available
+              else
+                assign entry_qty = entry.quantity | plus: 0
+                if entry_qty > 0
+                  assign in_stock = true
+                endif
+              endif
+              break
+            endfor
+
+            unless found
+              for availability in availabilities
+                assign availability_key = availability.location.name | strip | downcase
+                if availability_key != loc_key
+                  continue
+                endif
+                assign in_stock = availability.available
+                break
+              endfor
+            endunless
+
+            if in_stock
+              assign state = 'in'
+              assign state_label = 'products.product.stock_locations.in_stock' | t
+            else
+              assign state = 'out'
+              assign state_label = 'products.product.stock_locations.out_of_stock' | t
+            endif
+          -%}
+          <li class="stock-row stock-row--{{ state }}">
+            <span class="stock-row__name">
+              {{ loc_label | escape }}
+              {%- if loc_note != blank -%}
+                <span class="stock-row__note">{{ loc_note | escape }}</span>
+              {%- endif -%}
+            </span>
+            <span class="stock-row__status">
+              <span class="stock-dot" aria-hidden="true"></span>{{ state_label }}
+            </span>
+          </li>
+        {%- endfor -%}
+      </ul>
+    {%- endif -%}
+
+    {%- comment -%}
+      Diagnostics. Off by default, and only ever switched on from the theme
+      editor. Prints what Shopify handed the theme for the selected variant,
+      which is the only way to tell an empty `store_availabilities` (local pickup
+      off) apart from a location-name mismatch.
+    {%- endcomment -%}
+    {%- if block.settings.debug -%}
+      {%- liquid
+        assign debug_entries = selected_variant.metafields[ns][mkey].value
+        if debug_entries == blank
+          assign debug_entries = product_entries
+        endif
+        assign debug_availabilities = selected_variant.store_availabilities
+      -%}
+      <pre class="stock-locations__debug">
+variant:                {{ selected_variant.title }} (id {{ selected_variant.id }})
+variant.available:      {{ selected_variant.available }}
+inventory_management:   {{ selected_variant.inventory_management | default: '(not tracked)' }}
+inventory_quantity:     {{ selected_variant.inventory_quantity }}
+variants on product:    {{ variant_count }} (matrix: {{ show_variants }}, toggle: {{ show_toggle }})
+selected index:         {{ selected_index }} (window {{ window_start }}–{{ window_end }})
+store_availabilities:   {{ debug_availabilities.size | default: 0 }} returned
+{% for a in debug_availabilities %}  - name: "{{ a.location.name }}" | available: {{ a.available }} | pick_up_enabled: {{ a.pick_up_enabled }}
+{% else %}  (none — local pickup is off on every location, or this variant is
+   stocked at no location at all)
+{% endfor %}metafield {{ ns }}.{{ mkey }}: {{ debug_entries.size | default: 0 }} entries
+{% for e in debug_entries %}  - name: "{{ e.name }}" | available: {{ e.available }} | quantity: {{ e.quantity }}
+{% endfor %}configured locations:
+{% for line in config_lines %}  - "{{ line | split: '|' | first | strip }}"
+{% endfor %}</pre>
+    {%- endif -%}
   </div>
 {%- endif -%}

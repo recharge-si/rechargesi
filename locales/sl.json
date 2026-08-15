@@ -170,7 +170,8 @@
         "load_image": "Naložite sliko {{ index }} v pogledu galerije",
         "load_model": "Naložite 3D-model {{ index }} v pogledu galerije",
         "load_video": "Predvajajte videoposnetek {{ index }} v pogledu galerije",
-        "image_available": "Slika {{ index }} je zdaj na voljo v pogledu galerije"
+        "image_available": "Slika {{ index }} je zdaj na voljo v pogledu galerije",
+        "no_image": "Fotografija kmalu"
       },
       "nested_label": "{{ title }} za {{ parent_title }}",
       "view_full_details": "Prikaži vse podrobnosti",
@@ -189,15 +190,12 @@
       "sku_label": "SKU:",
       "ean_label": "EAN koda:",
       "stock_locations": {
-        "title": "Zaloga po lokacijah",
-        "caption": "Zaloga izdelka {{ product }} po posameznih lokacijah",
-        "col_location": "Lokacija",
-        "col_status": "Stanje",
-        "col_quantity": "Kol.",
-        "in_stock": "Na zalogi",
-        "low_stock": "Zadnji kosi",
-        "out_of_stock": "Ni na zalogi",
-        "total": "Skupaj na zalogi"
+        "title": "Availability",
+        "in_stock": "In stock",
+        "out_of_stock": "Out of stock",
+        "selected": "selected",
+        "show_all": "All sizes",
+        "show_less": "Show less"
       },
       "select_variant": "Izberite različico izdelka",
       "volume_pricing": {

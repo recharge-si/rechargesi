@@ -97,25 +97,58 @@ Key files:
 **How `constrain_to_viewport` + `media_fit: contain` interact:**
 `.product-media-container.constrain-height.media-fit-contain` in `assets/section-main-product.css` computes:
 ```css
---constrained-height: max(400px, calc(100vh - 300px));
+--constrained-height: max(400px, calc(100vh - var(--viewport-offset)));
 --contained-width: calc(var(--constrained-height) * var(--aspect-ratio));
 width: min(var(--contained-width), 100%);
 ```
 This makes **portrait images narrower than the full container**. The `--aspect-ratio` comes from the inline style `--preview-ratio` set in `snippets/product-thumbnail.liquid`.
 
-**Thumbnail strip width sync:**
-Because the constrained image is narrower than its container, `assets/media-gallery.js` contains a `syncThumbnailWidth()` method (added as a customization) that measures the active `.product-media-container` width and sets it as `max-width` on the thumbnail slider. Called on: initial RAF, window resize (debounced 200ms), and active media change.
+**Fitting the image to the fold — `--viewport-offset` is measured, not guessed.**
+A static offset can't work: the page above the gallery (header 155px + section padding + breadcrumb + vendor/title block) is ~305px and moves with header height, breadcrumb depth, title length, font loading and browser zoom. `fitToViewport()` in `assets/media-gallery.js` measures the gallery's document top and writes `--viewport-offset: {galleryTop + 72}px` inline on each `.product-media-container.constrain-height`. The 72px is a deliberate reserve so the **thumbnail strip stays half-visible at the fold** — the image lands fully in view and the peeking strip signals there is more below. The CSS value (380px, desktop) is only the no-JS fallback. On mobile the inline value is removed; the `max-width: 749px` rules in `product-page-enhancements.css` take over with natural aspect ratio.
 
-**Thumbnail strip CSS customizations** (in `assets/section-main-product.css`, end of file):
-- Nav arrow buttons hidden (`display: none !important`) — all images shown in a single row
-- Thumbnail items use `flex: 1 0 0` to fill width equally
+**The media column shrinks to the image; the info column absorbs the slack.** A height-capped image is narrower than its 58% column — at a 890px viewport a 513px image leaves 125px — which would otherwise open a hole between the image and the price panel. `syncMediaColumnWidth()` writes `--media-column-width` on `.product.grid`, and `product-page-enhancements.css` feeds it to the media wrapper while the info wrapper takes the rest. Image stays flush left with the title, info panel stays flush right with the page edge, gutter is a constant 40px.
+
+Verified across viewport heights (1100 / 890 / 760 / 650px): gutter 40px until the floor kicks in, both edges anchored at every height.
+
+Three things this depends on, all of which broke a draft:
+- **`flex: 1 1 0` on the info wrapper, never `auto`.** `.grid` is `flex-wrap: wrap`; with an auto basis the info column demands its max-content width and drops onto its own line below the image. This is what a zoomed-out window shows first.
+- **A floor on the media column** — `gridWidth - 600 - infoPadding`. Without it a short viewport shrinks the image to the 400px minimum and stretches the form past 600px. Past the floor the leftover goes back to the gutter, which is the lesser evil.
+- **Dawn's 44rem caps on `.product-form__input`, `.product-form__buttons` and `.recipient-form` are overridden to 100%.** Left alone, the pills and buttons stop short while the price rule spans the widened column, leaving the right edge ragged.
+
+Centring the image instead (`margin-inline: auto`) was tried and rejected — it halves the gap but breaks the image's alignment with the title's red bar.
+
+**`MediaGallery` initialises in `connectedCallback`, not the constructor.** The constructor's `querySelector` calls can return null (it runs while the parser is still inside the element) and it bails at the thumbnails check; on top of that Dawn re-renders the gallery on load, wiping any inline styles the constructor set. Layout setup therefore lives in `connectedCallback`, gated on `document.readyState`, with a `document.fonts.ready` re-run (web fonts change the title height above the gallery) and a `disconnectedCallback` that drops the window resize listener. **Do not move this back into the constructor** — it silently does nothing.
+
+**Thumbnail strip width sync:** `syncThumbnailWidth()` measures the active `.product-media-container` and sets it as `max-width` on the thumbnail slider, so the strip matches the image edges rather than the column. `refreshLayout()` runs the three in order — `fitToViewport()` (sets the height cap) → `syncMediaColumnWidth()` (column follows the resulting width) → `syncThumbnailWidth()`. Each clears its own override before measuring, so resize recomputes from scratch rather than compounding.
+
+**Thumbnail strip CSS** (`assets/section-main-product.css`, desktop block ~line 1040):
+- Brand-red prev/next buttons flanking the strip, `3.6rem` wide, with infinite-loop nav in `media-gallery.js`
+- Thumbnail items are `flex: 0 0 25%` — four per view
 - Horizontal padding zeroed out so thumbnails align flush with image edges
+
+**Header trimmed to buy back fold space** (`assets/product-page-enhancements.css` + `templates/product.json`): section `padding_top` 36→16, breadcrumb `padding-bottom` 1.6→1rem, `.product-page-header` margin 2→1.2rem, `.product__title` padding-bottom 1.6→0.8rem and its red bar margin 1.2→0.9rem. Together ~45px, which goes straight into image height.
 
 Key files:
 - `assets/section-main-product.css` — all product layout + constrain-height rules
-- `assets/media-gallery.js` — `MediaGallery` custom element; `syncThumbnailWidth()` is our addition
+- `assets/media-gallery.js` — `MediaGallery`; `connectedCallback`, `refreshLayout`, `fitToViewport`, `syncThumbnailWidth` are all ours
 - `snippets/product-media-gallery.liquid` — gallery HTML structure
 - `snippets/product-thumbnail.liquid` — sets `--ratio`/`--preview-ratio` inline styles on each media container
+
+### Variant Pills (Size Buttons)
+
+`.variant-pills-grid` sizes its columns from the **longest option value**, so labels never wrap mid-word (`5'11 - 90L` used to break across two lines). `snippets/product-variant-picker.liquid` measures the longest value in Liquid and writes `--pill-min: {chars × 0.75 + 1.8}rem`; the CSS is `repeat(auto-fit, minmax(min(100%, var(--pill-min)), 1fr))`, so columns stay equal width and the count adapts to whatever fits. Labels are `white-space: nowrap`.
+
+The 0.75rem/char coefficient was calibrated against real values measured in the browser at the pill's `bold 14px Assistant` — uppercase SKU-style codes (`P13230002004`) run ~0.73rem/char and are the worst case. Verified: 4×`6'7 - 130L` → 4 columns, 4×`2.0 transparent` → 3 columns, 6×`P1323…` → 3 columns, all single-line. **This replaced a per-item `grid-column: span N` char-count heuristic** whose >10-char threshold missed exactly the 10-char size labels that prompted the fix.
+
+### No-Image Placeholder
+
+Products awaiting photography render `snippets/media-placeholder.liquid` — the standard grey frame/sun/mountain glyph, no caption — instead of collapsing to a text-only card. Used in two places:
+- `snippets/card-product.liquid` — the card now **always** emits `.card__media` + `card--media` and switches only the inner `.media` contents, so grids stay aligned. The old `card--text` branch and its duplicate heading-id conditionals are gone.
+- `sections/main-product.liquid` — the gallery column falls back to a square placeholder container carrying `constrain-height media-fit-contain` with `--aspect-ratio: 1`, so it obeys the same fold fit as a real image. `product--no-media` centring is no longer used; the grid is always two-column.
+
+Styles live in `assets/base.css` (next to `.media > img`) because both cards and the product page need them. **The icon is centred by absolute positioning, not flex** — `.media > *:not(.zoom):not(.deferred-media__poster-button)` scores 0,3,0 and forces `display: block`, so a flex layout there needs a four-class selector. Every shape in the SVG clears the frame: a mountain line that meets the border doubles the stroke at the junction and reads as a smudge at card size.
+
+Only string: `products.product.media.no_image` (en + sl), used as the `aria-label` — it is never shown.
 
 ### Product Card Hover Image (Collection / Homepage)
 
@@ -179,24 +212,55 @@ Key files:
 
 ### Stock by Location (Product Page)
 
-**Block:** `stock_locations` in `main-product.liquid`, placed after `barcode_token` in `templates/product.json`. Renders a "Zaloga po lokacijah" table in the product info column.
+**Block:** `stock_locations` in `main-product.liquid`, placed after `barcode_token` in `templates/product.json` — below the buy buttons, its original spot. It was moved above Add to cart once and moved straight back; **leave it where it is.** In stock / out of stock only. No quantities, no low-stock state; that is a deliberate product decision, not a Liquid limitation.
 
-**Critical constraint:** Shopify's storefront Liquid **cannot read per-location inventory quantities**. `variant.store_availabilities` returns only an `available` boolean per location (and only for locations with local pickup enabled); `variant.inventory_quantity` is the aggregate. Real counts must be pushed in from the Admin API.
+**Two shapes, chosen automatically:**
 
-**Three data sources — first one with data wins:**
+- **More than one variant → a matrix.** Locations across the top, variants down the left, so a customer can pick a size *because* it is available. Collapsed it shows a **three-row window** around the selected variant — one either side, or the nearest three when the selection sits at either end — because neighbours are what someone reaches for when their size is out. Above three variants a CSS-only checkbox toggle ("All sizes") reveals the whole table.
+- **One variant → a list**, one row per location with the status on the right.
 
-1. **Metafield** (`custom.stock_by_location`, variant-level then product-level, configurable on the block). JSON list of `{name, quantity, address?, note?}`. Only `name`/`quantity` required. Populate from Admin API `inventoryItem.inventoryLevels`. This is the production source.
-2. **Manual** — the block's `manual_locations` textarea, one line per location: `Name | quantity | detail`. Shows every location listed with no setup, but the same numbers on every product and variant. Preview/demo only — must be cleared before the metafield goes live, or it will mask nothing but still be wrong if the metafield is empty.
-3. **Pickup availability** — `store_availabilities`. Real and variant-accurate, but no counts, so the quantity column is dropped and `.stock-locations__table--no-counts` is applied.
+Both shapes share their type: a location is always an uppercase micro-label at `--sl-label`, a status is always a 1.15rem coloured value with a dot. That is what keeps the two from reading as different components.
 
-**Row states** (`low_stock_threshold`, default 3): `stock-row--in` (`--color-success`), `--low` (`--color-urgency`), `--out` (muted, hollow dot). Out-of-stock uses a hollow ring rather than colour alone, so state survives colourblindness.
+**The two locations** are `Recharge` (own physical stock) and `Partner Supply` (stock held at partners). They are not hardcoded — the block's `locations` textarea maps Shopify location names to customer-facing labels, one per line: `Shopify name | Label | Note`. The third field is optional free text under the label, for saying what a location means for delivery ("Ready to collect"). It is never inferred — nothing is promised that the shop hasn't promised. Order in the textarea is display order.
 
-**Signature element:** a five-tick gauge in `--color-brand-primary` beside each number, filled by `quantity / full_stock_threshold` (default 10). Red is the material (quantity); green/amber are the signal (status) — the two never mix in one mark. The rise animation is **scale-only, never opacity** — the block re-renders on every variant change, and a fade would blink the ticks out each time.
+**Data sources, first hit per location wins:**
 
-**No JS.** Dawn re-renders the whole product info container on variant change, so the table updates for free.
+1. **Metafield** (`custom.stock_by_location`, variant-level then product-level, configurable). JSON list matched to a configured location by `name`; in stock when `available` is `true` or `quantity > 0`. **This is the live source** — see the sync script below.
+2. **`variant.store_availabilities`** — needs no sync, but Shopify populates it only when a location has **local pickup enabled**, and enabling that shows customers a pickup option at checkout. Grega does not want that, so pickup is off and this array is always empty here. Kept as a free fallback that would light up on its own if pickup were ever enabled.
+
+Shopify also omits a location from `store_availabilities` when it doesn't stock the variant; likewise the sync writes no entry for such a location. Either way an unresolved location renders as out of stock, which is the correct reading — products do not need to be stocked everywhere.
+
+**What keeps the metafield true: a Shopify Flow**, documented in `scripts/flow-stock-by-location.md`. Trigger *Product variant inventory quantity changed* → action *Send Admin API request* running `metafieldsSet`, with a Liquid loop over `productVariant.inventoryItem.inventoryLevels` building the JSON. Fires within seconds of any stock change; nothing is hosted or scheduled. Read that file before touching any of this.
+
+**Two workflows.** `Stock by location — live`, trigger *Product variant inventory quantity changed*, does the real-time work. `Stock by location — new products`, trigger *Product created* → **Wait 1 minute** → *Send Admin API request*, covers only the narrow case of a product created with stock already on it, where Shopify may count the initial set as creation rather than a change. Stock assigned at any later point *is* a change, so the live Flow already has it — which is why the wait is a minute and not hours. Test whether this workflow is needed at all before keeping it.
+
+**Third workflow — `Stock by location — sweeper`**, and it is the one that makes the whole thing reliable: *Scheduled time* → *Get product data* (100, **Updated at ascending**) → *For each loop* → *Send Admin API request*. It pages itself because the write bumps `updated_at`, walks the catalogue and wraps forever. It exists because the event triggers keep turning out to have holes — most notably **activating an item at a new location creates an inventory level, not a quantity change, and no Flow trigger fires at all**. There is no generic "product updated" trigger, which is just as well: with the sweeper writing product metafields it would trigger itself in a loop.
+
+Three traps, all already paid for:
+- **Build it on `Get product data`, not `Get product variant data`** — the variant action's sort dropdown has no `updated_at`, so a variant-level sweep re-processes the same batch forever.
+- **Ascending, never descending.** Descending re-reads what it just wrote.
+- The mutation writes an extra product-level `custom.stock_synced_at` metafield per product, purely to guarantee the product's `updated_at` moves — a variant metafield write may not propagate to the parent. It doubles as a visible last-synced marker.
+
+**Use the For each loop**, not batched offsets: `metafieldsSet` caps at 25 metafields per call, so batching caps the run at 4 products while looping gives one call per product (the cap then only bites at 24+ variants on one product). 100 products per run every 10 minutes is 600/hour — this store's ~1000 products cycle in under two hours, so the sweeper is also the backfill. Drop to hourly for steady state to limit `updated_at` churn.
+
+**Manual repair, only if the sweeper can't be made to work:** Inventory page → one location → select all → adjust available **+1**, then **−1**. Relative, not absolute, so a concurrent sale can't be clobbered. `scripts/sync-stock-by-location.mjs` does the same thing directly; do not schedule it, that was explicitly rejected.
+
+**Custom app credentials changed on 2026-01-01:** new apps expose no `shpat_` token in the admin. You get a Client ID + secret from the **Dev Dashboard** (`dev.shopify.com/dashboard`, reached via Settings → Apps → Develop apps → Build apps in Dev Dashboard) and exchange them for a 24-hour token via the client credentials grant. The script does that exchange itself from `SHOPIFY_CLIENT_ID`/`SHOPIFY_CLIENT_SECRET`; `SHOPIFY_ADMIN_TOKEN` still works for pre-2026 apps.
+
+**Every configured location always renders**, on every product, resolved or not — by explicit request. There is no hide-when-empty guard, so a store with local pickup disabled on every location shows "out of stock" everywhere rather than nothing. That failure is loud on purpose; check local pickup first if the whole catalogue goes out of stock at once.
+
+**Diagnostics:** the block's `debug` checkbox (off by default) prints what Shopify actually returned — `store_availabilities` size and contents, metafield entries, and the configured names — which is the only way to tell an empty array (pickup off) apart from a location-name mismatch. It renders to customers, so it's a theme-editor tool, not a permanent feature.
+
+**Strings are English on purpose**, including in `sl.json`. The storefront's active locale is Slovenian, and Grega wants this block in English regardless; the row labels come from the block's `locations` setting, which isn't translatable at all.
+
+**States:** in stock is `--color-success` with a filled dot; out of stock is **`--color-brand-primary`** with a hollow ring. Red for out-of-stock is Grega's explicit call, overriding the earlier muted grey — the ring keeps the state readable without relying on colour. The block is flat by design: hairline rules, no panel or card. A bordered, tinted panel was tried and rejected for not matching the site.
+
+**It does need JS — one line.** Dawn does *not* re-render the whole info container on variant change; `product-info.js` swaps a fixed list of element ids, so the block only follows the selected variant because `updateSourceFromDestination('StockLocations')` was added next to the existing `ProductBarcodeToken` line. **Renaming `#StockLocations-{{ section_id }}` silently freezes the block on the first variant** — which is exactly the bug the old single-row version shipped with, unnoticed because both locations usually read the same across sizes. Consequence of the `innerHTML` swap: an expanded "All sizes" table collapses when a different size is picked.
 
 Key files:
-- `snippets/product-stock-locations.liquid` — source selection, totals, table shell
-- `snippets/product-stock-location-row.liquid` — one row; shared by all three sources
+- `snippets/product-stock-locations.liquid` — the whole block; the resolution loop is deliberately written out twice, once per shape, because `render` gets a fresh scope and can't hand a value back
+- `assets/product-info.js` — the `updateSourceFromDestination('StockLocations')` line that makes it follow the variant
+- `scripts/flow-stock-by-location.md` — the Flow that keeps the rows true; the mutation and its Liquid template live here
+- `scripts/sync-stock-by-location.mjs` — one-time backfill, not a scheduled job
 - `assets/component-stock-locations.css` — all styles; verified no overflow down to a 300px container
-- Locale keys: `products.product.stock_locations.*` in `en.default.json` + `sl.json` only
+- Locale keys: `products.product.stock_locations.{title,in_stock,out_of_stock,selected,show_all,show_less}` in `en.default.json` + `sl.json` only
