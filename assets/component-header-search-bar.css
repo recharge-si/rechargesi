@@ -1,0 +1,112 @@
+/* --- Persistent header search bar (desktop) ---
+   Sits in the top row between the logo and the icon cluster, always visible —
+   not an icon that opens a modal. The space it fills already existed: the
+   header--middle-left grid gives the logo's column far more width than the
+   logo itself needs (the logo is left-aligned, not stretched), and the icons
+   are pinned to the row's end — that gap between them is what this occupies,
+   not new space carved out of the layout.
+
+   Mobile keeps the icon + full-screen predictive search modal
+   (snippets/header-search.liquid) instead — there's no room to spare on a
+   narrow screen for a permanent input, and a full-screen overlay is easier to
+   type into with a thumb than a cramped inline field. */
+@media screen and (min-width: 990px) {
+  .header--middle-left:has(.header__search-bar) {
+    grid-template-areas:
+      'heading search icons'
+      'navigation navigation navigation';
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    column-gap: 2.4rem;
+  }
+
+  .header__search-bar {
+    grid-area: search;
+    width: 100%;
+    max-width: 48rem;
+    justify-self: center;
+  }
+
+  /* The icon-triggered search is still rendered (same component as mobile),
+     just redundant once the persistent bar takes over — hide rather than
+     remove it from the DOM, so nothing has to change for narrower desktops. */
+  .header--middle-left:has(.header__search-bar) > .header__icons > .header__search {
+    display: none;
+  }
+}
+
+@media screen and (max-width: 989px) {
+  .header__search-bar {
+    display: none;
+  }
+}
+
+.header__search-bar .search {
+  width: 100%;
+}
+
+/* ── Quiet field, not the standard boxed input ──
+   The site's normal `.field` chrome — full border, drop shadow, floating
+   label — is built for a form or a modal, where it appears for a moment and
+   needs to read as "the important control here." Sitting in the header on
+   every page load, that same box read as a loud, empty rectangle competing
+   with the logo and icons either side of it. Quieter here: no border or
+   shadow at rest, just a hairline underline, so it recedes into the header
+   until someone actually reaches for it. */
+.header__search-bar .field:before {
+  content: none;
+}
+
+.header__search-bar .field:after {
+  box-shadow: none;
+  border-radius: 0;
+  border-bottom: 1px solid rgba(var(--color-foreground), 0.16);
+  transition: border-color var(--duration-short) ease;
+}
+
+/* Dawn has its own `.field:hover.field::after` rule that adds a full
+   box-shadow ring on hover, and hover/focus can be true at once (cursor
+   resting on the field while typing) — so every state below resets
+   box-shadow itself rather than trusting the cascade to drop it, and hover
+   is explicitly gated off once focused so the two can't fight over which
+   border colour wins. */
+.header__search-bar .field:hover:not(:focus-within):after {
+  box-shadow: none;
+  border-bottom-color: rgba(var(--color-foreground), 0.32);
+}
+
+.header__search-bar .field:focus-within:after {
+  box-shadow: none;
+  border-bottom: 1px solid var(--color-brand-primary);
+}
+
+/* No floating label. Dawn's label-rides-above-the-text pattern needs room
+   reserved above the input for the shrunk label once there's a value —
+   `.field__input:not(:placeholder-shown)` gets `padding-top: 2.2rem`, sized
+   for the tall 4.5rem default input. In this shorter, borderless bar that
+   reserved gap just read as a stray space between "Search" and whatever was
+   typed. The label is visually-hidden in the markup (kept for screen
+   readers); the native placeholder carries the same word instead, and the
+   input goes back to one simple vertical centring rule in every state. */
+.header__search-bar .field__input,
+.header__search-bar .field__input:focus,
+.header__search-bar .field__input:not(:placeholder-shown) {
+  height: 4rem;
+  padding: 0 1.5rem 0 0.2rem;
+  margin: 0;
+  background-color: transparent;
+  box-shadow: none;
+}
+
+.header__search-bar .field__input::placeholder {
+  opacity: 1;
+  color: rgba(var(--color-foreground), 0.45);
+}
+
+.header__search-bar .search__button .icon,
+.header__search-bar .reset__button .icon {
+  color: rgba(var(--color-foreground), 0.55);
+}
+
+.header__search-bar .search__button:hover .icon {
+  color: var(--color-brand-primary);
+}

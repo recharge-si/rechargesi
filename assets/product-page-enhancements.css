@@ -269,13 +269,124 @@ a.product-breadcrumb__segment:hover {
 
 .variant-pills-grid input[type='radio'] + label {
   display: flex !important;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
+  gap: 0.3rem;
   text-align: center;
   white-space: nowrap;
   width: 100% !important;
+  min-height: 5.6rem;
   margin: 0 !important;
-  padding: 0.4rem 0.8rem !important;
+  padding: 0.6rem 0.8rem !important;
+}
+
+/* --- Stock state on the chip ---
+   One status per size. The customer never sees a location; the own/partner split
+   surfaces only as a different delivery expectation.
+
+   Green = now. Amber = you can have it, it takes longer. Grey = you cannot.
+   Red is reserved for errors, and would in any case collide with the brand red
+   already doing two jobs on this screen (selected chip, Add to cart).
+
+   Dot shape carries the state as well as colour — filled, half, hollow — so it
+   still reads without colour vision. */
+.variant-pill__value {
+  line-height: 1.15;
+}
+
+/* No status dot on the chip. At the size it has to be here a dot is 6px of
+   coloured mush — it read as a smudge, not a signal — and the chip's own border
+   already frames the state. The word plus its colour is the whole indicator. */
+.variant-pill__stock {
+  display: block;
+  font-size: 1.05rem;
+  font-weight: 600;
+  letter-spacing: 0.015em;
+  line-height: 1.1;
+}
+
+.variant-pill__stock--own,
+.variant-pill__stock--available {
+  color: var(--color-success);
+}
+
+.variant-pill__stock--partner {
+  color: var(--color-info);
+}
+
+.variant-pill__stock--none {
+  color: rgba(var(--color-foreground), 0.5);
+}
+
+/* --- Delivery line for the selected size ---
+   Sits directly under the chips, above quantity and the CTA: the moment the size
+   is chosen is the moment "when does it arrive" matters. */
+/* No leading dot here either, and for a stronger reason than on the chip: it
+   pushed the text off the column's left edge, so this was the one line in the
+   whole info column that did not align with the price, the labels and the CTA.
+   That misalignment was most of what made the block look wrong. */
+.variant-delivery {
+  margin: 1.8rem 0 0;
+  font-size: 1.35rem;
+  line-height: 1.4;
+}
+
+/* Same treatment as the QUANTITY label so the two read as sibling fields. No red
+   accent bar — that belongs to legends (SIZE), and putting one here would make a
+   read-only status compete with the actual controls. */
+.variant-delivery__label {
+  display: block;
+  margin-bottom: 0.4rem;
+  font-size: 1.1rem;
+  letter-spacing: 0.12rem;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: rgba(var(--color-foreground), 0.55);
+}
+
+.variant-delivery__status {
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+.variant-delivery__lead {
+  color: rgba(var(--color-foreground), 0.7);
+}
+
+/* Em dash rather than a bare gap — without it the status and the lead time read
+   as two disconnected fragments that happened to land on the same line. */
+.variant-delivery__sep {
+  margin: 0 0.4rem;
+  color: rgba(var(--color-foreground), 0.35);
+}
+
+.variant-delivery--own,
+.variant-delivery--available {
+  color: var(--color-success);
+}
+
+.variant-delivery--partner {
+  color: var(--color-info);
+}
+
+.variant-delivery--none {
+  color: rgba(var(--color-foreground), 0.55);
+}
+
+/* The written "Sold out" is signal enough — Dawn's strikethrough on top of it is
+   a third copy of the same fact, and it struck through the status line too.
+   Needs .product-form__input--pill in front to out-specify Dawn's own rule in
+   component-product-variant-picker.css; an equal-specificity override lost on
+   stylesheet order and the strikethrough stayed. */
+.product-form__input--pill .variant-pills-grid input[type='radio'].disabled + label,
+.product-form__input--pill .variant-pills-grid input[type='radio']:disabled + label {
+  text-decoration: none;
+  color: rgba(var(--color-foreground), 0.55);
+}
+
+.variant-pills-grid input[type='radio']:checked + label .variant-pill__stock {
+  color: rgba(255, 255, 255, 0.92);
 }
 
 /* Selected state — solid brand fill */
@@ -484,11 +595,125 @@ a.product-breadcrumb__segment:hover {
   gap: 0.5rem;
 }
 
-/* --- Pickup Availability --- */
+/* --- Quantity + Add to cart share a row ---
+   display:contents on the buy-buttons wrapper promotes its children — the form,
+   the trust strip, pickup — into this grid, so only <product-form> sits beside
+   the stepper and everything after it still spans the full width. Without it the
+   whole buy-buttons column would indent past the stepper.
+
+   The visible QUANTITY label is dropped in this layout: with it, Add to cart
+   would align to the label's top and the stepper would hang below the button.
+   The visually-hidden #quantity-label-* span still names the control, and still
+   carries the "(N in cart)" count, so nothing is lost for assistive tech. */
+.product-form__actions {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: start;
+  column-gap: 1.2rem;
+}
+
+.product-form__actions > div:last-child {
+  display: contents;
+}
+
+.product-form__actions .product-form__quantity {
+  grid-column: 1;
+  grid-row: 1;
+  margin: 0;
+}
+
+.product-form__actions product-form,
+.product-form__actions .product-form {
+  grid-column: 2;
+  grid-row: 1;
+  /* Dawn puts margin-top: 2.5rem on product-form for the stacked layout. Side by
+     side that pushed Add to cart 25px below the stepper — measured, not guessed;
+     both boxes are 5.6rem tall, so zeroing this is all it takes to align them. */
+  margin-top: 0;
+}
+
+.product-form__actions .product-trust-strip,
+.product-form__actions pickup-availability {
+  grid-column: 1 / -1;
+}
+
+.product-form__actions .quantity__label {
+  display: none;
+}
+
+/* Matched heights so the stepper and the button read as one control pair. */
+.product-form__actions .quantity,
+.product-form__actions .product-form__submit {
+  min-height: 5.6rem;
+}
+
+.product-form__actions .product-form__submit {
+  margin-bottom: 0;
+}
+
+@media screen and (max-width: 749px) {
+  /* Side by side leaves the button too narrow to read on a phone. */
+  .product-form__actions {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .product-form__actions .product-form__quantity,
+  .product-form__actions product-form,
+  .product-form__actions .product-form {
+    grid-column: 1;
+    grid-row: auto;
+  }
+
+  .product-form__actions .quantity__label {
+    display: block;
+  }
+}
+
+/* --- Pickup Availability ---
+   Typed like the DELIVERY line so the two read as the same kind of statement:
+   uppercase micro-label, coloured status, muted timing after an em dash. No tick
+   icon — the delivery line has no marker either, and a lone green tick was the
+   main thing making this block look like leftover Dawn. */
 .pickup-availability-preview {
   padding: 1.4rem 0;
   border-top: 1px solid rgba(var(--color-foreground), 0.08);
   margin-top: 1.2rem;
+}
+
+.pickup-availability__label {
+  display: block;
+  margin-bottom: 0.4rem;
+  font-size: 1.1rem;
+  letter-spacing: 0.12rem;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: rgba(var(--color-foreground), 0.55);
+}
+
+.pickup-availability__line {
+  margin: 0;
+  font-size: 1.35rem;
+  line-height: 1.4;
+}
+
+.pickup-availability__status {
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  color: var(--color-success);
+}
+
+.pickup-availability__sep {
+  margin: 0 0.4rem;
+  color: rgba(var(--color-foreground), 0.35);
+}
+
+.pickup-availability__lead {
+  color: rgba(var(--color-foreground), 0.7);
+}
+
+.pickup-availability-preview .pickup-availability-button {
+  margin-top: 0.8rem;
+  font-size: 1.25rem;
 }
 
 /* --- Mobile --- */
@@ -553,9 +778,12 @@ a.product-breadcrumb__segment:hover {
     margin-right: -1.5rem;
   }
 
-  /* Cap variant pill columns at 4 — 5 columns is too narrow on mobile screens */
+  /* Mobile uses the same auto-fit tracks as desktop rather than a hard 4 columns.
+     --pill-cols was never set by anything, so this rule always forced exactly 4;
+     with a stock line on each chip that overflows below ~380px. Auto-fit against
+     --pill-min degrades to 3 or 2 columns instead of breaking. */
   .variant-pills-grid {
-    grid-template-columns: repeat(min(var(--pill-cols, 4), 4), 1fr);
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, var(--pill-min, 8rem)), 1fr));
   }
 
   /* Tighter trust strip on mobile */
@@ -563,36 +791,6 @@ a.product-breadcrumb__segment:hover {
     gap: 1rem;
     padding: 0.8rem 0 0.2rem;
   }
-}
-
-/* --- Trust strip below CTA buttons --- */
-.product-form__buttons + .product-trust-strip,
-.product-trust-strip {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 1.8rem;
-  padding: 1.1rem 0 0.4rem;
-  margin-top: 0.2rem;
-  flex-wrap: wrap;
-}
-
-.product-trust-strip__item {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 1.1rem;
-  color: rgba(var(--color-foreground), 0.5);
-  font-weight: 500;
-  letter-spacing: 0.01em;
-  white-space: nowrap;
-}
-
-.product-trust-strip__item svg {
-  width: 1.5rem;
-  height: 1.5rem;
-  flex-shrink: 0;
-  stroke: rgba(var(--color-foreground), 0.4);
 }
 
 /* --- Urgency / low-stock badge inline --- */

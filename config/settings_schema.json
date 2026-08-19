@@ -1451,5 +1451,66 @@
         "default": "scheme-1"
       }
     ]
+  },
+  {
+    "name": "Breadcrumbs",
+    "settings": [
+      {
+        "type": "paragraph",
+        "content": "Product breadcrumbs derive the category path from a navigation menu. This must be the menu the header uses, or products show only \"Home / Product\"."
+      },
+      {
+        "type": "link_list",
+        "id": "breadcrumb_menu",
+        "label": "Menu to derive the category path from",
+        "info": "Leave empty to use the header menu automatically. Do not point this at \"main-menu\" on this store — that handle exists but holds only three stray links, which is why breadcrumbs silently showed just \"Home\"."
+      }
+    ]
+  },
+  {
+    "name": "Stock & delivery",
+    "settings": [
+      {
+        "type": "paragraph",
+        "content": "Variant chips show one status per size. Locations are never shown to customers — they only decide which delivery wording a size gets."
+      },
+      {
+        "type": "textarea",
+        "id": "stock_primary_locations",
+        "label": "Our own locations",
+        "info": "Shopify location names counted as our own stock, one per line. Every other location is treated as partner stock.",
+        "default": "Recharge"
+      },
+      {
+        "type": "text",
+        "id": "stock_lead_own",
+        "label": "Delivery wording — our stock",
+        "info": "Shown next to \"In stock\". Leave blank to promise nothing.",
+        "default": "Ships in 1–2 working days"
+      },
+      {
+        "type": "text",
+        "id": "stock_lead_partner",
+        "label": "Delivery wording — partner stock",
+        "info": "Shown next to \"Available\". Leave blank to promise nothing.",
+        "default": "Ships in 5–7 working days"
+      },
+      {
+        "type": "header",
+        "content": "Data source"
+      },
+      {
+        "type": "text",
+        "id": "stock_metafield_namespace",
+        "label": "Metafield namespace",
+        "default": "custom"
+      },
+      {
+        "type": "text",
+        "id": "stock_metafield_key",
+        "label": "Metafield key",
+        "default": "stock_by_location"
+      }
+    ]
   }
 ]

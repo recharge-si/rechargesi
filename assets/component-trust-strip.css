@@ -1,0 +1,55 @@
+/* Free shipping / secure checkout / returns reassurance.
+
+   Its own component file because it is used on two surfaces now — under the
+   product page CTA and in the cart footer — and product-page-enhancements.css is
+   not loaded on the cart. Both callers load this explicitly. */
+
+.product-trust-strip {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.8rem;
+  padding: 1.1rem 0 0.4rem;
+  margin-top: 0.2rem;
+  flex-wrap: wrap;
+}
+
+.product-trust-strip__item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.1rem;
+  color: rgba(var(--color-foreground), 0.5);
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+}
+
+.product-trust-strip__item svg {
+  width: 1.5rem;
+  height: 1.5rem;
+  flex-shrink: 0;
+  stroke: rgba(var(--color-foreground), 0.4);
+}
+
+/* Stacked for narrow columns — the cart footer aside is tall and thin, where a
+   wrapping row would break into ragged pairs. */
+.product-trust-strip--stacked {
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 0.9rem;
+  padding: 0;
+  font-size: 1.2rem;
+}
+
+.product-trust-strip--stacked .product-trust-strip__item {
+  font-size: 1.2rem;
+}
+
+@media screen and (max-width: 749px) {
+  .product-trust-strip--row {
+    gap: 1rem;
+    padding: 0.8rem 0 0.2rem;
+  }
+}

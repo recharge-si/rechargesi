@@ -2464,6 +2464,13 @@
         "header__1": {
           "content": "Product card"
         },
+        "header__3": {
+          "content": "No results found"
+        },
+        "empty_state_collection": {
+          "label": "Products to show when nothing matches",
+          "info": "Shown under \"You might like these\" when a search returns no results. Leave blank to show from All products."
+        },
         "header__2": {
           "content": "Blog card"
         },

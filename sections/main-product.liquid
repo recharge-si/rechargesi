@@ -93,7 +93,28 @@
     assign bc_l3_url = ''
     assign bc_depth = 0
 
-    assign main_menu = linklists['main-menu']
+    comment
+      The breadcrumb walks the *navigation* menu to find the category path, so it
+      has to be the menu the header actually renders. This store's is
+      "recharge-menu", not Dawn's default "main-menu" — looking up a handle that
+      does not exist returns an empty linklist silently, the walk matched nothing,
+      and every product fell through to a bare "Home / Product Title".
+
+      Configurable via the Breadcrumbs theme setting, with a fallback chain so it
+      works before anyone opens the editor.
+    endcomment
+    comment
+      Tested as "unless size > 0", not "if size == 0": a missing handle yields nil,
+      nil.links.size is nil, and `nil == 0` is false — so an equality check never
+      falls through and the fallback silently does nothing.
+    endcomment
+    assign main_menu = linklists[settings.breadcrumb_menu]
+    unless main_menu.links.size > 0
+      assign main_menu = linklists['recharge-menu']
+    endunless
+    unless main_menu.links.size > 0
+      assign main_menu = linklists['main-menu']
+    endunless
 
     comment
       Walk the menu deepest-first: prefer a 3-level match over 2-level over 1-level.
@@ -412,6 +433,23 @@
                   </details>
                 </div>
               {%- when 'quantity_selector' -%}
+                {%- comment -%}
+                  A lone 14rem stepper sitting above a full-width red button read
+                  as a leftover control. When buy_buttons comes straight after it,
+                  wrap the pair so the stepper and Add to cart share a row — see
+                  .product-form__actions in product-page-enhancements.css, which
+                  uses display:contents on the buy-buttons wrapper so the trust
+                  strip and pickup can still span the full width underneath.
+
+                  Opened here and closed in the buy_buttons case. If the merchant
+                  reorders the blocks the pairing simply does not happen and both
+                  render exactly as stock Dawn.
+                {%- endcomment -%}
+                {% # theme-check-disable UnclosedHTMLElement %}
+                {%- if section.blocks[forloop.index].type == 'buy_buttons' -%}
+                  <div class="product-form__actions">
+                {%- endif -%}
+                {% # theme-check-enable UnclosedHTMLElement %}
                 <div
                   id="Quantity-Form-{{ section.id }}"
                   class="product-form__input product-form__quantity{% if settings.inputs_shadow_vertical_offset != 0 and settings.inputs_shadow_vertical_offset < 0 %} product-form__quantity-top{% endif %}"
@@ -669,6 +707,16 @@
                   section_id: section.id,
                   show_pickup_availability: true
                 -%}
+                {%- comment -%}
+                  Closes the .product-form__actions wrapper opened by the
+                  quantity_selector case immediately above this block.
+                {%- endcomment -%}
+                {% # theme-check-disable UnclosedHTMLElement %}
+                {%- assign prev_index = forloop.index0 | minus: 1 -%}
+                {%- if forloop.index0 > 0 and section.blocks[prev_index].type == 'quantity_selector' -%}
+                  </div>
+                {%- endif -%}
+                {% # theme-check-enable UnclosedHTMLElement %}
               {%- when 'rating' -%}
                 {%- if product.metafields.reviews.rating.value != blank -%}
                   <div class="rating-wrapper">

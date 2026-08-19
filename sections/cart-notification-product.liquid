@@ -17,12 +17,17 @@
           <p class="caption-with-letter-spacing light">{{ item.product.vendor }}</p>
         {%- endif -%}
         <h3 class="cart-notification-product__name h4">{{ item.product.title | escape }}</h3>
+        {%- if item.sku != blank -%}
+          <p class="caption-with-letter-spacing light cart-item__sku">
+            {{ 'products.product.sku_label' | t }} {{ item.sku }}
+          </p>
+        {%- endif -%}
         <dl>
           {%- unless item.product.has_only_default_variant -%}
             {%- for option in item.options_with_values -%}
               <div class="product-option">
                 <dt>{{ option.name }}:</dt>
-                <dd>{{ option.value }}</dd>
+                <dd>{%- render 'option-value-label', value: option.value -%}</dd>
               </div>
             {%- endfor -%}
           {%- endunless -%}

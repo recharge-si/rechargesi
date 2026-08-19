@@ -154,6 +154,12 @@
                             {{- item.product.title | escape -}}
                           </a>
 
+                          {%- if item.sku != blank -%}
+                            <p class="caption-with-letter-spacing light cart-item__sku">
+                              {{ 'products.product.sku_label' | t }} {{ item.sku }}
+                            </p>
+                          {%- endif -%}
+
                           {%- if item.original_price != item.final_price -%}
                             <div class="cart-item__discounted-prices">
                               <span class="visually-hidden">
@@ -185,7 +191,7 @@
                                   <div class="product-option">
                                     <dt>{{ option.name }}:</dt>
                                     <dd>
-                                      {{ option.value -}}
+                                      {%- render 'option-value-label', value: option.value -%}
                                       {%- unless forloop.last %}, {% endunless %}
                                     </dd>
                                   </div>
@@ -475,6 +481,8 @@
         </form>
       </cart-drawer-items>
       <div class="drawer__footer">
+        {%- render 'cart-pickup-notice' -%}
+
         {%- if settings.show_cart_note -%}
           <details id="Details-CartDrawer">
             <summary>

@@ -1,0 +1,163 @@
+/* ── Search breadcrumb + title (mirrors .cart-breadcrumb / .cart-header__title) ──
+   Stock Dawn's search page opened with a bare, uncentred "Search results" — the
+   only page on the site still wearing default typography instead of the
+   breadcrumb + accent-bar title every other template uses. Centred here (unlike
+   the cart's left-aligned version) because the search box below it is already
+   centred, and a left-aligned title over a centred box read lopsided. */
+.template-search__breadcrumb {
+  display: flex;
+  justify-content: center;
+  font-size: 1.2rem;
+  letter-spacing: 0.06em;
+  color: rgba(var(--color-foreground), 0.4);
+  margin-bottom: 1.6rem;
+}
+
+.template-search__breadcrumb a {
+  color: rgba(var(--color-foreground), 0.4);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.template-search__breadcrumb a:hover {
+  color: var(--color-brand-primary);
+}
+
+.template-search__breadcrumb-sep {
+  margin: 0 0.5rem;
+  opacity: 0.5;
+}
+
+.template-search__breadcrumb-current {
+  color: rgba(var(--color-foreground), 0.6);
+}
+
+.template-search__title {
+  font-family: var(--font-heading-family);
+  font-size: clamp(2.2rem, calc(var(--font-heading-scale) * 3rem), 4rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+  line-height: 1.1;
+  margin: 0;
+  color: rgb(var(--color-foreground));
+  text-align: center;
+}
+
+.template-search__title::after {
+  content: '';
+  display: block;
+  width: 4rem;
+  height: 3px;
+  background: var(--color-brand-primary);
+  margin: 1.2rem auto 0;
+}
+
+@media screen and (min-width: 750px) {
+  .template-search__title {
+    font-size: calc(var(--font-heading-scale) * 4rem);
+  }
+}
+
+/* ── No-results state (mirrors .cart-empty: uppercase heading, muted body) ──
+   Was previously one grey status line and then nothing — a dead end with no
+   next action, on the one page a customer reaches specifically because they
+   didn't find what they wanted from browsing. The heading/body colour values
+   are lifted from the empty-cart state so the two "nothing here" moments on
+   the site read as the same design decision. (A magnifying-glass icon sat
+   above the heading in an earlier pass — dropped as unneeded weight; the
+   heading already says exactly what happened.) */
+.search-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 2rem 2rem 4rem;
+}
+
+.search-empty__heading {
+  font-size: 2rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin: 0 0 1rem;
+  color: rgba(var(--color-foreground), 0.7);
+}
+
+.search-empty__body {
+  max-width: 44rem;
+  margin: 0 0 2.8rem;
+  color: rgba(var(--color-foreground), 0.6);
+}
+
+@media screen and (min-width: 990px) {
+  .search-empty__heading {
+    font-size: 2.4rem;
+  }
+}
+
+/* ── Category chips ──
+   Pulls straight from the same nav menu the header and breadcrumb already
+   resolve (settings.breadcrumb_menu → recharge-menu → main-menu) — no new
+   content to maintain, no risk of drifting out of sync with the real nav. Flat,
+   sharp-cornered, red on hover: the same brand-red-reserved-for-interaction
+   language as the variant pills, not a filled button (this is a wayfinding
+   control, not a primary action — the fallback product grid below carries that
+   weight instead). */
+.search-empty__categories {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.8rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-width: 60rem;
+}
+
+.search-empty__category-link {
+  display: inline-block;
+  padding: 0.9rem 1.8rem;
+  border: 1px solid rgba(var(--color-foreground), 0.15);
+  text-transform: uppercase;
+  font-size: 1.2rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: rgb(var(--color-foreground));
+  text-decoration: none;
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+
+.search-empty__category-link:hover,
+.search-empty__category-link:focus-visible {
+  border-color: var(--color-brand-primary);
+  color: var(--color-brand-primary);
+}
+
+/* ── Fallback product grid ──
+   "You might like these" carries the actual point of this section: a dead-end
+   search page is where a customer is most likely to leave, so the empty state
+   ends with real products instead of white space. Heading matches the
+   accent-bar treatment used for "Order summary" (cart) and "Our Recharge
+   Specialists" (footer) rather than inventing a fourth heading style. */
+.search-empty__fallback {
+  padding-top: 2rem;
+  border-top: 1px solid rgba(var(--color-foreground), 0.08);
+}
+
+.search-empty__fallback-heading {
+  font-size: 1.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: -0.01em;
+  text-align: center;
+  margin: 0 0 3rem;
+}
+
+.search-empty__fallback-heading::after {
+  content: '';
+  display: block;
+  width: 4rem;
+  height: 3px;
+  background: var(--color-brand-primary);
+  margin: 1rem auto 0;
+}

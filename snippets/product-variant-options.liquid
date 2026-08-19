@@ -47,9 +47,17 @@
     {{ option.name }}-{{ option.position }}
   {%- endcapture -%}
 
+  {%- comment -%}
+    display_value is the customer-facing text; escaped_value stays the raw stored
+    string because that is what Shopify matches variants on. See
+    'option-value-label' for why the two differ on imported products.
+  {%- endcomment -%}
+  {%- capture display_value %}{% render 'option-value-label', value: value %}{% endcapture -%}
+
   {%- capture input_dataset -%}
     data-product-url="{{ value.product_url }}"
     data-option-value-id="{{ value.id }}"
+    data-option-label="{{ display_value | escape }}"
   {%- endcapture -%}
 
   {%- capture label_unavailable -%}
@@ -62,7 +70,7 @@
 
   {%- if picker_type == 'swatch' -%}
     {%- capture help_text -%}
-      <span class="visually-hidden">{{ escaped_value }}</span>
+      <span class="visually-hidden">{{ display_value | escape }}</span>
       {{ label_unavailable }}
     {%- endcapture -%}
 
@@ -94,9 +102,73 @@
       {% endif %}
       {{ input_dataset }}
     >
+    {%- comment -%}
+      Stock state lives on the chip, not in a table below it — the choice happens
+      on the size button, so the information has to be there.
+
+      An option value can span several variants (multi-option products), so the
+      chip shows the best state any of them offers: own > available > partner.
+      That matches how `value.available` already behaves — available if any
+      combination is — and it never promises the faster path for a size that
+      cannot deliver it, because `own` only wins if some variant really is in our
+      own stock.
+
+      Matching is by position, not `contains`: `variant.options[i]` is the value
+      for option i, and two different options can legitimately share a value.
+
+      The visible status replaces `label_unavailable`; keeping both would
+      announce the sold-out state twice to a screen reader.
+    {%- endcomment -%}
+    {%- liquid
+      assign option_index = option.position | minus: 1
+      assign chip_state = 'none'
+
+      for candidate in product.variants
+        assign candidate_value = candidate.options[option_index]
+        if candidate_value != value.name
+          continue
+        endif
+
+        capture candidate_state
+          render 'variant-stock-state', variant: candidate
+        endcapture
+        assign candidate_state = candidate_state | strip
+
+        if candidate_state == 'own'
+          assign chip_state = 'own'
+          break
+        elsif candidate_state == 'available'
+          assign chip_state = 'available'
+        elsif candidate_state == 'partner' and chip_state != 'available'
+          assign chip_state = 'partner'
+        endif
+      endfor
+
+      if option_disabled
+        assign chip_state = 'none'
+      endif
+
+      comment
+        "On order" rather than "Available": the pair has to read as two different
+        things at a glance. "In stock / Available" are near-synonyms and told the
+        customer nothing about why one size arrives sooner than another.
+      endcomment
+      case chip_state
+        when 'own'
+          assign chip_label = 'products.product.inventory_in_stock' | t
+        when 'available'
+          assign chip_label = 'products.product.inventory_in_stock' | t
+        when 'partner'
+          assign chip_label = 'products.product.stock_state.on_order' | t
+        else
+          assign chip_label = 'products.product.sold_out' | t
+      endcase
+    -%}
     <label for="{{ input_id }}">
-      {{ value -}}
-      {{ label_unavailable }}
+      <span class="variant-pill__value">{{ display_value | escape }}</span>
+      <span class="variant-pill__stock variant-pill__stock--{{ chip_state }}">
+        {{- chip_label -}}
+      </span>
     </label>
   {%- elsif picker_type == 'dropdown' or picker_type == 'swatch_dropdown' -%}
     <option
@@ -114,9 +186,9 @@
       {{ input_dataset }}
     >
       {% if option_disabled -%}
-        {{- 'products.product.value_unavailable' | t: option_value: value -}}
+        {{- 'products.product.value_unavailable' | t: option_value: display_value -}}
       {%- else -%}
-        {{- value -}}
+        {{- display_value -}}
       {%- endif %}
     </option>
   {%- endif -%}

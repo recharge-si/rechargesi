@@ -195,8 +195,12 @@ if (!customElements.get('product-info')) {
           updateSourceFromDestination('Volume');
           updateSourceFromDestination('Price-Per-Item', ({ classList }) => classList.contains('hidden'));
           updateSourceFromDestination('ProductBarcodeToken');
-          // Availability matrix: the selected row and the window of sizes around it
-          // are resolved in Liquid, so it has to be swapped like the blocks above.
+          // Availability matrix. The block is no longer in templates/product.json —
+          // stock state moved onto the variant chips — but the block type still
+          // exists in main-product.liquid and can be re-added from the theme editor.
+          // This line is guarded on the element existing, so it is a no-op while the
+          // block is off. Removing it would silently freeze the matrix on the first
+          // variant if anyone ever turns it back on.
           updateSourceFromDestination('StockLocations');
 
           this.updateQuantityRules(this.sectionId, html);

@@ -15,7 +15,7 @@
         "banner_1": {
           "type": "banner",
           "settings": {
-            "image": "shopify://shop_images/recharge-bol-banner.png",
+            "image": "shopify://shop_images/odprt_recharge.png",
             "url": ""
           }
         },
@@ -29,7 +29,7 @@
         "banner_3": {
           "type": "banner",
           "settings": {
-            "image": "shopify://shop_images/recharge-selimo-banner.png",
+            "image": "shopify://shop_images/C-skin.png",
             "url": ""
           }
         }

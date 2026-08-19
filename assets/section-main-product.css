@@ -1261,63 +1261,16 @@ a.product__text {
   padding-bottom: 100%;
 }
 
-/* Overlay prev/next arrows on main product image */
-.product--thumbnail_slider slider-component:not(.thumbnail-slider) {
-  position: relative;
-}
-
-@media screen and (min-width: 750px) {
-  .product--thumbnail_slider slider-component:not(.thumbnail-slider) .slider-buttons {
-    display: flex;
-    position: absolute;
-    top: 50%;
-    left: 0;
-    right: 0;
-    transform: translateY(-50%);
-    justify-content: space-between;
-    padding: 0 1.2rem;
-    pointer-events: none;
-    z-index: 2;
-  }
-
-  .product--thumbnail_slider slider-component:not(.thumbnail-slider) .slider-counter {
-    display: none;
-  }
-
-  .product--thumbnail_slider slider-component:not(.thumbnail-slider) .slider-button {
-    pointer-events: all;
-    background: var(--color-brand-primary);
-    border: none;
-    border-radius: 0;
-    width: 4rem;
-    height: 4rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: none;
-    transition: background-color 0.15s ease, opacity 0.15s ease;
-    opacity: 0.9;
-  }
-
-  .product--thumbnail_slider slider-component:not(.thumbnail-slider) .slider-button:hover {
-    background: var(--color-brand-primary-dark);
-    box-shadow: none;
-    transform: none;
-    opacity: 1;
-  }
-
-  .product--thumbnail_slider slider-component:not(.thumbnail-slider) .slider-button[disabled] {
-    opacity: 0.25;
-  }
-
-  .product--thumbnail_slider slider-component:not(.thumbnail-slider) .slider-button .svg-wrapper svg,
-  .product--thumbnail_slider slider-component:not(.thumbnail-slider) .slider-button .icon {
-    width: 1.6rem;
-    height: 1.6rem;
-    color: white;
-    fill: white;
-  }
-}
+/*
+  No prev/next arrows over the main product image. There used to be a red
+  overlay pair here, but it could never work: Dawn's own
+  `.slider:not(.slider--everywhere):not(.slider--desktop) + .slider-buttons`
+  (component-slider.css, min-width 990px) scores 0,4,0 against the overlay's
+  0,3,1, so the arrows only ever appeared in the 750–989px band and vanished
+  above it. Desktop navigates the gallery by thumbnail strip, mobile swipes.
+  The thumbnail strip keeps its own brand-red arrows — those are a different
+  slider-component (.thumbnail-slider) and are unaffected.
+*/
 
 .product:not(.featured-product) .product__view-details {
   display: none;

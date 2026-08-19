@@ -2,6 +2,7 @@
 {{ 'component-totals.css' | asset_url | stylesheet_tag }}
 {{ 'component-price.css' | asset_url | stylesheet_tag }}
 {{ 'component-discounts.css' | asset_url | stylesheet_tag }}
+{{ 'component-trust-strip.css' | asset_url | stylesheet_tag }}
 
 {%- style -%}
   .section-{{ section.id }}-padding {
@@ -122,18 +123,66 @@
                 </button>
               </div>
 
-              {%- if additional_checkout_buttons -%}
-                <div class="cart__dynamic-checkout-buttons additional-checkout-buttons">
-                  {{ content_for_additional_checkout_buttons }}
-                </div>
-              {%- endif -%}
+              {%- comment -%}
+                Express wallet buttons (Shop Pay / PayPal / Google Pay) removed by
+                request. Check out is the single action here, matching the product
+                page where show_dynamic_checkout is also false. To restore, put
+                back the {{ content_for_additional_checkout_buttons }} object
+                wrapped in `{%- if additional_checkout_buttons -%}`.
+              {%- endcomment -%}
           {%- endcase -%}
         {% endfor %}
 
         <div id="cart-errors"></div>
       </div>
+
+      {%- comment -%}
+        Below the summary rather than beside it: the footer is one centred column,
+        so the way back into the catalogue and the reassurance both sit under the
+        decision instead of competing with it from the opposite margin.
+      {%- endcomment -%}
+      <div class="cart__footer-aside">
+        {%- render 'trust-strip' -%}
+        <a class="cart__continue" href="{{ routes.all_products_collection_url }}">
+          <span class="cart__continue-arrow" aria-hidden="true">&larr;</span>
+          {{ 'general.continue_shopping' | t }}
+        </a>
+      </div>
     </div>
   </div>
+
+  {%- comment -%}
+    Sticky checkout bar, shown on any viewport whenever the real CHECK OUT button
+    is off screen. The sticky summary cannot cover this on its own — its
+    containing block is the cart column, so it releases once its bottom reaches
+    the column bottom and then drifts up behind the header. On mobile the summary
+    sits below every line item, so the bar does the whole job there.
+
+    It is a separate submit button rather than a moved one: the real one stays in
+    the summary for keyboard and screen-reader order, and both post to the same
+    `form="cart"`, so quantity edits are picked up either way. Suppressed when the
+    cart is empty.
+  {%- endcomment -%}
+  {%- unless cart == empty -%}
+    <div class="cart__sticky-bar" aria-hidden="false">
+      <div class="cart__sticky-bar-inner">
+        <span class="cart__sticky-bar-total">
+          <span class="cart__sticky-bar-label">{{ 'sections.cart.estimated_total' | t }}</span>
+          <span class="cart__sticky-bar-value">{{ cart.total_price | money_with_currency }}</span>
+        </span>
+        <button
+          type="submit"
+          class="cart__sticky-bar-button button"
+          name="checkout"
+          form="cart"
+        >
+          {{ 'sections.cart.checkout' | t }}
+        </button>
+      </div>
+    </div>
+
+    <script src="{{ 'cart-sticky-bar.js' | asset_url }}" defer="defer"></script>
+  {%- endunless -%}
 </div>
 
 {% schema %}

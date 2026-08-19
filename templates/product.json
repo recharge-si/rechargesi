@@ -38,14 +38,6 @@
           "type": "barcode_token",
           "settings": {}
         },
-        "stock_locations": {
-          "type": "stock_locations",
-          "settings": {
-            "locations": "Recharge | Our stock\nPartner Supply | Partner stock",
-            "metafield_namespace": "custom",
-            "metafield_key": "stock_by_location"
-          }
-        },
         "quantity_selector": {
           "type": "quantity_selector",
           "settings": {}
@@ -53,7 +45,7 @@
         "buy_buttons": {
           "type": "buy_buttons",
           "settings": {
-            "show_dynamic_checkout": true,
+            "show_dynamic_checkout": false,
             "show_gift_card_recipient": true
           }
         },
@@ -76,7 +68,6 @@
         "quantity_selector",
         "buy_buttons",
         "barcode_token",
-        "stock_locations",
         "description",
         "share"
       ],

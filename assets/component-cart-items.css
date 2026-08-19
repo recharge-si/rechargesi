@@ -59,13 +59,17 @@ cart-items .title-wrapper-with-link {
 
 @media screen and (min-width: 750px) {
   .cart-item__image {
-    max-width: 100%;
+    max-width: 8rem;
   }
 }
 
 .cart-item__details {
-  font-size: 1.6rem;
-  line-height: calc(1 + 0.4 / var(--font-body-scale));
+  font-size: 1.5rem;
+  line-height: calc(1 + 0.25 / var(--font-body-scale));
+}
+
+.cart-item__details > * + * {
+  margin-top: 0.4rem;
 }
 
 .cart-item__details > * {
@@ -311,9 +315,12 @@ cart-remove-button .icon-remove {
     padding-left: 4rem;
   }
 
+  /* Rows were ~200px tall for a 110px image — 8rem of that was padding. Halved,
+     and cells centre vertically so price and stepper sit on the product's axis
+     rather than floating at the top of a tall empty cell. */
   .cart-items td {
-    vertical-align: top;
-    padding-top: 4rem;
+    vertical-align: middle;
+    padding-top: 2rem;
   }
 
   .cart-items .cart-item__nested-line td {
@@ -391,7 +398,7 @@ cart-remove-button .icon-remove {
 @media screen and (min-width: 750px) {
   .cart-item > td {
     border-bottom: 1px solid rgba(var(--color-foreground), 0.06);
-    padding-bottom: 4rem;
+    padding-bottom: 2rem;
   }
 }
 
@@ -432,4 +439,78 @@ cart-remove-button .icon-remove {
 .cart-item__discounted-prices .price.price--end {
   color: var(--color-brand-primary);
   font-weight: 700;
+}
+
+/* --- Store pickup notice ---
+   Lives here rather than component-cart.css because this file is loaded globally
+   in theme.liquid as well as on the cart page, so the drawer gets it too.
+
+   Deliberately not a tinted card. Shopify's own version of this message is a red
+   panel at the delivery step, and red for "you can still buy this, just not
+   collect it" is the same false alarm the variant chips avoid.
+
+   Constrained to a reading width. Full-bleed rows with a Remove link stranded at
+   the far right margin were the distracting part — the eye had to cross 700px of
+   nothing to pair a name with its action. One action for the whole set now sits
+   directly under the copy that explains it. */
+.cart-pickup-notice {
+  border-left: 3px solid var(--color-info);
+  padding: 0.2rem 0 0.2rem 1.4rem;
+  margin: 2.4rem 0;
+  max-width: 58ch;
+}
+
+.cart-pickup-notice__label {
+  margin: 0 0 0.8rem;
+  font-size: 1.1rem;
+  letter-spacing: 0.12rem;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: var(--color-info);
+}
+
+.cart-pickup-notice__items {
+  margin: 0 0 1rem;
+  padding: 0;
+  font-size: 1.35rem;
+  line-height: 1.5;
+}
+
+.cart-pickup-notice__item {
+  font-weight: 600;
+}
+
+.cart-pickup-notice__sep {
+  font-weight: 400;
+  color: rgba(var(--color-foreground), 0.35);
+}
+
+.cart-pickup-notice__variant {
+  font-weight: 400;
+  color: rgba(var(--color-foreground), 0.6);
+}
+
+.cart-pickup-notice__body {
+  margin: 0 0 1rem;
+  font-size: 1.3rem;
+  line-height: 1.5;
+  color: rgba(var(--color-foreground), 0.7);
+}
+
+.cart-pickup-notice__remove {
+  display: inline-block;
+  font-size: 1.2rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: rgba(var(--color-foreground), 0.55);
+  text-decoration: underline;
+  text-underline-offset: 0.3rem;
+  text-decoration-thickness: 0.1rem;
+  transition: color 0.15s ease;
+}
+
+.cart-pickup-notice__remove:hover,
+.cart-pickup-notice__remove:focus-visible {
+  color: var(--color-brand-primary);
 }

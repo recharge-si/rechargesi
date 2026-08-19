@@ -1,0 +1,116 @@
+{%- comment -%}
+  Resolves one variant to a single customer-facing state. Echoes exactly one of:
+
+    own        in our own stock          → fastest, green
+    partner    only at a partner         → slower, amber
+    available  sellable, source unknown  → green, but promises no lead time
+    none       cannot be bought          → grey
+
+  The point of the split is that "where" is an internal fact and "when" is the
+  customer's question. Callers turn these into a delivery expectation; nobody
+  ever sees a location name.
+
+  `available` is the honest degraded state. It happens when Shopify says the
+  variant is sellable but the metafield has nothing for it — Flow not run yet, a
+  brand-new product, or the sweeper mid-cycle. Claiming "ships in 1-2 days" there
+  would be inventing a promise, so the lead time is simply omitted and the chip
+  falls back to plain "In stock". With the metafield absent entirely the whole
+  page degrades to exactly the old in/out behaviour.
+
+  `variant.available` is authoritative for sellability: if Shopify will not sell
+  it, no metafield entry can override that to anything but `none`. The metafield
+  only ever refines a yes into own-vs-partner.
+
+  Accepts:
+  - variant: {Object} variant object
+
+  Usage:
+  {%- capture state %}{% render 'variant-stock-state', variant: variant %}{% endcapture -%}
+{%- endcomment -%}
+{%- liquid
+  assign vss_state = 'none'
+
+  if variant.available
+    assign vss_ns = settings.stock_metafield_namespace | default: 'custom'
+    assign vss_key = settings.stock_metafield_key | default: 'stock_by_location'
+
+    assign vss_entries = variant.metafields[vss_ns][vss_key].value
+    if vss_entries == blank
+      assign vss_entries = variant.product.metafields[vss_ns][vss_key].value
+    endif
+
+    comment
+      Keys are wrapped in pipes so a location named "Recharge" cannot match
+      "Recharge Partner" by substring.
+    endcomment
+    assign vss_primary = settings.stock_primary_locations | default: 'Recharge'
+    assign vss_primary = vss_primary | newline_to_br | replace: '<br />', ',' | replace: '<br>', ','
+    assign vss_primary_list = vss_primary | split: ','
+    assign vss_primary_keys = '|'
+    for name in vss_primary_list
+      assign clean = name | strip | downcase
+      if clean != blank
+        assign vss_primary_keys = vss_primary_keys | append: clean | append: '|'
+      endif
+    endfor
+
+    assign vss_own = false
+    assign vss_partner = false
+
+    for entry in vss_entries
+      assign entry_name = entry.name | strip | downcase
+      if entry_name == blank
+        continue
+      endif
+
+      assign entry_in = false
+      if entry.available == true
+        assign entry_in = true
+      else
+        assign entry_qty = entry.quantity | plus: 0
+        if entry_qty > 0
+          assign entry_in = true
+        endif
+      endif
+      unless entry_in
+        continue
+      endunless
+
+      assign needle = '|' | append: entry_name | append: '|'
+      if vss_primary_keys contains needle
+        assign vss_own = true
+      else
+        assign vss_partner = true
+      endif
+    endfor
+
+    comment
+      Free fallback that lights up on its own if local pickup is ever enabled —
+      see the Stock by Location notes in CLAUDE.md for why it is empty today.
+    endcomment
+    unless vss_own or vss_partner
+      for availability in variant.store_availabilities
+        unless availability.available
+          continue
+        endunless
+        assign avail_name = availability.location.name | strip | downcase
+        assign needle = '|' | append: avail_name | append: '|'
+        if vss_primary_keys contains needle
+          assign vss_own = true
+        else
+          assign vss_partner = true
+        endif
+      endfor
+    endunless
+
+    if vss_own
+      assign vss_state = 'own'
+    elsif vss_partner
+      assign vss_state = 'partner'
+    else
+      assign vss_state = 'available'
+    endif
+  endif
+
+  echo vss_state
+-%}

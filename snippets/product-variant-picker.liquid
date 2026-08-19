@@ -32,7 +32,7 @@
           <legend class="form__label">
             {%- if option.name == 'Title' -%}{{ 'products.product.select_variant' | t }}{%- else -%}{{ option.name }}{%- endif -%}:
             <span data-selected-value>
-              {{- option.selected_value -}}
+              {%- render 'option-value-label', value: option.selected_value -%}
             </span>
           </legend>
           {% render 'product-variant-options',
@@ -50,14 +50,39 @@
           horizontal padding. The grid then fits as many equal columns as that minimum
           allows — see .variant-pills-grid in product-page-enhancements.css.
         {%- endcomment -%}
+        {%- comment -%}
+          Measured on the label the customer actually sees, not the stored value —
+          an imported "%e2%88%85-1114-mm" is 18 characters but renders as 9.
+        {%- endcomment -%}
         {%- assign longest_value = 0 -%}
         {%- for value in option.values -%}
-          {%- assign value_length = value.name | size -%}
+          {%- capture value_label %}{% render 'option-value-label', value: value.name %}{% endcapture -%}
+          {%- assign value_length = value_label | size -%}
           {%- if value_length > longest_value -%}
             {%- assign longest_value = value_length -%}
           {%- endif -%}
         {%- endfor -%}
         {%- assign pill_min = longest_value | times: 75 | plus: 180 | divided_by: 100.0 -%}
+        {%- comment -%}
+          The chip's second line carries the stock status, so the track has to fit
+          that too — "Razprodano" is longer than a size like "77". Status text is
+          1.05rem against the value's 1.2rem, hence 0.62rem/char rather than 0.75.
+          No allowance for a dot: the chip status is text only, and reserving for
+          a dot that no longer exists pushed 7 sizes onto two rows.
+        {%- endcomment -%}
+        {%- assign status_len = 'products.product.inventory_in_stock' | t | size -%}
+        {%- assign sold_out_len = 'products.product.sold_out' | t | size -%}
+        {%- if sold_out_len > status_len -%}
+          {%- assign status_len = sold_out_len -%}
+        {%- endif -%}
+        {%- assign avail_len = 'products.product.stock_state.on_order' | t | size -%}
+        {%- if avail_len > status_len -%}
+          {%- assign status_len = avail_len -%}
+        {%- endif -%}
+        {%- assign status_min = status_len | times: 62 | plus: 180 | divided_by: 100.0 -%}
+        {%- if status_min > pill_min -%}
+          {%- assign pill_min = status_min -%}
+        {%- endif -%}
         {%- if pill_min < 6 -%}
           {%- assign pill_min = 6 -%}
         {%- endif -%}
@@ -108,8 +133,18 @@
       {%- endif -%}
     {%- endfor -%}
 
+    {%- render 'variant-delivery-line', variant: product.selected_or_first_available_variant -%}
+
     <script type="application/json" data-selected-variant>
       {{ product.selected_or_first_available_variant | json }}
     </script>
   </variant-selects>
+{%- else -%}
+  {%- comment -%}
+    A single-variant product has no chips to carry stock state, so without this it
+    would show none of it — which is most of the accessories in this catalogue.
+    The delivery line stands on its own here; there is no variant to follow, so it
+    needs no <variant-selects> wrapper and no JS.
+  {%- endcomment -%}
+  {%- render 'variant-delivery-line', variant: product.selected_or_first_available_variant -%}
 {%- endunless -%}

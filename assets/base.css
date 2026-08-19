@@ -4,6 +4,11 @@
   --color-brand-primary-darker: #8f0d12;
   --color-success: #1a7a3c;
   --color-urgency: #b45309;
+  /* Neutral informational blue. Used for "on order" stock, where amber read as a
+     warning — nothing is wrong with a product that simply ships from a supplier,
+     and orange next to the brand red made the page look like it had a problem.
+     Tuned to the same weight as the success green: ~6.4:1 on white. */
+  --color-info: #1257a3;
   --alpha-button-background: 1;
   --alpha-button-border: 1;
   --alpha-link: 0.85;
@@ -3279,14 +3284,30 @@ details-disclosure > details {
   margin-bottom: var(--media-shadow-vertical-offset);
 }
 
+/* `outside`, not `inside`. With `list-style-position: inside` the marker sits in
+   the li's own content box, so an li whose content is a block element — which is
+   what pasted/imported supplier descriptions always produce,
+   `<li><p><strong>Custom Colors:</strong> …</p></li>` — puts the bullet on its
+   own line and drops the text underneath it, unbulleted. That was the "weird"
+   description rendering: a column of lone bullets with orphaned paragraphs. */
 .rte ul,
 .rte ol {
-  list-style-position: inside;
+  list-style-position: outside;
   padding-left: 2rem;
 }
 
 .rte li {
   list-style: inherit;
+}
+
+/* Block children of a list item must not add their own leading/trailing gap, or
+   the bullet floats away from the text it belongs to. */
+.rte li > p:first-child {
+  margin-top: 0;
+}
+
+.rte li > p:last-child {
+  margin-bottom: 0;
 }
 
 .rte li:last-child {

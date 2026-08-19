@@ -220,13 +220,46 @@ if (!customElements.get('media-gallery')) {
         if (!containers.length) return;
 
         if (!this.mql.matches) {
-          containers.forEach((container) => container.style.removeProperty('--viewport-offset'));
+          containers.forEach((container) => {
+            container.style.removeProperty('--viewport-offset');
+            container.style.removeProperty('--constrained-min-height');
+          });
           return;
         }
 
         const THUMBNAIL_PEEK = 72;
         const galleryTop = Math.round(this.getBoundingClientRect().top + window.scrollY);
         const offset = galleryTop + THUMBNAIL_PEEK;
+
+        /* The floor has to know about width, not just height. A short viewport
+           (say 1700x740) leaves 100vh - offset around 360px, which the flat 400px
+           floor caught — and a 400px square image then sat in a 460px column
+           inside an 1100px grid, looking lost. The image should never be narrower
+           than the column it already owns, so derive the floor from that column:
+           the same gridWidth - MAX_INFO_WIDTH - padding that syncMediaColumnWidth
+           uses as its own floor.
+
+           On a tall viewport 100vh - offset wins and nothing changes; this only
+           bites when the screen is short, where it deliberately trades some of
+           the thumbnail peek for an image you can actually see. */
+        const grid = this.closest('.product.grid');
+        const infoWrapper = grid && grid.querySelector('.product__info-wrapper');
+        let minHeight = 0;
+
+        if (grid && infoWrapper) {
+          const MAX_INFO_WIDTH = 600;
+          const infoPadding = parseFloat(getComputedStyle(infoWrapper).paddingLeft) || 0;
+          const fairWidth = grid.getBoundingClientRect().width - MAX_INFO_WIDTH - infoPadding;
+
+          if (fairWidth > 0) {
+            containers.forEach((container) => {
+              const ratio = parseFloat(getComputedStyle(container).getPropertyValue('--aspect-ratio')) || 1;
+              minHeight = Math.round(fairWidth / ratio);
+              container.style.setProperty('--constrained-min-height', `${minHeight}px`);
+            });
+          }
+        }
+
         containers.forEach((container) => container.style.setProperty('--viewport-offset', `${offset}px`));
       }
 

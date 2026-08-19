@@ -266,7 +266,8 @@ cart-items {
 
   .cart__footer {
     display: flex;
-    justify-content: space-between;
+    flex-direction: column;
+    align-items: center;
     border: 0;
   }
 
@@ -274,13 +275,17 @@ cart-items {
     padding-top: 0;
   }
 
-  .cart__footer > * {
-    width: 35rem;
+  /* One centred column, not a two-column row. The summary is the only thing on
+     this row worth reading, so it sits in the middle of the page rather than
+     hugging the right margin with dead space beside it. */
+  .cart__footer > .cart__blocks {
+    width: 44rem;
+    max-width: 100%;
   }
 
   .cart__footer > * + * {
-    margin-left: 4rem;
-    margin-top: 0;
+    margin-left: 0;
+    margin-top: 2.4rem;
   }
 }
 
@@ -316,13 +321,13 @@ cart-items {
 }
 
 .tax-note {
-  margin: 2.2rem 0 1.6rem auto;
+  margin: 1.6rem 0;
   text-align: center;
   display: block;
 }
 
 .cart__checkout-button {
-  max-width: 36rem;
+  max-width: 100%;
   background-color: var(--color-brand-primary);
   color: #fff;
   text-transform: uppercase;
@@ -372,7 +377,7 @@ cart-remove-button .button:hover {
 
   .tax-note {
     margin-bottom: 2.2rem;
-    text-align: right;
+    text-align: center;
   }
 
   [data-shopify-buttoncontainer] {
@@ -384,3 +389,188 @@ cart-remove-button .button:hover {
     gap: 1rem;
   }
 }
+
+
+/* --- Cart footer aside ---
+   Fills the empty half of the footer row with a route back into the catalogue
+   and the same three claims the product page makes. Not filler: they are the two
+   things a customer wants at the moment they decide to check out. */
+.cart__footer-aside {
+  display: flex;
+  flex-direction: column;
+  gap: 1.4rem;
+  align-items: center;
+  width: 44rem;
+  max-width: 100%;
+  margin-top: 2.4rem;
+}
+
+.cart__continue {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 1.3rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: rgba(var(--color-foreground), 0.7);
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.cart__continue:hover,
+.cart__continue:focus-visible {
+  color: var(--color-brand-primary);
+}
+
+.cart__continue-arrow {
+  transition: transform 0.15s ease;
+}
+
+.cart__continue:hover .cart__continue-arrow {
+  transform: translateX(-0.3rem);
+}
+
+/* Express wallet buttons: match the height of CHECK OUT above them so the pair
+   reads as one stack rather than a big button with small chips under it. */
+.cart__dynamic-checkout-buttons {
+  max-width: none;
+  margin: 1rem 0 0;
+}
+
+@media screen and (max-width: 749px) {
+  .cart__footer-aside {
+    width: 100%;
+  }
+}
+
+/* --- Cart page: single stacked column, no sidebar ---
+   A two-column grid with the summary sticking alongside the items was tried and
+   reverted: even sticky and properly aligned to the breadcrumb, a small bordered
+   card sitting mostly alone in a tall column read as a floating, disconnected
+   object ("like a fly on the screen") rather than part of the page. Rather than
+   keep patching that shape — a filled-background column was the next idea — the
+   page goes back to one centred column (items, then summary, below — the plain
+   flex/centring rules above already produce this with no grid override needed),
+   and the fixed bottom bar becomes the sole mechanism for keeping checkout
+   reachable while scrolling, on every viewport, not just mobile. See the sticky
+   bar block below: it already re-queries the CHECK OUT button on every scroll
+   frame, so it needed no changes to take over this job on desktop too. */
+
+/* --- Sticky checkout bar ---
+   Shown whenever the real CHECK OUT button is off screen, hidden while it is
+   visible, so the two are never visible at once. On mobile it's a full-width bar
+   pinned to the bottom edge — thumb reach matters more than restraint on a
+   narrow screen. From 750px up it's a compact card anchored to the bottom-right
+   corner instead: a full-width strip that wide reads as a heavy, page-spanning
+   interruption, where a corner card reads as a floating aid that doesn't fight
+   for the whole viewport. It also hides itself once the real site footer scrolls
+   into view (see cart-sticky-bar.js), so it never sits on top of that content. */
+.cart__sticky-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 4;
+  background: rgb(var(--color-background));
+  border-top: 1px solid rgba(var(--color-foreground), 0.12);
+  box-shadow: 0 -2px 12px rgba(var(--color-foreground), 0.06);
+  padding-top: 1rem;
+  padding-bottom: calc(1rem + env(safe-area-inset-bottom));
+  transform: translateY(101%);
+  transition: transform 0.25s ease;
+}
+
+/* 101% so the box-shadow clears the edge too. */
+.cart__sticky-bar.is-visible {
+  transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cart__sticky-bar {
+    transition: none;
+  }
+}
+
+/* Bar itself stays full width (edge to edge); the content group sits inside a
+   page-width column like the rest of the site, pushed to the right of that
+   column with justify-content rather than centered — this is the "move it from
+   left to right" the centred version was missing.
+
+   Padding here has to match `.page-width` exactly (1.5rem, then 5rem at
+   750px+) rather than the bar carrying its own fixed padding — the bar had
+   1.5rem at every width, so above 750px the CHECK OUT button's right edge sat
+   further out than the item rows' TOTAL column and the header's red accent
+   bar, which both use `.page-width`'s wider desktop gutter. */
+.cart__sticky-bar-inner {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 1.4rem;
+  max-width: var(--page-width);
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+
+@media screen and (min-width: 750px) {
+  .cart__sticky-bar-inner {
+    padding: 0 5rem;
+  }
+}
+
+.cart__sticky-bar-total {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-width: 0;
+}
+
+.cart__sticky-bar-label {
+  font-size: 1rem;
+  letter-spacing: 0.1rem;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: rgba(var(--color-foreground), 0.55);
+  white-space: nowrap;
+}
+
+.cart__sticky-bar-value {
+  font-size: 1.6rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.cart__sticky-bar-button {
+  flex: 0 0 auto;
+  min-width: 24rem;
+  min-height: 4.8rem;
+  background-color: var(--color-brand-primary);
+  color: #fff;
+  text-transform: uppercase;
+  letter-spacing: 0.1rem;
+  font-weight: 700;
+  border: 0;
+  border-radius: 0;
+}
+
+.cart__sticky-bar-button:hover {
+  background-color: var(--color-brand-primary-dark);
+}
+
+/* The bar is fixed on every viewport, so the last thing on the page needs
+   clearance everywhere or it sits underneath it permanently. */
+#MainContent:has(.cart__sticky-bar) {
+  padding-bottom: 8rem;
+}
+
+@media screen and (max-width: 749px) {
+  .cart__sticky-bar-inner {
+    gap: 1.2rem;
+  }
+
+  .cart__sticky-bar-button {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+}
+

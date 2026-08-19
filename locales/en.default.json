@@ -38,6 +38,11 @@
       }
     },
     "continue_shopping": "Continue shopping",
+    "trust": {
+      "free_shipping": "Free shipping",
+      "secure_checkout": "Secure checkout",
+      "returns": "30-day returns"
+    },
     "pagination": {
       "label": "Pagination",
       "page": "Page {{ number }}",
@@ -133,6 +138,12 @@
       "sku": "SKU",
       "sku_label": "SKU:",
       "ean_label": "EAN code:",
+      "stock_state": {
+        "label": "Delivery",
+        "on_order": "On order",
+        "detail_own": "In stock in our shop",
+        "detail_partner": "From our supplier"
+      },
       "stock_locations": {
         "title": "Availability",
         "in_stock": "In stock",
@@ -178,6 +189,8 @@
         "price_range": "{{ minimum }} - {{ maximum }}"
       },
       "pickup_availability": {
+        "label": "Pickup",
+        "available_at_html": "Available at <span class=\"color-foreground\">{{ location_name }}</span>",
         "view_store_info": "View store information",
         "check_other_stores": "Check availability at other stores",
         "pick_up_available": "Pickup available",
@@ -270,7 +283,11 @@
       "title": "Search results",
       "search_for": "Search for “{{ terms }}”",
       "suggestions": "Suggestions",
-      "pages": "Pages"
+      "pages": "Pages",
+      "empty_heading": "We couldn’t find “{{ terms }}”",
+      "empty_body": "Check the spelling, try a different word, or jump straight into a category below.",
+      "browse_categories": "Browse categories",
+      "you_might_like": "You might like these"
     },
     "cart": {
       "cart": "Cart"
@@ -310,6 +327,11 @@
       }
     },
     "cart": {
+      "pickup_notice": {
+        "label": "Not available for store pickup",
+        "remove_all": "Remove these items",
+        "body": "These come from our supplier and are shipped to you. If you'd like to collect the rest in store, please order these separately."
+      },
       "title": "Your cart",
       "caption": "Cart items",
       "remove_title": "Remove {{ title }}",

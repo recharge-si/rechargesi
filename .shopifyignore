@@ -1,0 +1,7 @@
+# Editors that save atomically (write a sibling temp file, then rename) make the
+# `shopify theme dev` watcher try to upload the temp file. It has no .liquid
+# extension, the upload fails, and the CLI then serves an "Upload Errors" page
+# for every request until it is restarted — the real files are fine.
+*.tmp.*
+*~
+.DS_Store

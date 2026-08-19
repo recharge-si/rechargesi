@@ -215,7 +215,7 @@
               -%}
               <tr class="{{ row_classes }}">
                 <th scope="row" class="stock-table__variant">
-                  {{- row_variant.title | escape -}}
+                  {%- render 'option-value-label', value: row_variant.title -%}
                   {%- if is_selected -%}
                     <span class="visually-hidden">
                       ({{ 'products.product.stock_locations.selected' | t }})

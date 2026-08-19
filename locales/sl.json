@@ -38,6 +38,11 @@
       }
     },
     "continue_shopping": "Nadaljuj nakup",
+    "trust": {
+      "free_shipping": "Brezplačna dostava",
+      "secure_checkout": "Varno plačilo",
+      "returns": "30-dnevno vračilo"
+    },
     "pagination": {
       "label": "Oštevilčevanje strani",
       "page": "Stran {{ number }}",
@@ -154,6 +159,8 @@
         "unit_price": "Cena na enoto"
       },
       "pickup_availability": {
+        "label": "Prevzem",
+        "available_at_html": "Na voljo v trgovini <span class=\"color-foreground\">{{ location_name }}</span>",
         "view_store_info": "Prikaži podatke o trgovini",
         "check_other_stores": "Preveri razpoložljivost v drugih trgovinah",
         "pick_up_available": "Na voljo je osebni prevzem",
@@ -189,6 +196,12 @@
       "sku": "Inventarna številka",
       "sku_label": "SKU:",
       "ean_label": "EAN koda:",
+      "stock_state": {
+        "label": "Dostava",
+        "on_order": "Po naročilu",
+        "detail_own": "Na zalogi v naši trgovini",
+        "detail_partner": "Pri našem dobavitelju"
+      },
       "stock_locations": {
         "title": "Availability",
         "in_stock": "In stock",
@@ -288,7 +301,11 @@
         "two": "Št. izdelkov: {{ count }}"
       },
       "suggestions": "Predlogi",
-      "pages": "Strani"
+      "pages": "Strani",
+      "empty_heading": "Nismo našli »{{ terms }}«",
+      "empty_body": "Preverite črkovanje, poskusite drugo besedo ali raziščite eno od kategorij spodaj.",
+      "browse_categories": "Prebrskajte kategorije",
+      "you_might_like": "Morda vam bo všeč"
     },
     "cart": {
       "cart": "Košarica"
@@ -322,6 +339,11 @@
       }
     },
     "cart": {
+      "pickup_notice": {
+        "label": "Ni na voljo za osebni prevzem",
+        "remove_all": "Odstrani te izdelke",
+        "body": "Te izdelke naročimo pri dobavitelju in vam jih pošljemo. Če želite ostale izdelke prevzeti v trgovini, jih prosimo naročite ločeno."
+      },
       "title": "Vaša košarica",
       "caption": "Izdelki v košarici",
       "remove_title": "Odstrani izdelek {{ title }}",
