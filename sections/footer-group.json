@@ -18,14 +18,14 @@
           "type": "text",
           "settings": {
             "heading": "Recharge d.o.o.",
-            "subtext": "<p>info@recharge.si<br>+386 40 245 922</p>"
+            "subtext": "<p><a href=\"mailto:info@recharge.si\">info@recharge.si</a><br><a href=\"tel:+38640245922\">+386 40 245 922</a></p>"
           }
         },
         "prostor": {
           "type": "text",
           "settings": {
             "heading": "Our Recharge Space",
-            "subtext": "<p>Our store is currently moving to a bigger space for you. We promise it will be worth the wait.</p><p>We will reopen our doors soon.</p><p>If you would like to visit us, please call us at 040 245 922 and we will arrange an appointment.</p><p>Thank you for your understanding!</p>"
+            "subtext": "<p>Our shop has reopened at its new, bigger location!</p><p>Call us at <a href=\"tel:+38640245922\">040 245 922</a> for opening hours and directions, or to arrange advice time with the team — we are happy to help you choose the right gear.</p>"
           }
         }
       },

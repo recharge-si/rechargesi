@@ -9,11 +9,11 @@
   padding-bottom: 1rem;
   font-size: 1.2rem;
   letter-spacing: 0.06em;
-  color: rgba(var(--color-foreground), 0.4);
+  color: rgba(var(--color-foreground), 0.62);
 }
 
 .product-breadcrumb a {
-  color: rgba(var(--color-foreground), 0.4);
+  color: rgba(var(--color-foreground), 0.62);
   text-decoration: none;
   transition: color 0.2s ease;
 }
@@ -28,7 +28,7 @@
 }
 
 a.product-breadcrumb__segment {
-  color: rgba(var(--color-foreground), 0.5);
+  color: rgba(var(--color-foreground), 0.62);
   text-decoration: none;
   transition: color 0.2s ease;
 }
@@ -58,7 +58,7 @@ a.product-breadcrumb__segment:hover {
 }
 
 .product-breadcrumb__current {
-  color: rgba(var(--color-foreground), 0.6);
+  color: rgba(var(--color-foreground), 0.75);
 }
 
 /* --- Entrance Animations --- */
@@ -217,13 +217,13 @@ a.product-breadcrumb__segment:hover {
 /* Tax note — muted, small */
 .product__tax {
   font-size: 1.1rem;
-  color: rgba(var(--color-foreground), 0.45);
+  color: rgba(var(--color-foreground), 0.65);
   margin-top: 0.5rem !important;
 }
 
 .product__tax a {
   color: inherit;
-  text-decoration-color: rgba(var(--color-foreground), 0.25);
+  text-decoration-color: rgba(var(--color-foreground), 0.4);
 }
 
 .product__tax a:hover {
@@ -236,7 +236,7 @@ a.product-breadcrumb__segment:hover {
   letter-spacing: 0.12rem;
   text-transform: uppercase;
   font-weight: 700;
-  color: rgba(var(--color-foreground), 0.55);
+  color: rgba(var(--color-foreground), 0.65);
   margin-bottom: 0.8rem;
   display: block;
 }
@@ -259,7 +259,7 @@ a.product-breadcrumb__segment:hover {
 .product-form__input .swatch__input + .swatch__label,
 .product-form__input input[type='radio'] + label {
   border-radius: 0 !important;
-  min-height: 4.2rem;
+  min-height: 4.4rem;
   font-size: 1.2rem;
   font-weight: 600;
   letter-spacing: 0.04em;
@@ -316,7 +316,7 @@ a.product-breadcrumb__segment:hover {
 }
 
 .variant-pill__stock--none {
-  color: rgba(var(--color-foreground), 0.5);
+  color: rgba(var(--color-foreground), 0.65);
 }
 
 /* --- Delivery line for the selected size ---
@@ -342,7 +342,7 @@ a.product-breadcrumb__segment:hover {
   letter-spacing: 0.12rem;
   text-transform: uppercase;
   font-weight: 700;
-  color: rgba(var(--color-foreground), 0.55);
+  color: rgba(var(--color-foreground), 0.65);
 }
 
 .variant-delivery__status {
@@ -371,7 +371,7 @@ a.product-breadcrumb__segment:hover {
 }
 
 .variant-delivery--none {
-  color: rgba(var(--color-foreground), 0.55);
+  color: rgba(var(--color-foreground), 0.65);
 }
 
 /* The written "Sold out" is signal enough — Dawn's strikethrough on top of it is
@@ -411,7 +411,7 @@ a.product-breadcrumb__segment:hover {
   letter-spacing: 0.12rem;
   text-transform: uppercase;
   font-weight: 700;
-  color: rgba(var(--color-foreground), 0.55);
+  color: rgba(var(--color-foreground), 0.65);
 }
 
 .quantity {
@@ -687,7 +687,7 @@ a.product-breadcrumb__segment:hover {
   letter-spacing: 0.12rem;
   text-transform: uppercase;
   font-weight: 700;
-  color: rgba(var(--color-foreground), 0.55);
+  color: rgba(var(--color-foreground), 0.65);
 }
 
 .pickup-availability__line {

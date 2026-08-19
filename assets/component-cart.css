@@ -2,12 +2,12 @@
 .cart-breadcrumb {
   font-size: 1.2rem;
   letter-spacing: 0.06em;
-  color: rgba(var(--color-foreground), 0.4);
+  color: rgba(var(--color-foreground), 0.62);
   margin-bottom: 2rem;
 }
 
 .cart-breadcrumb a {
-  color: rgba(var(--color-foreground), 0.4);
+  color: rgba(var(--color-foreground), 0.62);
   text-decoration: none;
   transition: color 0.2s ease;
 }
@@ -22,7 +22,7 @@
 }
 
 .cart-breadcrumb__current {
-  color: rgba(var(--color-foreground), 0.6);
+  color: rgba(var(--color-foreground), 0.75);
 }
 
 /* ── Cart Header (mirrors .blog-prepih__header / __title) ── */
@@ -530,7 +530,7 @@ cart-remove-button .button:hover {
   letter-spacing: 0.1rem;
   text-transform: uppercase;
   font-weight: 700;
-  color: rgba(var(--color-foreground), 0.55);
+  color: rgba(var(--color-foreground), 0.7);
   white-space: nowrap;
 }
 

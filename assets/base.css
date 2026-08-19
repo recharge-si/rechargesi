@@ -1524,10 +1524,10 @@ details[open] > .share-button__fallback {
 /* Close — absolute X in top-right, shown after copy */
 .share-button__close {
   position: absolute;
-  top: 0.4rem;
-  right: 0.4rem;
-  width: 2.8rem;
-  height: 2.8rem;
+  top: 0;
+  right: 0;
+  width: 4.4rem;
+  height: 4.4rem;
   padding: 0;
   display: flex;
   align-items: center;
@@ -1667,6 +1667,13 @@ details[open] > .share-button__fallback {
   font-weight: var(--font-body-weight);
   font-size: 1.2rem;
   color: rgba(var(--color-foreground), 0.75);
+}
+
+/* Native selects under 16px trigger iOS focus zoom. */
+@media screen and (max-width: 989px) {
+  .select__select {
+    font-size: 1.6rem;
+  }
 }
 
 .field:hover.field:after,
@@ -3586,7 +3593,6 @@ details-disclosure > details {
 
   :root {
     --easter-egg: none;
-    --sparkle: url('./sparkle.gif');
   }
 
   .animate--hover-vertical-lift .button:not(.button--tertiary),

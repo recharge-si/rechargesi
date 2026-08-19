@@ -168,6 +168,12 @@
   }
 }
 
+@media screen and (max-width: 989px) {
+  .footer-block--menu .list-menu__item--link {
+    padding: 1.1rem 0;
+  }
+}
+
 .footer-block__details-content .list-menu__item--active {
   color: rgb(var(--color-foreground));
 }

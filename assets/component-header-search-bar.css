@@ -99,7 +99,7 @@
 
 .header__search-bar .field__input::placeholder {
   opacity: 1;
-  color: rgba(var(--color-foreground), 0.45);
+  color: rgba(var(--color-foreground), 0.6);
 }
 
 .header__search-bar .search__button .icon,

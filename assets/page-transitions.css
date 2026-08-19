@@ -81,3 +81,14 @@
 html.pt-transitioning {
   scroll-behavior: auto;
 }
+
+/* Belt for the JS guard: if a transition is ever triggered anyway, it must not animate. */
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(main-content),
+  ::view-transition-new(main-content),
+  #MainContent.pt-exiting,
+  #MainContent.pt-entering,
+  .pt-progress {
+    animation: none;
+  }
+}
