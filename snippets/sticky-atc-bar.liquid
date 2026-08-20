@@ -1,0 +1,59 @@
+{%- comment -%}
+  Mobile sticky Add-to-cart bar (product page).
+
+  On a 390px viewport the real Add to cart sits ~1,000px deep — 1.5 screens
+  below the fold. This bar keeps the buy action reachable the whole way down:
+  title + live price left, Add to cart right, fixed to the bottom edge.
+  Mobile only (<750px) — the desktop info column already keeps the button
+  in reach.
+
+  Mechanics mirror the proven cart sticky bar:
+  - It is a SECOND submit button, not a moved one — `form` attribute points at
+    the real product form, so ProductForm's AJAX add + toast run unchanged and
+    the form's variant id + quantity inputs are honoured.
+  - sticky-atc-bar.js shows it only while the real submit button is off screen
+    and hides it as soon as the footer enters the viewport.
+  - Price and button state (Sold out / Unavailable) follow variant changes by
+    mirroring the real elements with MutationObservers — no dependency on
+    pubsub timing.
+
+  Accepts:
+  - product: {Object} product
+  - section_id: {String} section.id of main-product
+
+  Usage (from main-product.liquid, after the buy buttons exist):
+  {%- render 'sticky-atc-bar', product: product, section_id: section.id -%}
+{%- endcomment -%}
+{{ 'component-sticky-atc.css' | asset_url | stylesheet_tag }}
+{%- liquid
+  assign sab_form_id = 'product-form-' | append: section_id
+  assign sab_variant = product.selected_or_first_available_variant
+-%}
+<div class="sticky-atc" data-section="{{ section_id }}">
+  <div class="sticky-atc__info">
+    <span class="sticky-atc__title">{{ product.title | escape }}</span>
+    <div class="sticky-atc__price" id="StickyAtcPrice-{{ section_id }}">
+      {%- render 'price', product: product, use_variant: true -%}
+    </div>
+  </div>
+  <button
+    type="submit"
+    form="{{ sab_form_id }}"
+    id="StickyAtcButton-{{ section_id }}"
+    class="sticky-atc__button button"
+    {% if sab_variant == null or sab_variant.available == false %}
+      disabled
+    {% endif %}
+  >
+    <span>
+      {%- if sab_variant == null -%}
+        {{ 'products.product.unavailable' | t }}
+      {%- elsif sab_variant.available == false -%}
+        {{ 'products.product.sold_out' | t }}
+      {%- else -%}
+        {{ 'products.product.add_to_cart' | t }}
+      {%- endif -%}
+    </span>
+  </button>
+</div>
+<script src="{{ 'sticky-atc-bar.js' | asset_url }}" defer="defer"></script>

@@ -973,6 +973,13 @@
   </div>
 </product-info>
 
+{%- comment -%}
+  Outside <product-info> on purpose: Dawn's section re-render swaps ids inside
+  it, and the bar must never be part of that churn — its price/button follow
+  the real elements via observers in sticky-atc-bar.js instead.
+{%- endcomment -%}
+{%- render 'sticky-atc-bar', product: product, section_id: section.id -%}
+
 {% schema %}
 {
   "name": "t:sections.main-product.name",

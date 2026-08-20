@@ -58,6 +58,11 @@ body:has(.cart__sticky-bar.is-visible) .scroll-top {
   bottom: calc(10rem + env(safe-area-inset-bottom));
 }
 
+/* Product page, mobile: same story with the sticky Add-to-cart bar. */
+body:has(.sticky-atc.is-visible) .scroll-top {
+  bottom: calc(10rem + env(safe-area-inset-bottom));
+}
+
 @media (prefers-reduced-motion: reduce) {
   .scroll-top {
     transition: none;
