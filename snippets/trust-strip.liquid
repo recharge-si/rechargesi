@@ -3,8 +3,15 @@
 
   Was hardcoded English inline in buy-buttons.liquid; extracted here so the cart
   footer can use the same three claims rather than inventing a second set, and so
-  they translate. Claims are unchanged — this promises nothing the product page
-  did not already promise.
+  they translate.
+
+  The shipping and returns claims link to the policies that back them — a claim
+  a customer can verify in one tap is worth more than a decorative one, and it
+  keeps the strip honest: the copy must match what the linked page says.
+  (Free shipping: over 25 € within Slovenia; returns: 14 days per the refund
+  policy.) Secure checkout stays a plain span — there is no policy page for it.
+  Because the items are focusable links the container is no longer aria-hidden;
+  only the icons are.
 
   Accepts:
   - layout: {String} 'row' (default) or 'stacked' for narrow columns
@@ -16,24 +23,43 @@
 {%- liquid
   assign ts_layout = layout | default: 'row'
 -%}
-<div class="product-trust-strip product-trust-strip--{{ ts_layout }}" aria-hidden="true">
+<div class="product-trust-strip product-trust-strip--{{ ts_layout }}">
+  {%- if shop.shipping_policy.url != blank -%}
+    <a class="product-trust-strip__item" href="{{ shop.shipping_policy.url }}">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+        <path d="M5 12l5 5L20 7"/>
+      </svg>
+      {{ 'general.trust.free_shipping' | t }}
+    </a>
+  {%- else -%}
+    <span class="product-trust-strip__item">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+        <path d="M5 12l5 5L20 7"/>
+      </svg>
+      {{ 'general.trust.free_shipping' | t }}
+    </span>
+  {%- endif -%}
   <span class="product-trust-strip__item">
-    <svg viewBox="0 0 24 24" fill="none" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M5 12l5 5L20 7"/>
-    </svg>
-    {{ 'general.trust.free_shipping' | t }}
-  </span>
-  <span class="product-trust-strip__item">
-    <svg viewBox="0 0 24 24" fill="none" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+    <svg viewBox="0 0 24 24" fill="none" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
       <path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
     </svg>
     {{ 'general.trust.secure_checkout' | t }}
   </span>
-  <span class="product-trust-strip__item">
-    <svg viewBox="0 0 24 24" fill="none" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
-      <polyline points="1 4 1 10 7 10"/><polyline points="23 20 23 14 17 14"/>
-      <path d="M20.49 9A9 9 0 005.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 013.51 15"/>
-    </svg>
-    {{ 'general.trust.returns' | t }}
-  </span>
+  {%- if shop.refund_policy.url != blank -%}
+    <a class="product-trust-strip__item" href="{{ shop.refund_policy.url }}">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+        <polyline points="1 4 1 10 7 10"/><polyline points="23 20 23 14 17 14"/>
+        <path d="M20.49 9A9 9 0 005.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 013.51 15"/>
+      </svg>
+      {{ 'general.trust.returns' | t }}
+    </a>
+  {%- else -%}
+    <span class="product-trust-strip__item">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+        <polyline points="1 4 1 10 7 10"/><polyline points="23 20 23 14 17 14"/>
+        <path d="M20.49 9A9 9 0 005.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 013.51 15"/>
+      </svg>
+      {{ 'general.trust.returns' | t }}
+    </span>
+  {%- endif -%}
 </div>

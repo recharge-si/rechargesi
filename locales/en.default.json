@@ -39,9 +39,9 @@
     },
     "continue_shopping": "Continue shopping",
     "trust": {
-      "free_shipping": "Free shipping",
+      "free_shipping": "Free shipping over 25 € (SI)",
       "secure_checkout": "Secure checkout",
-      "returns": "30-day returns"
+      "returns": "14-day returns"
     },
     "pagination": {
       "label": "Pagination",

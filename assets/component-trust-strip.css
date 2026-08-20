@@ -25,6 +25,23 @@
   white-space: nowrap;
 }
 
+/* Linked claims (shipping, returns) keep the same quiet look as the plain
+   span until interacted with; the padding/margin pair grows the touch target
+   without shifting the layout. */
+a.product-trust-strip__item {
+  color: rgba(var(--color-foreground), 0.7);
+  text-decoration: none;
+  padding-block: 1rem;
+  margin-block: -1rem;
+}
+
+a.product-trust-strip__item:hover,
+a.product-trust-strip__item:focus-visible {
+  color: var(--color-brand-primary);
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
 .product-trust-strip__item svg {
   width: 1.5rem;
   height: 1.5rem;

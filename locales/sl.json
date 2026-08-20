@@ -39,9 +39,9 @@
     },
     "continue_shopping": "Nadaljuj nakup",
     "trust": {
-      "free_shipping": "Brezplačna dostava",
+      "free_shipping": "Brezplačna dostava nad 25 €",
       "secure_checkout": "Varno plačilo",
-      "returns": "30-dnevno vračilo"
+      "returns": "14-dnevno vračilo"
     },
     "pagination": {
       "label": "Oštevilčevanje strani",

@@ -18,14 +18,14 @@
           "type": "text",
           "settings": {
             "heading": "Recharge d.o.o.",
-            "subtext": "<p><a href=\"mailto:info@recharge.si\">info@recharge.si</a><br><a href=\"tel:+38640245922\">+386 40 245 922</a></p>"
+            "subtext": "<p>Ulica Vojke Šmuc 5<br>6000 Koper, Slovenia</p><p><a href=\"mailto:info@recharge.si\">info@recharge.si</a><br><a href=\"tel:+38640240922\">+386 40 240 922</a></p><p>VAT ID: SI91939119<br>Reg. no.: 8604223000</p>"
           }
         },
         "prostor": {
           "type": "text",
           "settings": {
             "heading": "Our Recharge Space",
-            "subtext": "<p>Our shop has reopened at its new, bigger location!</p><p>Call us at <a href=\"tel:+38640245922\">040 245 922</a> for opening hours and directions, or to arrange advice time with the team — we are happy to help you choose the right gear.</p>"
+            "subtext": "<p>Shop and pickup point at Vič:<br><strong>Koperska ulica 74, 1000 Ljubljana</strong><br><a href=\"https://maps.google.com/?q=Koperska+ulica+74,+1000+Ljubljana\">Directions</a></p><p>Mon–Tue: 9:00–16:00<br>Wed: 9:00–17:30<br>Thu: 9:00–16:00<br>Fri: 9:00–15:00<br>Sat–Sun: closed</p><p>Visiting at another time? Call <a href=\"tel:+38640240922\">040 240 922</a> and we will arrange a meeting — we are happy to help you choose the right gear.</p>"
           }
         }
       },
