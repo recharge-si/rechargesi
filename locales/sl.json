@@ -81,6 +81,7 @@
     "button_label": "Naroči"
   },
   "accessibility": {
+    "scroll_to_top": "Nazaj na vrh",
     "skip_to_text": "Preskoči na vsebino",
     "close": "Zapri",
     "unit_price_separator": "na",
