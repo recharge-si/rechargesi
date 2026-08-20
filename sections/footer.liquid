@@ -41,17 +41,114 @@
     assign footer_menu = section.settings.footer_menu
     assign menu_columns = 0
     if footer_menu != blank
-      assign menu_columns = footer_menu.links.size
+      for link in footer_menu.links
+        if link.links.size > 0
+          assign menu_columns = menu_columns | plus: 1
+        endif
+      endfor
     endif
     assign total_columns = section.blocks.size | plus: menu_columns
+
+    assign show_follow = false
+    if shop.features.follow_on_shop? and section.settings.enable_follow_on_shop
+      assign show_follow = true
+    endif
+    assign show_social_row = false
+    if section.settings.show_social and has_social_icons
+      assign show_social_row = true
+    endif
   -%}
 
-  {%- if total_columns > 0
-    or section.settings.newsletter_enable
-    or section.settings.show_social
-    and has_social_icons == true
-    or section.settings.enable_follow_on_shop
-  -%}
+  {%- comment -%}
+    Brand band — wordmark + tagline on the left, newsletter on the right.
+    The newsletter lives here rather than below the grid so the footer opens
+    with the brand instead of a wall of link columns.
+  {%- endcomment -%}
+  <div class="footer__brand-band page-width">
+    <div class="footer__brand-identity">
+      <a class="footer__wordmark" href="{{ routes.root_url }}">{{ shop.name }}</a>
+      {%- if section.settings.tagline != blank -%}
+        <p class="footer__tagline">{{ section.settings.tagline | escape }}</p>
+      {%- endif -%}
+    </div>
+    {%- if section.settings.newsletter_enable -%}
+      <div class="footer__newsletter-slot">
+        {%- if section.settings.newsletter_heading != blank -%}
+          <h2 class="footer-block__heading inline-richtext">{{ section.settings.newsletter_heading }}</h2>
+        {%- endif -%}
+        {%- form 'customer', id: 'ContactFooter', class: 'footer__newsletter newsletter-form' -%}
+          <input type="hidden" name="contact[tags]" value="newsletter">
+          <div class="newsletter-form__field-wrapper">
+            <div class="field">
+              <input
+                id="NewsletterForm--{{ section.id }}"
+                type="email"
+                name="contact[email]"
+                class="field__input"
+                value="{{ form.email }}"
+                aria-required="true"
+                autocorrect="off"
+                autocapitalize="off"
+                autocomplete="email"
+                {% if form.errors %}
+                  autofocus
+                  aria-invalid="true"
+                  aria-describedby="ContactFooter-error"
+                {% elsif form.posted_successfully? %}
+                  aria-describedby="ContactFooter-success"
+                {% endif %}
+                placeholder="{{ 'newsletter.label' | t }}"
+                required
+              >
+              {%- comment -%}
+                Label visually hidden, placeholder carries the word — same
+                reasoning as the header search bar: the floating-label
+                choreography needs a tall boxed field to make sense.
+              {%- endcomment -%}
+              <label class="field__label visually-hidden" for="NewsletterForm--{{ section.id }}">
+                {{ 'newsletter.label' | t }}
+              </label>
+              <button
+                type="submit"
+                class="newsletter-form__button field__button"
+                name="commit"
+                id="Subscribe"
+                aria-label="{{ 'newsletter.button_label' | t }}"
+              >
+                <span class="svg-wrapper">
+                  {{- 'icon-arrow.svg' | inline_asset_content -}}
+                </span>
+              </button>
+            </div>
+            {%- if form.errors -%}
+              <small class="newsletter-form__message form__message" id="ContactFooter-error">
+                <span class="svg-wrapper">
+                  {{- 'icon-error.svg' | inline_asset_content -}}
+                </span>
+                {{- form.errors.translated_fields.email | capitalize }}
+                {{ form.errors.messages.email -}}
+              </small>
+            {%- endif -%}
+          </div>
+          {%- if form.posted_successfully? -%}
+            <h3
+              class="newsletter-form__message newsletter-form__message--success form__message"
+              id="ContactFooter-success"
+              tabindex="-1"
+              autofocus
+            >
+              <span class="svg-wrapper">
+                {{- 'icon-success.svg' | inline_asset_content -}}
+              </span>
+              {{- 'newsletter.success' | t }}
+            </h3>
+          {%- endif -%}
+        {%- endform -%}
+      </div>
+    {%- endif -%}
+  </div>
+
+  {%- if total_columns > 0 or show_follow or show_social_row -%}
     <div class="footer__content-top page-width">
       {%- if total_columns > 0 -%}
         <div
@@ -158,6 +255,15 @@
           {%- endcomment -%}
           {%- if footer_menu != blank -%}
             {%- for link in footer_menu.links -%}
+              {%- comment -%}
+                A top-level item with no children would render as a heading
+                floating over nothing — skip it. Give the item children in the
+                menu to bring its column back. menu_columns above counts the
+                same way, so the grid class stays in step.
+              {%- endcomment -%}
+              {%- if link.links.size == 0 -%}
+                {%- continue -%}
+              {%- endif -%}
               <div
                 class="footer-block footer-block--menu{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--slide-in{% endif %}"
                 {% if settings.animations_reveal_on_scroll %}
@@ -194,93 +300,19 @@
         </div>
       {%- endif -%}
 
-      <div
-        class="footer-block--newsletter{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--slide-in{% endif %}"
-        {% if settings.animations_reveal_on_scroll %}
-          data-cascade
-        {% endif %}
-      >
-        {%- if section.settings.newsletter_enable -%}
-          <div class="footer-block__newsletter">
-            {%- if section.settings.newsletter_heading != blank -%}
-              <h2 class="footer-block__heading inline-richtext">{{ section.settings.newsletter_heading }}</h2>
-            {%- endif -%}
-            {%- form 'customer', id: 'ContactFooter', class: 'footer__newsletter newsletter-form' -%}
-              <input type="hidden" name="contact[tags]" value="newsletter">
-              <div class="newsletter-form__field-wrapper">
-                <div class="field">
-                  <input
-                    id="NewsletterForm--{{ section.id }}"
-                    type="email"
-                    name="contact[email]"
-                    class="field__input"
-                    value="{{ form.email }}"
-                    aria-required="true"
-                    autocorrect="off"
-                    autocapitalize="off"
-                    autocomplete="email"
-                    {% if form.errors %}
-                      autofocus
-                      aria-invalid="true"
-                      aria-describedby="ContactFooter-error"
-                    {% elsif form.posted_successfully? %}
-                      aria-describedby="ContactFooter-success"
-                    {% endif %}
-                    placeholder="{{ 'newsletter.label' | t }}"
-                    required
-                  >
-                  <label class="field__label" for="NewsletterForm--{{ section.id }}">
-                    {{ 'newsletter.label' | t }}
-                  </label>
-                  <button
-                    type="submit"
-                    class="newsletter-form__button field__button"
-                    name="commit"
-                    id="Subscribe"
-                    aria-label="{{ 'newsletter.button_label' | t }}"
-                  >
-                    <span class="svg-wrapper">
-                      {{- 'icon-arrow.svg' | inline_asset_content -}}
-                    </span>
-                  </button>
-                </div>
-                {%- if form.errors -%}
-                  <small class="newsletter-form__message form__message" id="ContactFooter-error">
-                    <span class="svg-wrapper">
-                      {{- 'icon-error.svg' | inline_asset_content -}}
-                    </span>
-                    {{- form.errors.translated_fields.email | capitalize }}
-                    {{ form.errors.messages.email -}}
-                  </small>
-                {%- endif -%}
-              </div>
-              {%- if form.posted_successfully? -%}
-                <h3
-                  class="newsletter-form__message newsletter-form__message--success form__message"
-                  id="ContactFooter-success"
-                  tabindex="-1"
-                  autofocus
-                >
-                  <span class="svg-wrapper">
-                    {{- 'icon-success.svg' | inline_asset_content -}}
-                  </span>
-                  {{- 'newsletter.success' | t }}
-                </h3>
-              {%- endif -%}
-            {%- endform -%}
-          </div>
-        {%- endif -%}
+      {%- if show_follow or show_social_row -%}
+        <div class="footer-block--newsletter">
+          {%- if show_follow -%}
+            <div class="footer__follow-on-shop">
+              {{ shop | login_button: action: 'follow' }}
+            </div>
+          {%- endif -%}
 
-        {%- if shop.features.follow_on_shop? and section.settings.enable_follow_on_shop -%}
-          <div class="footer__follow-on-shop">
-            {{ shop | login_button: action: 'follow' }}
-          </div>
-        {%- endif -%}
-
-        {%- if section.settings.show_social and has_social_icons -%}
-          {%- render 'social-icons', class: 'footer__list-social' -%}
-        {%- endif -%}
-      </div>
+          {%- if show_social_row -%}
+            {%- render 'social-icons', class: 'footer__list-social' -%}
+          {%- endif -%}
+        </div>
+      {%- endif -%}
     </div>
   {%- endif -%}
 
@@ -472,6 +504,17 @@
       "id": "footer_menu",
       "label": "Footer menu",
       "info": "Two-level menu: top-level items become column headings, their children become the links beneath each heading."
+    },
+    {
+      "type": "header",
+      "content": "Brand band"
+    },
+    {
+      "type": "text",
+      "id": "tagline",
+      "label": "Tagline",
+      "default": "Windsurf · Wing · Foil · SUP",
+      "info": "Shown under the wordmark at the top of the footer."
     },
     {
       "type": "header",

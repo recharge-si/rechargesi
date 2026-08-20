@@ -7,10 +7,6 @@
   border-top: 3px solid var(--color-brand-primary);
 }
 
-.footer:not(.color-scheme-1) {
-  border-top: none;
-}
-
 /* --------------------------------------------------------------------------
    Content top — main grid area
    -------------------------------------------------------------------------- */
@@ -145,7 +141,10 @@
 }
 
 .footer-block__heading-link:hover {
-  color: var(--color-brand-primary);
+  text-decoration: underline;
+  text-decoration-color: var(--color-brand-primary);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 0.3em;
 }
 
 /* --------------------------------------------------------------------------
@@ -164,7 +163,11 @@
 
 @media screen and (min-width: 750px) {
   .footer-block--menu .list-menu__item--link:hover {
-    color: var(--color-brand-primary);
+    color: rgb(var(--color-foreground));
+    text-decoration: underline;
+    text-decoration-color: var(--color-brand-primary);
+    text-decoration-thickness: 2px;
+    text-underline-offset: 0.3em;
   }
 }
 
@@ -197,8 +200,20 @@
   color: rgba(var(--color-foreground), 0.65);
 }
 
+/* Paragraphs are the grouping unit (address / contact / legal, address /
+   hours / call note) — real space between groups, lines within a group stay
+   tight via <br>. */
 .footer-block__details-content.rte p {
-  margin-bottom: 0.3rem;
+  margin-bottom: 1.6rem;
+}
+
+.footer-block__details-content.rte p:last-child {
+  margin-bottom: 0;
+}
+
+.footer-block__details-content.rte strong {
+  color: rgb(var(--color-foreground));
+  font-weight: 600;
 }
 
 .footer-block__details-content.rte a {
@@ -207,8 +222,14 @@
   transition: color 0.25s ease;
 }
 
+/* Hover keeps the text dark and signals with a red underline — steadier than
+   flipping the text itself red. */
 .footer-block__details-content.rte a:hover {
-  color: var(--color-brand-primary);
+  color: rgb(var(--color-foreground));
+  text-decoration: underline;
+  text-decoration-color: var(--color-brand-primary);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 0.3em;
 }
 
 /* --------------------------------------------------------------------------
@@ -506,7 +527,7 @@
 }
 
 .footer .footer__payment .list-payment .svg-wrapper {
-  opacity: 0.55;
+  opacity: 0.9;
   transition: opacity 0.2s ease;
 }
 
@@ -528,6 +549,7 @@
 
 .copyright__content {
   font-size: 1.1rem;
+  color: rgba(var(--color-foreground), 0.62);
 }
 
 .copyright__content a {
@@ -537,7 +559,7 @@
 }
 
 .copyright__content a:hover {
-  color: var(--color-brand-primary);
+  color: rgb(var(--color-foreground));
 }
 
 .policies {
@@ -601,6 +623,144 @@
   100% {
     opacity: 1;
     transform: translateY(-1rem);
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Brand band — wordmark + tagline left, newsletter right
+   -------------------------------------------------------------------------- */
+
+.footer__brand-band {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 3.2rem 6rem;
+  padding-bottom: 4rem;
+  margin-bottom: 4.4rem;
+  border-bottom: 1px solid rgba(var(--color-foreground), 0.08);
+}
+
+.footer__wordmark {
+  display: inline-block;
+  font-size: clamp(2.8rem, 3.4vw, 4rem);
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  line-height: 1;
+  color: rgb(var(--color-foreground));
+  text-decoration: none;
+}
+
+.footer__wordmark::after {
+  content: '';
+  display: block;
+  width: 4rem;
+  height: 3px;
+  background: var(--color-brand-primary);
+  margin-top: 1rem;
+  transition: width 0.3s ease;
+}
+
+.footer__wordmark:hover::after {
+  width: 100%;
+}
+
+.footer__tagline {
+  margin: 1.4rem 0 0;
+  font-size: 1.2rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(var(--color-foreground), 0.62);
+}
+
+/* ── Newsletter: quiet underline field, same reasoning as the header search
+   bar — a boxed floating-label input is form chrome, wrong for something that
+   sits on every page. Overrides are scoped to the slot so a future social/
+   follow row keeps stock styling. ── */
+
+.footer__newsletter-slot {
+  flex: 1 1 30rem;
+  max-width: 40rem;
+}
+
+.footer__newsletter-slot .footer-block__heading {
+  margin-bottom: 0.6rem;
+}
+
+/* Dawn centres the form's children (align-items: center) and gives the form
+   its own side margins and width cap — all of which indent the field off the
+   heading's left edge. Stretch and zero them so the underline runs flush with
+   the heading across the whole slot. */
+.footer__newsletter-slot .newsletter-form {
+  align-items: stretch;
+  width: 100%;
+  max-width: none;
+  margin: 0;
+}
+
+.footer__newsletter-slot .newsletter-form__field-wrapper {
+  max-width: none;
+}
+
+.footer__newsletter-slot .field:before {
+  content: none;
+}
+
+.footer__newsletter-slot .field:after {
+  box-shadow: none;
+  border-radius: 0;
+  border-bottom: 1px solid rgba(var(--color-foreground), 0.16);
+  transition: border-color var(--duration-short) ease;
+}
+
+.footer__newsletter-slot .field:hover:not(:focus-within):after {
+  box-shadow: none;
+  border-bottom-color: rgba(var(--color-foreground), 0.32);
+}
+
+.footer__newsletter-slot .field:focus-within:after {
+  box-shadow: none;
+  border-bottom: 1px solid var(--color-brand-primary);
+}
+
+.footer__newsletter-slot .field__input,
+.footer__newsletter-slot .field__input:focus,
+.footer__newsletter-slot .field__input:not(:placeholder-shown) {
+  height: 4.4rem;
+  padding: 0 4.8rem 0 0.2rem;
+  margin: 0;
+  background-color: transparent;
+  box-shadow: none;
+  color: rgb(var(--color-foreground));
+}
+
+.footer__newsletter-slot .field__input::placeholder {
+  opacity: 1;
+  color: rgba(var(--color-foreground), 0.6);
+}
+
+.footer__newsletter-slot .newsletter-form__button {
+  width: 4.4rem;
+}
+
+.footer__newsletter-slot .newsletter-form__button .icon {
+  color: rgba(var(--color-foreground), 0.7);
+}
+
+.footer__newsletter-slot .newsletter-form__button:hover .icon {
+  color: var(--color-brand-primary);
+}
+
+@media screen and (max-width: 749px) {
+  /* Match .footer__content-top's widened mobile gutter so the wordmark and
+     the column text share a left edge. */
+  .footer__brand-band {
+    padding-left: calc(4rem / var(--font-body-scale));
+    padding-right: calc(4rem / var(--font-body-scale));
+    padding-bottom: 3.2rem;
+    margin-bottom: 3.2rem;
+    gap: 2.8rem;
   }
 }
 

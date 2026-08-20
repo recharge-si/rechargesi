@@ -36,8 +36,8 @@
       "settings": {
         "color_scheme": "scheme-1",
         "footer_menu": "footer",
-        "newsletter_enable": false,
-        "newsletter_heading": "",
+        "newsletter_enable": true,
+        "newsletter_heading": "Newsletter",
         "enable_follow_on_shop": false,
         "show_social": false,
         "enable_country_selector": false,
