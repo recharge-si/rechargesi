@@ -43,6 +43,11 @@
       "secure_checkout": "Varno plačilo",
       "returns": "14-dnevno vračilo"
     },
+    "free_shipping": {
+      "remaining": "Še {{ amount }} do brezplačne dostave",
+      "reached": "Dosegli ste brezplačno dostavo",
+      "label": "Napredek do brezplačne dostave"
+    },
     "pagination": {
       "label": "Oštevilčevanje strani",
       "page": "Stran {{ number }}",
@@ -56,7 +61,8 @@
     "cart": {
       "view": "Prikaži košarico ({{ count }})",
       "item_added": "Artikel je dodan v košarico",
-      "view_empty_cart": "Prikaži košarico"
+      "view_empty_cart": "Prikaži košarico",
+      "subtotal": "Vmesna vsota"
     },
     "share": {
       "copy_to_clipboard": "Kopiraj povezavo",

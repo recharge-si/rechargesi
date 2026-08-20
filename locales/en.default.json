@@ -43,6 +43,11 @@
       "secure_checkout": "Secure checkout",
       "returns": "14-day returns"
     },
+    "free_shipping": {
+      "remaining": "{{ amount }} away from free shipping (SI)",
+      "reached": "Your order ships free (SI)",
+      "label": "Free shipping progress"
+    },
     "pagination": {
       "label": "Pagination",
       "page": "Page {{ number }}",
@@ -56,7 +61,8 @@
     "cart": {
       "view": "View cart ({{ count }})",
       "view_empty_cart": "View cart",
-      "item_added": "Item added to your cart"
+      "item_added": "Item added to your cart",
+      "subtotal": "Subtotal"
     },
     "share": {
       "close": "Close share",

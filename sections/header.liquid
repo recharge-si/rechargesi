@@ -8,6 +8,17 @@
   media="print"
   onload="this.media='all'"
 >
+{%- comment -%}
+  Free-shipping bar styles must load globally: the toast's contents arrive via
+  the Section Rendering API, which extracts only the item div — a stylesheet
+  inside that section would never reach the page.
+{%- endcomment -%}
+<link
+  rel="stylesheet"
+  href="{{ 'component-free-shipping.css' | asset_url }}"
+  media="print"
+  onload="this.media='all'"
+>
 
 {%- if settings.predictive_search_enabled -%}
   <link rel="stylesheet" href="{{ 'component-price.css' | asset_url }}" media="print" onload="this.media='all'">

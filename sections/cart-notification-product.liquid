@@ -52,6 +52,24 @@
         {%- if item.selling_plan_allocation != null -%}
           <p class="product-option">{{ item.selling_plan_allocation.selling_plan.name }}</p>
         {%- endif -%}
+        <p class="cart-notification-product__price">
+          {%- if item.quantity > 1 -%}{{ item.quantity }} × {% endif -%}
+          {{ item.final_price | money }}
+        </p>
+      </div>
+      {%- comment -%}
+        Everything the toast shows must live inside this per-item div —
+        cart-notification.js extracts only [id="cart-notification-product-KEY"]
+        from the fetched section, so a sibling would never reach the popup.
+        The subtotal and progress numbers are current because the section is
+        re-fetched on every add.
+      {%- endcomment -%}
+      <div class="cart-notification-product__footer">
+        <div class="cart-notification-product__subtotal">
+          <span>{{ 'general.cart.subtotal' | t }} ({{ cart.item_count }})</span>
+          <span class="cart-notification-product__subtotal-value">{{ cart.total_price | money }}</span>
+        </div>
+        {%- render 'free-shipping-bar' -%}
       </div>
     </div>
   {%- endfor -%}
