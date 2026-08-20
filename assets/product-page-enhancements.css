@@ -761,13 +761,11 @@ a.product-breadcrumb__segment:hover {
     display: none !important;
   }
 
-  /* No zoom icon, no tap-to-modal. User swipes; image is already full size. */
-  .product__media-icon {
-    display: none !important;
-  }
-  .product__modal-opener {
-    pointer-events: none;
-  }
+  /* Tap-to-lightbox stays ON. An earlier pass hid the zoom icon and killed
+     pointer-events here ("image is already full size") — wrong call for
+     spec-critical gear: the phone is the research device, and a full-screen
+     pinch-zoomable lightbox is the only way to inspect construction details.
+     Stock Dawn behavior (product-modal.js) applies. */
 
   /* Thumbnail strip: match the gallery viewer's full-bleed width.
      syncThumbnailWidth() skips mobile (mql = min-width:750px), so width must be set via CSS.
