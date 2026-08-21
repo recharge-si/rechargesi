@@ -22,7 +22,12 @@
   overflow: hidden;
 }
 
-.free-shipping-bar__fill {
+/* The fill is an empty div, and base.css hides empty elements globally
+   (div:empty { display: none }, specificity 0,1,1) — without an explicit
+   display at higher specificity the fill silently vanishes and the bar
+   reads as permanently empty. */
+.free-shipping-bar .free-shipping-bar__fill {
+  display: block;
   height: 100%;
   border-radius: inherit;
   background: var(--color-brand-primary);
