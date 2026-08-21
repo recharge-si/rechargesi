@@ -651,23 +651,10 @@ a.product-breadcrumb__segment:hover {
   margin-bottom: 0;
 }
 
-@media screen and (max-width: 749px) {
-  /* Side by side leaves the button too narrow to read on a phone. */
-  .product-form__actions {
-    grid-template-columns: minmax(0, 1fr);
-  }
-
-  .product-form__actions .product-form__quantity,
-  .product-form__actions product-form,
-  .product-form__actions .product-form {
-    grid-column: 1;
-    grid-row: auto;
-  }
-
-  .product-form__actions .quantity__label {
-    display: block;
-  }
-}
+/* Mobile used to collapse the buy row to one column (stepper above a
+   full-width button); reversed by request — the stepper and Add to cart share
+   one line at every width now, so the desktop grid above simply applies.
+   The visually-hidden #quantity-label-* span still names the stepper. */
 
 /* --- Pickup Availability ---
    Typed like the DELIVERY line so the two read as the same kind of statement:
