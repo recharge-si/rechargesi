@@ -163,7 +163,11 @@ Key files:
 - "Order summary" heading with red accent bar, total row with flex label/value layout
 - Larger price: `2.2rem` mobile, `2.6rem` desktop
 
-**Empty cart state:** Cart SVG icon (muted), uppercase title, brand-red CTA button.
+**Empty cart state:** Editorial layout matching `main-page-branded` / footer (no boxes or icons). Page header + red bar stays visible.
+- Left: uppercase title, subtext, red "Continue shopping" + outline "Log in" buttons (login only for guests)
+- Right (990px+, divided by 1px border): "Shop by category" list built from `linklists['recharge-menu']`, footer-style heading with red underline, arrow links
+- Below: recommended products grid from the section setting `empty_collection` (set in `templates/cart.json`); hidden if blank
+- Strings are translation keys `sections.cart.empty_*` (en + sl only)
 
 **Hardcoded strings** (not using translation keys):
 - `"Home"` — breadcrumb in `main-cart-items.liquid`

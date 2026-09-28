@@ -26,7 +26,7 @@
 
 <script src="{{ 'quantity-popover.js' | asset_url }}" defer="defer"></script>
 
-<cart-items class="gradient color-{{ section.settings.color_scheme }} isolate{% if cart == empty %} is-empty{% else %} section-{{ section.id }}-padding{% endif %}">
+<cart-items class="gradient color-{{ section.settings.color_scheme }} isolate section-{{ section.id }}-padding{% if cart == empty %} is-empty{% endif %}">
   <div class="page-width">
     <nav class="cart-breadcrumb" aria-label="{{ 'general.breadcrumbs.aria_label' | t }}">
       <a href="/">{{ 'general.breadcrumbs.home' | t }}</a>
@@ -40,25 +40,71 @@
 
     <div class="cart__warnings">
       <div class="cart-empty">
-        <div class="cart-empty__icon">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="48" height="48">
-            <circle cx="9" cy="21" r="1"/>
-            <circle cx="20" cy="21" r="1"/>
-            <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
-          </svg>
+        <div class="cart-empty__main">
+          <h2 class="cart-empty__title">{{ 'sections.cart.empty' | t }}</h2>
+          <p class="cart-empty__text">{{ 'sections.cart.empty_subtext' | t }}</p>
+
+          <div class="cart-empty__actions">
+            <a href="{{ routes.all_products_collection_url }}" class="cart-empty__button button">
+              {{ 'general.continue_shopping' | t }}
+            </a>
+            {%- if shop.customer_accounts_enabled and customer == null -%}
+              <a href="{{ routes.account_login_url }}" class="cart-empty__button cart-empty__button--secondary button">
+                {{ 'sections.cart.empty_login' | t }}
+              </a>
+            {%- endif -%}
+          </div>
+
+          {%- if shop.customer_accounts_enabled and customer == null -%}
+            <p class="cart-empty__hint">{{ 'sections.cart.empty_login_hint' | t }}</p>
+          {%- endif -%}
         </div>
-        <h1 class="cart-empty__title">{{ 'sections.cart.empty' | t }}</h1>
-        <a href="{{ routes.all_products_collection_url }}" class="cart-empty__button button">
-          {{ 'general.continue_shopping' | t }}
-        </a>
+
+        {%- assign empty_menu = linklists['recharge-menu'] -%}
+        {%- if empty_menu.links.size > 0 -%}
+          <nav class="cart-empty__categories" aria-labelledby="CartEmptyCategories-{{ section.id }}">
+            <h2 class="cart-empty__heading" id="CartEmptyCategories-{{ section.id }}">
+              {{- 'sections.cart.empty_categories' | t -}}
+            </h2>
+            <ul class="cart-empty__category-list list-unstyled" role="list">
+              {%- for link in empty_menu.links -%}
+                <li>
+                  <a href="{{ link.url }}" class="cart-empty__category-link">
+                    <span>{{ link.title | escape }}</span>
+                    <span class="cart-empty__category-arrow" aria-hidden="true">&rarr;</span>
+                  </a>
+                </li>
+              {%- endfor -%}
+            </ul>
+          </nav>
+        {%- endif -%}
       </div>
 
-      {%- if shop.customer_accounts_enabled and customer == null -%}
-        <div class="cart-empty__login">
-          <h2 class="cart__login-title">{{ 'sections.cart.login.title' | t }}</h2>
-          <p class="cart__login-paragraph">
-            {{ 'sections.cart.login.paragraph_html' | t: link: routes.account_login_url }}
-          </p>
+      {%- assign empty_collection = section.settings.empty_collection -%}
+      {%- if empty_collection != blank and empty_collection.products_count > 0 -%}
+        {{ 'component-card.css' | asset_url | stylesheet_tag }}
+        <div class="cart-empty__recs">
+          <div class="cart-empty__recs-header">
+            <h2 class="cart-empty__heading">{{ 'sections.cart.empty_recommendations' | t }}</h2>
+            <a href="{{ empty_collection.url }}" class="cart-empty__recs-link">
+              {{- 'sections.cart.empty_view_all' | t -}}
+              <span aria-hidden="true">&rarr;</span>
+            </a>
+          </div>
+          <ul class="grid product-grid contains-card contains-card--product{% if settings.card_style == 'standard' %} contains-card--standard{% endif %} grid--4-col-desktop grid--2-col-tablet-down" role="list">
+            {%- for product in empty_collection.products limit: section.settings.empty_products_count -%}
+              <li class="grid__item">
+                {% render 'card-product',
+                  card_product: product,
+                  media_aspect_ratio: 'square',
+                  image_shape: 'default',
+                  lazy_load: true,
+                  show_secondary_image: true,
+                  section_id: section.id
+                %}
+              </li>
+            {%- endfor -%}
+          </ul>
         </div>
       {%- endif -%}
     </div>
@@ -524,6 +570,25 @@
       "unit": "px",
       "label": "t:sections.all.padding.padding_bottom",
       "default": 36
+    },
+    {
+      "type": "header",
+      "content": "Empty cart"
+    },
+    {
+      "type": "collection",
+      "id": "empty_collection",
+      "label": "Recommended products",
+      "info": "Collection shown when the cart is empty. Leave blank to hide."
+    },
+    {
+      "type": "range",
+      "id": "empty_products_count",
+      "min": 2,
+      "max": 8,
+      "step": 2,
+      "label": "Number of products",
+      "default": 4
     }
   ]
 }
