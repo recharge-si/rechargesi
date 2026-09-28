@@ -1,0 +1,45 @@
+/* Free-shipping progress bar (snippets/free-shipping-bar.liquid).
+   Loaded by the surfaces that render it: main-cart-items and the
+   added-to-cart toast section. Progress fill is brand red — it's a nudge
+   toward the primary action, not a warning; the reached state flips the
+   whole component to success green. */
+
+.free-shipping-bar {
+  margin: 1.2rem 0;
+  max-width: 44rem; /* a page-wide meter reads as a dashboard, not a nudge */
+}
+
+.free-shipping-bar__text {
+  margin: 0 0 0.6rem;
+  font-size: 1.3rem;
+  color: rgba(var(--color-foreground), 0.75);
+}
+
+.free-shipping-bar__track {
+  height: 0.6rem;
+  border-radius: 0.3rem;
+  background: rgba(var(--color-foreground), 0.08);
+  overflow: hidden;
+}
+
+.free-shipping-bar__fill {
+  height: 100%;
+  border-radius: inherit;
+  background: var(--color-brand-primary);
+  transition: width 0.4s ease;
+}
+
+.free-shipping-bar--reached .free-shipping-bar__text {
+  color: var(--color-success);
+  font-weight: 600;
+}
+
+.free-shipping-bar--reached .free-shipping-bar__fill {
+  background: var(--color-success);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .free-shipping-bar__fill {
+    transition: none;
+  }
+}

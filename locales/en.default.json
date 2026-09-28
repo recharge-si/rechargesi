@@ -38,6 +38,16 @@
       }
     },
     "continue_shopping": "Continue shopping",
+    "trust": {
+      "free_shipping": "Free shipping over 25 € (SI)",
+      "secure_checkout": "Secure checkout",
+      "returns": "14-day returns"
+    },
+    "free_shipping": {
+      "remaining": "{{ amount }} away from free shipping (SI)",
+      "reached": "Your order ships free (SI)",
+      "label": "Free shipping progress"
+    },
     "pagination": {
       "label": "Pagination",
       "page": "Page {{ number }}",
@@ -51,7 +61,8 @@
     "cart": {
       "view": "View cart ({{ count }})",
       "view_empty_cart": "View cart",
-      "item_added": "Item added to your cart"
+      "item_added": "Item added to your cart",
+      "subtotal": "Subtotal"
     },
     "share": {
       "close": "Close share",
@@ -76,6 +87,7 @@
     "button_label": "Subscribe"
   },
   "accessibility": {
+    "scroll_to_top": "Back to top",
     "skip_to_text": "Skip to content",
     "skip_to_product_info": "Skip to product information",
     "close": "Close",
@@ -133,6 +145,20 @@
       "sku": "SKU",
       "sku_label": "SKU:",
       "ean_label": "EAN code:",
+      "stock_state": {
+        "label": "Delivery",
+        "on_order": "On order",
+        "detail_own": "In stock in our shop",
+        "detail_partner": "From our supplier"
+      },
+      "stock_locations": {
+        "title": "Availability",
+        "in_stock": "In stock",
+        "out_of_stock": "Out of stock",
+        "selected": "selected",
+        "show_all": "All sizes",
+        "show_less": "Show less"
+      },
       "select_variant": "Select product variant",
       "on_sale": "Sale",
       "product_variants": "Product variants",
@@ -144,7 +170,8 @@
         "image_available": "Image {{ index }} is now available in gallery view",
         "open_media": "Open media {{ index }} in modal",
         "play_model": "Play 3D Viewer",
-        "play_video": "Play video"
+        "play_video": "Play video",
+        "no_image": "Photo coming soon"
       },
       "nested_label": "{{ title }} for {{ parent_title }}",
       "quantity": {
@@ -169,6 +196,8 @@
         "price_range": "{{ minimum }} - {{ maximum }}"
       },
       "pickup_availability": {
+        "label": "Pickup",
+        "available_at_html": "Available at <span class=\"color-foreground\">{{ location_name }}</span>",
         "view_store_info": "View store information",
         "check_other_stores": "Check availability at other stores",
         "pick_up_available": "Pickup available",
@@ -261,7 +290,11 @@
       "title": "Search results",
       "search_for": "Search for “{{ terms }}”",
       "suggestions": "Suggestions",
-      "pages": "Pages"
+      "pages": "Pages",
+      "empty_heading": "We couldn’t find “{{ terms }}”",
+      "empty_body": "Check the spelling, try a different word, or jump straight into a category below.",
+      "browse_categories": "Browse categories",
+      "you_might_like": "You might like these"
     },
     "cart": {
       "cart": "Cart"
@@ -301,6 +334,11 @@
       }
     },
     "cart": {
+      "pickup_notice": {
+        "label": "Not available for store pickup",
+        "remove_all": "Remove these items",
+        "body": "These come from our supplier and are shipped to you. If you'd like to collect the rest in store, please order these separately."
+      },
       "title": "Your cart",
       "caption": "Cart items",
       "remove_title": "Remove {{ title }}",

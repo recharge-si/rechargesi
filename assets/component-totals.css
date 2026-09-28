@@ -44,8 +44,11 @@
   padding: 2.5rem 0;
 }
 
+/* Centred with the column. The red accent bar has to be centred too, or it
+   reads as a stray tick under a centred heading. */
 .cart-summary__header {
   margin-bottom: 2rem;
+  text-align: center;
 }
 
 .cart-summary__title {
@@ -61,7 +64,7 @@
   height: 3px;
   background: var(--color-brand-primary);
   width: 3rem;
-  margin-top: 0.8rem;
+  margin: 0.8rem auto 0;
 }
 
 .cart-summary__total {

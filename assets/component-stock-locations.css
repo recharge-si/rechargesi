@@ -1,0 +1,324 @@
+/* ============================================================
+   Stock by Location — the availability matrix in the product
+   info column. Locations across the top, variants down the left.
+
+   Flat by design, like the rest of the info column: an uppercase
+   micro-label under a brand rule, hairline separators, no panel or
+   card. Binary states — a cell is in stock or it isn't — carried by
+   colour and by dot shape, so they survive colourblindness.
+   ============================================================ */
+
+.stock-locations {
+  --sl-rule: rgba(var(--color-foreground), 0.08);
+  --sl-rule-strong: rgba(var(--color-foreground), 0.18);
+  --sl-label: rgba(var(--color-foreground), 0.4);
+  --sl-value: rgba(var(--color-foreground), 0.82);
+
+  margin: 2.4rem 0;
+}
+
+/* --- Heading + brand rule --- */
+.stock-locations__title {
+  margin: 0 0 1.4rem;
+  font-size: 1.2rem;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(var(--color-foreground), 0.72);
+}
+
+.stock-locations__title::after {
+  content: '';
+  display: block;
+  width: 3.2rem;
+  height: 3px;
+  margin-top: 0.9rem;
+  background: var(--color-brand-primary);
+}
+
+/* A third location, or a long note, scrolls inside the block rather than
+   widening the info column. */
+.stock-locations__scroll {
+  overflow-x: auto;
+}
+
+.stock-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+/* --- Column heads --- */
+.stock-table thead th {
+  padding: 0 0 0.9rem;
+  text-align: left;
+  vertical-align: bottom;
+  font-weight: 700;
+  border-bottom: 1px solid var(--sl-rule-strong);
+}
+
+.stock-table__corner {
+  font-size: 1.05rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--sl-label);
+}
+
+/* The variant column absorbs the slack; status columns hug their content and
+   sit together on the right, keeping the label-left/value-right rhythm the
+   rest of the info column uses. */
+.stock-table__location {
+  width: 1%;
+  white-space: nowrap;
+  padding-left: 1.6rem !important;
+}
+
+.stock-table__location-name {
+  display: block;
+  font-size: 1.05rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--sl-label);
+}
+
+/* Free text from the block setting — what this location means for delivery. */
+.stock-table__location-note {
+  display: block;
+  margin-top: 0.3rem;
+  font-size: 1.05rem;
+  font-weight: 500;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--sl-label);
+}
+
+/* --- Rows --- */
+.stock-table tbody th,
+.stock-table tbody td {
+  padding: 1.1rem 0;
+  text-align: left;
+  vertical-align: middle;
+  border-bottom: 1px solid var(--sl-rule);
+}
+
+.stock-table tbody tr:last-child > * {
+  border-bottom: 1px solid var(--sl-rule-strong);
+}
+
+.stock-table__variant {
+  font-size: 1.4rem;
+  font-weight: 600;
+  line-height: 1.25;
+  color: var(--sl-value);
+  overflow-wrap: anywhere;
+}
+
+/* --- Single-variant shape: one row per location, status on the right --- */
+.stock-locations__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--sl-rule-strong);
+}
+
+.stock-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1.2rem;
+  padding: 1.1rem 0;
+  border-bottom: 1px solid var(--sl-rule);
+}
+
+.stock-row:last-child {
+  border-bottom: 1px solid var(--sl-rule-strong);
+}
+
+/* Same treatment as the matrix's column heads, so a location reads the same
+   whichever shape the block is in. */
+.stock-row__name {
+  font-size: 1.05rem;
+  font-weight: 700;
+  line-height: 1.3;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--sl-label);
+  overflow-wrap: anywhere;
+}
+
+.stock-row__note {
+  display: block;
+  margin-top: 0.3rem;
+  font-size: 1.05rem;
+  font-weight: 500;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--sl-label);
+}
+
+.stock-row__status {
+  flex: 0 0 auto;
+  font-size: 1.15rem;
+  font-weight: 600;
+  line-height: 1.3;
+  white-space: nowrap;
+  text-align: right;
+}
+
+.stock-row--in .stock-row__status {
+  color: var(--color-success);
+}
+
+.stock-row--out .stock-row__status {
+  color: var(--color-brand-primary);
+}
+
+.stock-row--out .stock-dot {
+  background: transparent;
+  box-shadow: inset 0 0 0 1.5px currentColor;
+}
+
+/* --- Selected variant — ties the row to the chosen pill above.
+   Weight and a neutral tint, so brand red keeps one meaning here. --- */
+.stock-table__row--selected > * {
+  background: rgba(var(--color-foreground), 0.04);
+}
+
+.stock-table__row--selected .stock-table__variant {
+  font-weight: 700;
+  color: rgb(var(--color-foreground));
+}
+
+/* --- Cells --- */
+.stock-cell {
+  width: 1%;
+  padding-left: 1.6rem !important;
+  font-size: 1.15rem;
+  font-weight: 600;
+  line-height: 1.3;
+  white-space: nowrap;
+}
+
+.stock-cell--in {
+  color: var(--color-success);
+}
+
+.stock-cell--out {
+  color: var(--color-brand-primary);
+}
+
+.stock-dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  margin-right: 0.7rem;
+  border-radius: 50%;
+  background: currentColor;
+  vertical-align: 0.12em;
+}
+
+/* Hollow ring, so the out-of-stock state reads without relying on colour. */
+.stock-cell--out .stock-dot {
+  background: transparent;
+  box-shadow: inset 0 0 0 1.5px currentColor;
+}
+
+/* --- Disclosure: collapsed shows only the selected variant's row ---
+   CSS-only, so the block keeps its no-JS promise. The input stays in the
+   layout (not display:none) so it remains focusable and announces its state. */
+.stock-toggle {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.stock-toggle:not(:checked) ~ .stock-locations__scroll .stock-table__row:not(.stock-table__row--near) {
+  display: none;
+}
+
+/* Collapsed, the window's last row is the visible last one — give it the
+   closing rule that `tbody tr:last-child` carries when expanded. */
+.stock-toggle:not(:checked) ~ .stock-locations__scroll .stock-table__row--near-last > * {
+  border-bottom: 1px solid var(--sl-rule-strong);
+}
+
+.stock-toggle__label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-top: 1.1rem;
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--sl-label);
+  cursor: pointer;
+  transition: color 0.15s ease;
+}
+
+.stock-toggle__label:hover {
+  color: var(--color-brand-primary);
+}
+
+.stock-toggle:focus-visible ~ .stock-toggle__label {
+  outline: 2px solid var(--color-brand-primary);
+  outline-offset: 3px;
+}
+
+.stock-toggle__caret {
+  width: 10px;
+  height: auto;
+  transition: transform 0.2s ease;
+}
+
+.stock-toggle:not(:checked) ~ .stock-toggle__label .stock-toggle__text--less,
+.stock-toggle:checked ~ .stock-toggle__label .stock-toggle__text--more {
+  display: none;
+}
+
+.stock-toggle:checked ~ .stock-toggle__label .stock-toggle__caret {
+  transform: rotate(180deg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stock-toggle__caret {
+    transition: none;
+  }
+}
+
+/* --- Diagnostics, theme-editor only --- */
+.stock-locations__debug {
+  margin: 1.2rem 0 0;
+  padding: 1rem;
+  overflow-x: auto;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 1.05rem;
+  line-height: 1.5;
+  white-space: pre;
+  color: rgba(var(--color-foreground), 0.7);
+  background: rgba(var(--color-foreground), 0.04);
+  border-left: 3px solid var(--color-urgency);
+}
+
+/* --- Narrow product info column / small screens --- */
+@media screen and (max-width: 480px) {
+  .stock-table__variant {
+    font-size: 1.3rem;
+  }
+
+  .stock-table__location,
+  .stock-cell {
+    padding-left: 1rem !important;
+  }
+
+  .stock-cell {
+    font-size: 1.05rem;
+  }
+}

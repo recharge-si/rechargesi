@@ -1,0 +1,70 @@
+/* Scroll-to-top button — fixed bottom-right, revealed by scroll-to-top.js
+   after one viewport of scroll.
+
+   Quiet at rest (white disc, hairline ring, dark arrow) and brand red only on
+   interaction: red is reserved for primary actions on this site, and a
+   utility control shouldn't compete with Add to cart or CHECK OUT. */
+
+.scroll-top {
+  position: fixed;
+  right: 2rem;
+  bottom: calc(2rem + env(safe-area-inset-bottom));
+  z-index: 3; /* under the cart sticky bar (4) and every drawer/modal */
+  width: 4.4rem;
+  height: 4.4rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  background: rgb(var(--color-background));
+  color: rgb(var(--color-foreground));
+  border: 1px solid rgba(var(--color-foreground), 0.15);
+  border-radius: 50%;
+  box-shadow: 0 2px 10px rgba(var(--color-foreground), 0.12);
+  cursor: pointer;
+  opacity: 0;
+  transform: translateY(1rem);
+  pointer-events: none;
+  transition: opacity 0.25s ease, transform 0.25s ease, background-color 0.2s ease, color 0.2s ease, bottom 0.25s ease;
+}
+
+.scroll-top.is-visible {
+  opacity: 1;
+  transform: none;
+  pointer-events: auto;
+}
+
+.scroll-top:hover,
+.scroll-top:focus-visible {
+  background: var(--color-brand-primary);
+  border-color: var(--color-brand-primary);
+  color: rgb(var(--color-background));
+}
+
+.scroll-top:active {
+  background: var(--color-brand-primary-darker);
+  border-color: var(--color-brand-primary-darker);
+}
+
+.scroll-top svg {
+  width: 1.8rem;
+  height: 1.8rem;
+}
+
+/* Cart page: while the sticky checkout bar is shown, step above it — at the
+   normal offset the opaque full-width bar (z-index 4) would swallow the button
+   entirely. 10rem clears the bar's ~76px at every width. */
+body:has(.cart__sticky-bar.is-visible) .scroll-top {
+  bottom: calc(10rem + env(safe-area-inset-bottom));
+}
+
+/* Product page, mobile: same story with the sticky Add-to-cart bar. */
+body:has(.sticky-atc.is-visible) .scroll-top {
+  bottom: calc(10rem + env(safe-area-inset-bottom));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scroll-top {
+    transition: none;
+  }
+}

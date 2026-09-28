@@ -4,6 +4,11 @@
   --color-brand-primary-darker: #8f0d12;
   --color-success: #1a7a3c;
   --color-urgency: #b45309;
+  /* Neutral informational blue. Used for "on order" stock, where amber read as a
+     warning — nothing is wrong with a product that simply ships from a supplier,
+     and orange next to the brand red made the page look like it had a problem.
+     Tuned to the same weight as the success green: ~6.4:1 on white. */
+  --color-info: #1257a3;
   --alpha-button-background: 1;
   --alpha-button-border: 1;
   --alpha-link: 0.85;
@@ -1163,6 +1168,23 @@ summary::-webkit-details-marker {
   transition: opacity 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
+/* Stand-in for products with no image. The `.media > *` rule above already sizes
+   this to fill the aspect box, so the icon is centred by position rather than flex —
+   overriding that rule's display would need a four-class selector. */
+.media-placeholder {
+  background-color: rgba(var(--color-foreground), 0.045);
+}
+
+.media-placeholder__icon {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: clamp(3.2rem, 22%, 7.2rem);
+  height: auto;
+  color: rgba(var(--color-foreground), 0.22);
+}
+
 .media--square {
   padding-bottom: 100%;
 }
@@ -1502,10 +1524,10 @@ details[open] > .share-button__fallback {
 /* Close — absolute X in top-right, shown after copy */
 .share-button__close {
   position: absolute;
-  top: 0.4rem;
-  right: 0.4rem;
-  width: 2.8rem;
-  height: 2.8rem;
+  top: 0;
+  right: 0;
+  width: 4.4rem;
+  height: 4.4rem;
   padding: 0;
   display: flex;
   align-items: center;
@@ -1645,6 +1667,13 @@ details[open] > .share-button__fallback {
   font-weight: var(--font-body-weight);
   font-size: 1.2rem;
   color: rgba(var(--color-foreground), 0.75);
+}
+
+/* Native selects under 16px trigger iOS focus zoom. */
+@media screen and (max-width: 989px) {
+  .select__select {
+    font-size: 1.6rem;
+  }
 }
 
 .field:hover.field:after,
@@ -2493,24 +2522,7 @@ input[type='checkbox'] {
   width: 100%;
   display: inline-flex;
   align-items: center;
-  gap: 1.6rem;
   transition: width 0.3s cubic-bezier(0.52, 0, 0.61, 0.99);
-}
-
-/* Brand accent stripe beside the logo */
-.header__heading-logo-wrapper::before {
-  content: '';
-  width: 3px;
-  align-self: stretch;
-  background: var(--color-brand-primary);
-  border-radius: 2px;
-  flex-shrink: 0;
-  opacity: 0.85;
-  transition: opacity 0.3s ease, height 0.3s ease;
-}
-
-.header__heading-link:hover .header__heading-logo-wrapper::before {
-  opacity: 1;
 }
 
 /* Subtle hover lift on the logo */
@@ -2526,11 +2538,6 @@ input[type='checkbox'] {
   .header__heading,
   .header__heading-link {
     text-align: center;
-  }
-
-  /* Hide accent stripe on mobile — logo is centered */
-  .header__heading-logo-wrapper::before {
-    display: none;
   }
 
   /* Cap logo size on mobile for balanced proportions */
@@ -3284,14 +3291,30 @@ details-disclosure > details {
   margin-bottom: var(--media-shadow-vertical-offset);
 }
 
+/* `outside`, not `inside`. With `list-style-position: inside` the marker sits in
+   the li's own content box, so an li whose content is a block element — which is
+   what pasted/imported supplier descriptions always produce,
+   `<li><p><strong>Custom Colors:</strong> …</p></li>` — puts the bullet on its
+   own line and drops the text underneath it, unbulleted. That was the "weird"
+   description rendering: a column of lone bullets with orphaned paragraphs. */
 .rte ul,
 .rte ol {
-  list-style-position: inside;
+  list-style-position: outside;
   padding-left: 2rem;
 }
 
 .rte li {
   list-style: inherit;
+}
+
+/* Block children of a list item must not add their own leading/trailing gap, or
+   the bullet floats away from the text it belongs to. */
+.rte li > p:first-child {
+  margin-top: 0;
+}
+
+.rte li > p:last-child {
+  margin-bottom: 0;
 }
 
 .rte li:last-child {
@@ -3570,7 +3593,6 @@ details-disclosure > details {
 
   :root {
     --easter-egg: none;
-    --sparkle: url('./sparkle.gif');
   }
 
   .animate--hover-vertical-lift .button:not(.button--tertiary),

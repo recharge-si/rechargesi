@@ -1,0 +1,88 @@
+{%- comment -%}
+  Warns, before checkout, that part of the cart cannot be collected in store.
+
+  Shopify only says this at the delivery step, as a red "1 item can't be picked
+  up" error whose only offered remedy is "Remove item". By then the customer has
+  entered an address and picked a method. This says the same thing earlier, in
+  calmer language, and offers the remedy Shopify does not: place a second order.
+
+  **Eligibility is `variant-stock-state` returning `own`.** Pickup happens at our
+  own locations, and `stock_primary_locations` is already the list of those, so
+  no new configuration and no second definition of the same fact. Anything on
+  order from a supplier is by definition not on a shelf to collect.
+
+  **Only renders for a mixed cart** — some collectable, some not. That is exactly
+  the case that produces Shopify's error. If nothing is collectable Shopify never
+  offers pickup at all, and if everything is there is nothing to warn about; in
+  both cases this would be noise for a customer who wanted delivery anyway.
+
+  Accepts: nothing — reads `cart` directly.
+
+  Usage:
+  {%- render 'cart-pickup-notice' -%}
+{%- endcomment -%}
+{%- liquid
+  assign cpn_blocked = 0
+  assign cpn_collectable = 0
+  assign cpn_updates = ''
+
+  for item in cart.items
+    capture cpn_state
+      render 'variant-stock-state', variant: item.variant
+    endcapture
+    assign cpn_state = cpn_state | strip
+
+    if cpn_state == 'own'
+      assign cpn_collectable = cpn_collectable | plus: 1
+    else
+      assign cpn_blocked = cpn_blocked | plus: 1
+      comment
+        One link clears the lot. /cart/update accepts updates[variant_id]=0 pairs
+        as a GET query string, so removing every blocked line is a single href
+        with no JS — the per-row links this replaces meant a page load each.
+      endcomment
+      if cpn_updates != ''
+        assign cpn_updates = cpn_updates | append: '&'
+      endif
+      assign cpn_updates = cpn_updates | append: 'updates[' | append: item.variant_id | append: ']=0'
+    endif
+  endfor
+-%}
+{%- if cpn_blocked > 0 and cpn_collectable > 0 -%}
+  <div class="cart-pickup-notice">
+    <p class="cart-pickup-notice__label">
+      {{- 'sections.cart.pickup_notice.label' | t -}}
+    </p>
+    <ul class="cart-pickup-notice__items list-unstyled" role="list">
+      {%- for item in cart.items -%}
+        {%- liquid
+          capture cpn_row_state
+            render 'variant-stock-state', variant: item.variant
+          endcapture
+          assign cpn_row_state = cpn_row_state | strip
+        -%}
+        {%- unless cpn_row_state == 'own' -%}
+          <li class="cart-pickup-notice__item">
+            {{- item.product.title | escape -}}
+            {%- unless item.variant.title == 'Default Title' -%}
+              {%- comment -%}
+                Real separator, not a ::before — generated content is not in the
+                text layer, so title and variant ran together as "Racing104".
+              {%- endcomment -%}
+              <span class="cart-pickup-notice__sep" aria-hidden="true"> — </span>
+              <span class="cart-pickup-notice__variant">
+                {%- render 'option-value-label', value: item.variant.title -%}
+              </span>
+            {%- endunless -%}
+          </li>
+        {%- endunless -%}
+      {%- endfor -%}
+    </ul>
+    <p class="cart-pickup-notice__body">
+      {{- 'sections.cart.pickup_notice.body' | t -}}
+    </p>
+    <a class="cart-pickup-notice__remove" href="{{ routes.cart_update_url }}?{{ cpn_updates }}">
+      {{- 'sections.cart.pickup_notice.remove_all' | t -}}
+    </a>
+  </div>
+{%- endif -%}

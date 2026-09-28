@@ -1,23 +1,47 @@
 {% comment %}theme-check-disable UndefinedObject{% endcomment %}
 {%- assign pick_up_availabilities = product_variant.store_availabilities | where: 'pick_up_enabled', true -%}
+{%- comment -%}
+  Stock Dawn gates on "some location has pickup switched on", which is why an
+  out-of-stock size rendered "Pickup currently unavailable at Recharge" plus a
+  rule and a block of empty space — a whole panel to say nothing useful. Gate on
+  a location where it is actually collectable instead: when nothing comes back,
+  no <pickup-availability-preview> is emitted, pickup-availability.js finds none
+  in the fetched section and empties the container, so the block disappears
+  rather than announcing its own absence.
+{%- endcomment -%}
+{%- assign pick_up_available = pick_up_availabilities | where: 'available', true -%}
 
-{%- if pick_up_availabilities.size > 0 -%}
+{%- if pick_up_available.size > 0 -%}
   <pickup-availability-preview class="pickup-availability-preview">
-    {% assign closest_location = pick_up_availabilities.first %}
-
-    {% if closest_location.available %}
-      <span class="svg-wrapper">{{ 'icon-tick.svg' | inline_asset_content }}</span>
-    {% endif %}
+    {%- comment -%}
+      Taken from the available list, not the enabled list — otherwise the nearest
+      location could be one that cannot fulfil, and the preview would go back to
+      leading with "unavailable" while a collectable store sat further down.
+    {%- endcomment -%}
+    {% assign closest_location = pick_up_available.first %}
 
     <div class="pickup-availability-info">
       {%- if closest_location.available -%}
-        <p class="caption-large">
-          {{
-            'products.product.pickup_availability.pick_up_available_at_html'
-            | t: location_name: closest_location.location.name
-          }}
+        {%- comment -%}
+          Same shape as the DELIVERY line at the top of the column: uppercase
+          micro-label, then the status with its timing after an em dash. Stock
+          Dawn's tick icon and two stacked captions were the only thing in the
+          info column still wearing default Dawn styling, which is what made it
+          read as an outsider. The label makes "Pickup available at X" redundant,
+          so the value is just the location.
+        {%- endcomment -%}
+        <span class="pickup-availability__label">
+          {{- 'products.product.pickup_availability.label' | t -}}
+        </span>
+        <p class="pickup-availability__line">
+          <span class="pickup-availability__status">
+            {{- 'products.product.pickup_availability.available_at_html' | t: location_name: closest_location.location.name -}}
+          </span>
+          {%- if closest_location.pick_up_time != blank -%}
+            <span class="pickup-availability__sep" aria-hidden="true">—</span>
+            <span class="pickup-availability__lead">{{ closest_location.pick_up_time }}</span>
+          {%- endif -%}
         </p>
-        <p class="caption">{{ closest_location.pick_up_time }}</p>
         <button
           id="ShowPickupAvailabilityDrawer"
           class="pickup-availability-button link link--text underlined-link"
@@ -71,7 +95,7 @@
           {{ product_option.name | escape }}:&nbsp;
           {%- for value in product_option.values -%}
             {%- if product_option.selected_value == value -%}
-              <span>{{ value | escape }}</span>
+              <span>{%- render 'option-value-label', value: value -%}</span>
             {%- endif -%}
           {%- endfor -%}
           {%- unless forloop.last -%},&nbsp;{%- endunless -%}

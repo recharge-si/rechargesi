@@ -1,0 +1,37 @@
+{%- comment -%}
+  Renders a human-readable label for a variant option value or variant title.
+
+  Part of this catalogue was imported with option values stored as
+  percent-encoded slugs — "%e2%88%85-1114-mm" where a customer should read
+  "∅ 1114 mm". The stored value is what Shopify matches variants on, so it
+  cannot be rewritten from the theme; this only cleans up the text shown to
+  the customer. Form values, input names and option-value ids keep the raw
+  stored string.
+
+  A value is only rewritten when it is *demonstrably* encoded: it contains a
+  "%" and round-trips through url_decode to something different. Legitimate
+  values pass through untouched — "6'7 - 130L" keeps its spaced hyphen,
+  "50% carbon" keeps its percent sign.
+
+  Output is unescaped, matching what it replaces ({{ value }}). Escape at the
+  call site where the surrounding markup needs it.
+
+  Accepts:
+  - value: {String} raw option value, or a product_option_value / variant title
+
+  Usage:
+  {%- capture display_value %}{% render 'option-value-label', value: value %}{% endcapture -%}
+{%- endcomment -%}
+{%- liquid
+  assign ovl_raw = value | append: ''
+  assign ovl_label = ovl_raw
+
+  if ovl_raw contains '%'
+    assign ovl_decoded = ovl_raw | url_decode
+    if ovl_decoded != ovl_raw
+      assign ovl_label = ovl_decoded | replace: '_', ' ' | replace: '-', ' ' | strip
+    endif
+  endif
+
+  echo ovl_label
+-%}

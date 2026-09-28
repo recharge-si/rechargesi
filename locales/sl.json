@@ -38,6 +38,16 @@
       }
     },
     "continue_shopping": "Nadaljuj nakup",
+    "trust": {
+      "free_shipping": "Brezplačna dostava nad 25 €",
+      "secure_checkout": "Varno plačilo",
+      "returns": "14-dnevno vračilo"
+    },
+    "free_shipping": {
+      "remaining": "Še {{ amount }} do brezplačne dostave",
+      "reached": "Dosegli ste brezplačno dostavo",
+      "label": "Napredek do brezplačne dostave"
+    },
     "pagination": {
       "label": "Oštevilčevanje strani",
       "page": "Stran {{ number }}",
@@ -51,7 +61,8 @@
     "cart": {
       "view": "Prikaži košarico ({{ count }})",
       "item_added": "Artikel je dodan v košarico",
-      "view_empty_cart": "Prikaži košarico"
+      "view_empty_cart": "Prikaži košarico",
+      "subtotal": "Vmesna vsota"
     },
     "share": {
       "copy_to_clipboard": "Kopiraj povezavo",
@@ -76,6 +87,7 @@
     "button_label": "Naroči"
   },
   "accessibility": {
+    "scroll_to_top": "Nazaj na vrh",
     "skip_to_text": "Preskoči na vsebino",
     "close": "Zapri",
     "unit_price_separator": "na",
@@ -154,6 +166,8 @@
         "unit_price": "Cena na enoto"
       },
       "pickup_availability": {
+        "label": "Prevzem",
+        "available_at_html": "Na voljo v trgovini <span class=\"color-foreground\">{{ location_name }}</span>",
         "view_store_info": "Prikaži podatke o trgovini",
         "check_other_stores": "Preveri razpoložljivost v drugih trgovinah",
         "pick_up_available": "Na voljo je osebni prevzem",
@@ -170,7 +184,8 @@
         "load_image": "Naložite sliko {{ index }} v pogledu galerije",
         "load_model": "Naložite 3D-model {{ index }} v pogledu galerije",
         "load_video": "Predvajajte videoposnetek {{ index }} v pogledu galerije",
-        "image_available": "Slika {{ index }} je zdaj na voljo v pogledu galerije"
+        "image_available": "Slika {{ index }} je zdaj na voljo v pogledu galerije",
+        "no_image": "Fotografija kmalu"
       },
       "nested_label": "{{ title }} za {{ parent_title }}",
       "view_full_details": "Prikaži vse podrobnosti",
@@ -188,6 +203,20 @@
       "sku": "Inventarna številka",
       "sku_label": "SKU:",
       "ean_label": "EAN koda:",
+      "stock_state": {
+        "label": "Dostava",
+        "on_order": "Po naročilu",
+        "detail_own": "Na zalogi v naši trgovini",
+        "detail_partner": "Pri našem dobavitelju"
+      },
+      "stock_locations": {
+        "title": "Availability",
+        "in_stock": "In stock",
+        "out_of_stock": "Out of stock",
+        "selected": "selected",
+        "show_all": "All sizes",
+        "show_less": "Show less"
+      },
       "select_variant": "Izberite različico izdelka",
       "volume_pricing": {
         "title": "Količinski popust",
@@ -279,7 +308,11 @@
         "two": "Št. izdelkov: {{ count }}"
       },
       "suggestions": "Predlogi",
-      "pages": "Strani"
+      "pages": "Strani",
+      "empty_heading": "Nismo našli »{{ terms }}«",
+      "empty_body": "Preverite črkovanje, poskusite drugo besedo ali raziščite eno od kategorij spodaj.",
+      "browse_categories": "Prebrskajte kategorije",
+      "you_might_like": "Morda vam bo všeč"
     },
     "cart": {
       "cart": "Košarica"
@@ -313,6 +346,11 @@
       }
     },
     "cart": {
+      "pickup_notice": {
+        "label": "Ni na voljo za osebni prevzem",
+        "remove_all": "Odstrani te izdelke",
+        "body": "Te izdelke naročimo pri dobavitelju in vam jih pošljemo. Če želite ostale izdelke prevzeti v trgovini, jih prosimo naročite ločeno."
+      },
       "title": "Vaša košarica",
       "caption": "Izdelki v košarici",
       "remove_title": "Odstrani izdelek {{ title }}",

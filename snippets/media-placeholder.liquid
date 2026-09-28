@@ -1,0 +1,32 @@
+{% comment %}
+  Renders the stand-in for a product that has no image yet, so cards and the product
+  gallery keep the same footprint instead of collapsing.
+
+  Must be a direct child of a `.media` element — base.css sizes it to fill the
+  aspect-ratio box, and base.css centres the icon inside it.
+
+  Usage:
+  <div class="media media--transparent">{% render 'media-placeholder' %}</div>
+{% endcomment %}
+
+<div class="media-placeholder" role="img" aria-label="{{ 'products.product.media.no_image' | t }}">
+  <svg
+    class="media-placeholder__icon"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="1.25"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    aria-hidden="true"
+    focusable="false"
+  >
+    {%- comment -%}
+      Every shape clears the frame — a mountain line that meets or crosses the border
+      doubles the stroke at the junction and reads as a smudge at card size.
+    {%- endcomment -%}
+    <rect x="3" y="4.75" width="18" height="14.5" rx="2" />
+    <circle cx="8.25" cy="9.75" r="1.25" />
+    <path d="M6 16.5 9.75 12.5l2.75 2.9 2.25-1.9L18 16.5" />
+  </svg>
+</div>

@@ -33,7 +33,7 @@
               {{ block.settings.image | image_url: width: 3840 | image_tag:
                 class: 'hero-banner-grid__image',
                 height: height,
-                sizes: '(min-width: 750px) 75vw, 100vw',
+                sizes: '100vw',
                 widths: '375, 550, 750, 1100, 1500, 1780, 2000, 3000',
                 fetchpriority: fetch_priority
               }}
@@ -42,7 +42,7 @@
                 class: 'hero-banner-grid__image',
                 loading: 'lazy',
                 height: height,
-                sizes: '(min-width: 750px) 75vw, 100vw',
+                sizes: '100vw',
                 widths: '375, 550, 750, 1100, 1500, 1780, 2000, 3000'
               }}
             {%- endif -%}
@@ -67,53 +67,6 @@
       {%- endfor -%}
     {%- endif -%}
   </div>
-
-  {%- comment -%} Right: Thumbnail sidebar {%- endcomment -%}
-  <div class="hero-banner-grid__thumbs">
-    {%- for block in banners -%}
-      <button
-        class="hero-banner-grid__thumb{% if forloop.first %} hero-banner-grid__thumb--active{% endif %}"
-        data-index="{{ forloop.index0 }}"
-        type="button"
-        aria-label="{{ 'sections.hero_banner.show_banner' | t: index: forloop.index }}"
-        {{ block.shopify_attributes }}
-      >
-        {%- if block.settings.image != blank -%}
-          {%- liquid
-            assign th_height = block.settings.image.width | divided_by: block.settings.image.aspect_ratio | round
-            assign th_loading = 'lazy'
-            if section.index == 1
-              assign th_loading = 'eager'
-            endif
-          -%}
-          {{ block.settings.image | image_url: width: 800 | image_tag:
-            class: 'hero-banner-grid__thumb-image',
-            loading: th_loading,
-            height: th_height,
-            sizes: '(min-width: 750px) 25vw, 33vw',
-            widths: '200, 375, 550, 750'
-          }}
-        {%- else -%}
-          <div class="hero-banner-grid__placeholder">
-            {{ 'collection-1' | placeholder_svg_tag: 'placeholder-svg' }}
-          </div>
-        {%- endif -%}
-        <div class="hero-banner-grid__thumb-progress">
-          <div class="hero-banner-grid__thumb-progress-bar"></div>
-        </div>
-      </button>
-    {%- endfor -%}
-
-    {%- if banners.size == 0 -%}
-      {%- for i in (1..3) -%}
-        <button class="hero-banner-grid__thumb{% if forloop.first %} hero-banner-grid__thumb--active{% endif %}" data-index="{{ forloop.index0 }}" type="button">
-          <div class="hero-banner-grid__placeholder">
-            {{ 'collection-1' | placeholder_svg_tag: 'placeholder-svg' }}
-          </div>
-        </button>
-      {%- endfor -%}
-    {%- endif -%}
-  </div>
 </hero-banner-grid>
 </div>
 
@@ -123,30 +76,15 @@
       constructor() {
         super();
         this.mainItems = this.querySelectorAll('.hero-banner-grid__main-item');
-        this.thumbs = this.querySelectorAll('.hero-banner-grid__thumb');
         this.activeIndex = 0;
         this.autoRotate = this.dataset.autoRotate === 'true';
         this.speed = parseInt(this.dataset.speed, 10) * 1000 || 5000;
         this.timer = null;
-        this.isPaused = false;
       }
 
       connectedCallback() {
         if (this.mainItems.length === 0) return;
         this.mainEl = this.querySelector('.hero-banner-grid__main');
-
-        this.thumbs.forEach((thumb) => {
-          thumb.addEventListener('mouseenter', () => {
-            this.goTo(parseInt(thumb.dataset.index, 10));
-            this.isPaused = true;
-            this.stopTimer();
-          });
-          thumb.addEventListener('mouseleave', () => {
-            this.isPaused = false;
-            this.startProgressBar();
-            this.startTimer();
-          });
-        });
 
         /* Set initial height once first image loads */
         this.updateHeight();
@@ -160,7 +98,6 @@
         this._resizeObserver.observe(this.mainEl);
 
         if (this.autoRotate && this.mainItems.length > 1) {
-          this.startProgressBar();
           this.startTimer();
         }
       }
@@ -182,28 +119,9 @@
       }
 
       goTo(index) {
-        const prevThumb = this.thumbs[this.activeIndex];
-        if (prevThumb) {
-          prevThumb.classList.remove('hero-banner-grid__thumb--active');
-          const prevBar = prevThumb.querySelector('.hero-banner-grid__thumb-progress-bar');
-          if (prevBar) { prevBar.style.transition = 'none'; prevBar.style.width = '0'; }
-        }
         this.mainItems[this.activeIndex]?.classList.remove('hero-banner-grid__main-item--active');
-
         this.activeIndex = index;
-
         this.mainItems[this.activeIndex]?.classList.add('hero-banner-grid__main-item--active');
-        const nextThumb = this.thumbs[this.activeIndex];
-        if (nextThumb) {
-          nextThumb.classList.add('hero-banner-grid__thumb--active');
-          const nextBar = nextThumb.querySelector('.hero-banner-grid__thumb-progress-bar');
-          if (nextBar && this.autoRotate && !this.isPaused) {
-            void nextBar.offsetWidth;
-            nextBar.style.transition = `width ${this.speed}ms linear`;
-            nextBar.style.width = '100%';
-          }
-        }
-
         this.updateHeight();
       }
 
@@ -212,20 +130,9 @@
         this.goTo(nextIndex);
       }
 
-      startProgressBar() {
-        const bar = this.thumbs[this.activeIndex]?.querySelector('.hero-banner-grid__thumb-progress-bar');
-        if (bar) {
-          bar.style.transition = 'none';
-          bar.style.width = '0';
-          void bar.offsetWidth;
-          bar.style.transition = `width ${this.speed}ms linear`;
-          bar.style.width = '100%';
-        }
-      }
-
       startTimer() {
         this.stopTimer();
-        if (!this.autoRotate || this.isPaused) return;
+        if (!this.autoRotate) return;
         this.timer = setInterval(() => this.next(), this.speed);
       }
 

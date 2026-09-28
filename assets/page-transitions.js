@@ -8,6 +8,10 @@
 (function () {
   'use strict';
 
+  /* Reduced motion → no interception at all: the browser navigates natively,
+     so no fade classes, no progress bar, no 400ms swap delay. */
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
   const MAIN_SELECTOR = '#MainContent';
   const TRANSITION_DURATION = 400; // ms — matches CSS animation total
 

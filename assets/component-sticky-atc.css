@@ -1,0 +1,75 @@
+/* Mobile sticky Add-to-cart bar (snippets/sticky-atc-bar.liquid).
+   Mobile only — the desktop info column keeps the real button reachable.
+   Same fixed-bar conventions as the cart sticky bar: full-width, hairline
+   top, safe-area padding, translateY reveal, z-index 4 (above the
+   scroll-to-top button's 3 — component-scroll-top.css lifts that button
+   while this bar is visible). */
+
+.sticky-atc {
+  display: none;
+}
+
+@media screen and (max-width: 749px) {
+  .sticky-atc {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.2rem;
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 4;
+    background: rgb(var(--color-background));
+    border-top: 1px solid rgba(var(--color-foreground), 0.12);
+    box-shadow: 0 -2px 12px rgba(var(--color-foreground), 0.06);
+    padding: 1rem 1.5rem calc(1rem + env(safe-area-inset-bottom));
+    transform: translateY(101%);
+    transition: transform 0.25s ease;
+  }
+
+  /* 101% so the box-shadow clears the edge too. */
+  .sticky-atc.is-visible {
+    transform: translateY(0);
+  }
+
+  .sticky-atc__info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    min-width: 0; /* lets the title ellipsis instead of pushing the button out */
+  }
+
+  .sticky-atc__title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .sticky-atc__price .price {
+    font-size: 1.5rem;
+    font-weight: 700;
+  }
+
+  /* Dawn's .price carries top margin in some states — the bar is tight. */
+  .sticky-atc__price .price,
+  .sticky-atc__price .price * {
+    margin-top: 0;
+    margin-bottom: 0;
+  }
+
+  .sticky-atc__button {
+    flex-shrink: 0;
+    min-height: 4.4rem;
+    min-width: 13rem;
+    padding: 0 2rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sticky-atc {
+    transition: none;
+  }
+}

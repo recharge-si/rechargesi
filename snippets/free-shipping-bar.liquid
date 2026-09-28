@@ -1,0 +1,46 @@
+{%- comment -%}
+  Free-shipping progress bar — "€X away from free shipping" with a fill track,
+  switching to a success state once the cart clears the threshold.
+
+  Threshold comes from settings.free_shipping_threshold (EUR, theme settings →
+  Stock & delivery); 0/blank renders nothing, so the whole feature can be
+  switched off without touching code. The claim is Slovenia-only, which the
+  English string carries as "(SI)" — same convention as the trust strip.
+
+  Rendered in re-fetched surfaces only (main-cart-items, the added-to-cart
+  toast), so the numbers are always current: both surfaces re-render through
+  the Section Rendering API on every cart change and the snippet recomputes
+  from the fresh cart object. No JS.
+
+  Usage:
+  {%- render 'free-shipping-bar' -%}
+{%- endcomment -%}
+{%- liquid
+  assign fs_threshold = settings.free_shipping_threshold | default: 0 | times: 100
+-%}
+{%- if fs_threshold > 0 and cart != empty -%}
+  {%- liquid
+    assign fs_remaining = fs_threshold | minus: cart.total_price
+    assign fs_pct = cart.total_price | times: 100 | divided_by: fs_threshold | at_most: 100
+    assign fs_remaining_money = fs_remaining | money
+  -%}
+  <div class="free-shipping-bar{% if fs_remaining <= 0 %} free-shipping-bar--reached{% endif %}">
+    <p class="free-shipping-bar__text">
+      {%- if fs_remaining > 0 -%}
+        {{ 'general.free_shipping.remaining' | t: amount: fs_remaining_money }}
+      {%- else -%}
+        {{ 'general.free_shipping.reached' | t }}
+      {%- endif -%}
+    </p>
+    <div
+      class="free-shipping-bar__track"
+      role="progressbar"
+      aria-valuemin="0"
+      aria-valuemax="100"
+      aria-valuenow="{{ fs_pct }}"
+      aria-label="{{ 'general.free_shipping.label' | t }}"
+    >
+      <div class="free-shipping-bar__fill" style="width: {{ fs_pct }}%"></div>
+    </div>
+  </div>
+{%- endif -%}

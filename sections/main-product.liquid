@@ -93,7 +93,28 @@
     assign bc_l3_url = ''
     assign bc_depth = 0
 
-    assign main_menu = linklists['main-menu']
+    comment
+      The breadcrumb walks the *navigation* menu to find the category path, so it
+      has to be the menu the header actually renders. This store's is
+      "recharge-menu", not Dawn's default "main-menu" — looking up a handle that
+      does not exist returns an empty linklist silently, the walk matched nothing,
+      and every product fell through to a bare "Home / Product Title".
+
+      Configurable via the Breadcrumbs theme setting, with a fallback chain so it
+      works before anyone opens the editor.
+    endcomment
+    comment
+      Tested as "unless size > 0", not "if size == 0": a missing handle yields nil,
+      nil.links.size is nil, and `nil == 0` is false — so an equality check never
+      falls through and the fallback silently does nothing.
+    endcomment
+    assign main_menu = linklists[settings.breadcrumb_menu]
+    unless main_menu.links.size > 0
+      assign main_menu = linklists['recharge-menu']
+    endunless
+    unless main_menu.links.size > 0
+      assign main_menu = linklists['main-menu']
+    endunless
 
     comment
       Walk the menu deepest-first: prefer a 3-level match over 2-level over 1-level.
@@ -231,9 +252,24 @@
         {%- endunless -%}
       {%- endfor -%}
     </div>
-    <div class="product product--{{ section.settings.media_size }} product--{{ section.settings.media_position }} product--{{ section.settings.gallery_layout }} product--mobile-{{ section.settings.mobile_thumbnails }} grid grid--1-col {% if product.media.size > 0 %}grid--2-col-tablet{% else %}product--no-media{% endif %}">
+    <div class="product product--{{ section.settings.media_size }} product--{{ section.settings.media_position }} product--{{ section.settings.gallery_layout }} product--mobile-{{ section.settings.mobile_thumbnails }} grid grid--1-col grid--2-col-tablet">
       <div class="grid__item product__media-wrapper">
-        {% render 'product-media-gallery', variant_images: variant_images %}
+        {%- if product.media.size > 0 -%}
+          {% render 'product-media-gallery', variant_images: variant_images %}
+        {%- else -%}
+          {%- comment -%}
+            No media: keep the two-column layout and show the placeholder, so a product
+            awaiting photography reads the same here as it does on a collection card.
+          {%- endcomment -%}
+          <div
+            class="product-media-container media-type-image media-fit-contain global-media-settings gradient{% if section.settings.constrain_to_viewport %} constrain-height{% endif %}"
+            style="--ratio: 1; --preview-ratio: 1; --aspect-ratio: 1"
+          >
+            <div class="media media--transparent">
+              {% render 'media-placeholder' %}
+            </div>
+          </div>
+        {%- endif -%}
       </div>
       <div class="product__info-wrapper grid__item{% if settings.page_width > 1400 and section.settings.media_size == "small" %} product__info-wrapper--extra-padding{% endif %}{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--slide-in{% endif %}">
         <section
@@ -368,6 +404,14 @@
                 </p>
               {%- when 'barcode_token' -%}
                 {%- render 'product-barcode-token', product: product, section_id: section.id -%}
+              {%- when 'stock_locations' -%}
+                <div class="quick-add-hidden" {{ block.shopify_attributes }}>
+                  {%- render 'product-stock-locations',
+                    product: product,
+                    block: block,
+                    section_id: section.id
+                  -%}
+                </div>
               {%- when 'custom_liquid' -%}
                 {{ block.settings.custom_liquid }}
               {%- when 'collapsible_tab' -%}
@@ -389,6 +433,23 @@
                   </details>
                 </div>
               {%- when 'quantity_selector' -%}
+                {%- comment -%}
+                  A lone 14rem stepper sitting above a full-width red button read
+                  as a leftover control. When buy_buttons comes straight after it,
+                  wrap the pair so the stepper and Add to cart share a row — see
+                  .product-form__actions in product-page-enhancements.css, which
+                  uses display:contents on the buy-buttons wrapper so the trust
+                  strip and pickup can still span the full width underneath.
+
+                  Opened here and closed in the buy_buttons case. If the merchant
+                  reorders the blocks the pairing simply does not happen and both
+                  render exactly as stock Dawn.
+                {%- endcomment -%}
+                {% # theme-check-disable UnclosedHTMLElement %}
+                {%- if section.blocks[forloop.index].type == 'buy_buttons' -%}
+                  <div class="product-form__actions">
+                {%- endif -%}
+                {% # theme-check-enable UnclosedHTMLElement %}
                 <div
                   id="Quantity-Form-{{ section.id }}"
                   class="product-form__input product-form__quantity{% if settings.inputs_shadow_vertical_offset != 0 and settings.inputs_shadow_vertical_offset < 0 %} product-form__quantity-top{% endif %}"
@@ -646,6 +707,16 @@
                   section_id: section.id,
                   show_pickup_availability: true
                 -%}
+                {%- comment -%}
+                  Closes the .product-form__actions wrapper opened by the
+                  quantity_selector case immediately above this block.
+                {%- endcomment -%}
+                {% # theme-check-disable UnclosedHTMLElement %}
+                {%- assign prev_index = forloop.index0 | minus: 1 -%}
+                {%- if forloop.index0 > 0 and section.blocks[prev_index].type == 'quantity_selector' -%}
+                  </div>
+                {%- endif -%}
+                {% # theme-check-enable UnclosedHTMLElement %}
               {%- when 'rating' -%}
                 {%- if product.metafields.reviews.rating.value != blank -%}
                   <div class="rating-wrapper">
@@ -902,6 +973,13 @@
   </div>
 </product-info>
 
+{%- comment -%}
+  Outside <product-info> on purpose: Dawn's section re-render swaps ids inside
+  it, and the bar must never be part of that churn — its price/button follow
+  the real elements via observers in sticky-atc-bar.js instead.
+{%- endcomment -%}
+{%- render 'sticky-atc-bar', product: product, section_id: section.id -%}
+
 {% schema %}
 {
   "name": "t:sections.main-product.name",
@@ -984,6 +1062,51 @@
       "type": "barcode_token",
       "name": "Barcode & Token",
       "limit": 1
+    },
+    {
+      "type": "stock_locations",
+      "name": "Stock by location",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "paragraph",
+          "content": "A matrix of variants against locations — in stock / out of stock, no quantities. Products with one variant show a single row. Data comes from the custom.stock_by_location metafield, kept up to date by a Shopify Flow. Setup is in scripts/flow-stock-by-location.md."
+        },
+        {
+          "type": "textarea",
+          "id": "locations",
+          "label": "Locations",
+          "info": "One per line: Shopify location name | column heading | note. The Shopify name must match Settings → Locations exactly. Order here is the order shown. The note is optional free text under the heading — use it to say what that location means for delivery, e.g. \"Ready to collect\".",
+          "default": "Recharge | Our stock\nPartner Supply | Partner stock"
+        },
+        {
+          "type": "checkbox",
+          "id": "debug",
+          "label": "Show diagnostics",
+          "default": false,
+          "info": "Temporary. Prints what Shopify actually reported for this variant, so you can see why a row reads out of stock. Visible to customers — turn off when done."
+        },
+        {
+          "type": "header",
+          "content": "Metafield"
+        },
+        {
+          "type": "paragraph",
+          "content": "Where the sync script writes. JSON list of objects with a name matching the lines above, plus quantity (or available true/false). Change only if you moved the metafield."
+        },
+        {
+          "type": "text",
+          "id": "metafield_namespace",
+          "label": "Metafield namespace",
+          "default": "custom"
+        },
+        {
+          "type": "text",
+          "id": "metafield_key",
+          "label": "Metafield key",
+          "default": "stock_by_location"
+        }
+      ]
     },
     {
       "type": "inventory",

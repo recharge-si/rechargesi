@@ -15,7 +15,7 @@
         "banner_1": {
           "type": "banner",
           "settings": {
-            "image": "shopify://shop_images/recharge-bol-banner.png",
+            "image": "shopify://shop_images/odprt_recharge.png",
             "url": ""
           }
         },
@@ -29,7 +29,7 @@
         "banner_3": {
           "type": "banner",
           "settings": {
-            "image": "shopify://shop_images/recharge-selimo-banner.png",
+            "image": "shopify://shop_images/C-skin.png",
             "url": ""
           }
         }
@@ -48,7 +48,7 @@
       "type": "featured-collection",
       "settings": {
         "collection": "windsurf-boards-freestyle-wave",
-        "products_to_show": 8,
+        "products_to_show": 25,
         "title": "Featured",
         "heading_size": "h2",
         "description": "",

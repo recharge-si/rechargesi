@@ -1,0 +1,20 @@
+{%- comment -%}
+  Scroll-to-top button, fixed bottom-right on every page.
+
+  Self-contained: loads its own CSS/JS so theme.liquid only carries the render
+  line. scroll-to-top.js reveals it after one viewport of scroll (same
+  rAF-scroll-check pattern as cart-sticky-bar.js) and scrolls instantly instead
+  of smoothly for prefers-reduced-motion users. On the cart page it steps above
+  the sticky checkout bar while that bar is visible (see component-scroll-top.css)
+  so the two never stack.
+
+  Usage:
+  {%- render 'scroll-to-top' -%}
+{%- endcomment -%}
+{{ 'component-scroll-top.css' | asset_url | stylesheet_tag }}
+<button type="button" class="scroll-top" aria-label="{{ 'accessibility.scroll_to_top' | t }}">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+    <path d="M12 19V5M5 12l7-7 7 7"/>
+  </svg>
+</button>
+<script src="{{ 'scroll-to-top.js' | asset_url }}" defer="defer"></script>

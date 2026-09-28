@@ -95,11 +95,46 @@
   margin-top: 1rem;
 }
 
+/* flex-wrap so the full-width footer (subtotal + free-shipping bar) drops
+   under the image + details pair instead of becoming a third column. */
 .cart-notification-product {
   align-items: flex-start;
   display: flex;
+  flex-wrap: wrap;
   padding-bottom: 3rem;
   padding-top: 2rem;
+}
+
+.cart-notification-product__price {
+  margin: 0.8rem 0 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.cart-notification-product__footer {
+  flex-basis: 100%;
+  margin-top: 1.6rem;
+  padding-top: 1.4rem;
+  border-top: 1px solid rgba(var(--color-foreground), 0.08);
+}
+
+.cart-notification-product__subtotal {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 1rem;
+  font-size: 1.3rem;
+  color: rgba(var(--color-foreground), 0.75);
+}
+
+.cart-notification-product__subtotal-value {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: rgb(var(--color-foreground));
+}
+
+.cart-notification-product__footer .free-shipping-bar {
+  margin-bottom: 0;
 }
 
 .cart-notification-product dl {

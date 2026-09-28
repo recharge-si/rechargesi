@@ -1,0 +1,69 @@
+{%- comment -%}
+  Delivery expectation for one variant — the thing that actually changes the
+  decision, placed next to where the decision is made.
+
+  Rendered in two places, which is why it is a snippet rather than inline markup:
+
+  1. Inside <variant-selects>, for products with a real choice of variant. The
+     chips answer "which sizes can I get"; this answers "when, for the one I
+     picked". It needs no entry in product-info.js — updateOptionValues() swaps
+     the whole <variant-selects> element, so anything inside it follows the
+     variant automatically.
+  2. On its own for single-variant products, which have no picker at all and so
+     would otherwise show none of this.
+
+  The own/partner difference is spelled out here in customer words — "in our
+  shop" vs "from our supplier" — because the chip only has room for the short
+  verdict. A location name is never printed.
+
+  Lead-time wording is free text from theme settings and is never inferred. A
+  blank setting, or the degraded `available` state, leaves the status standing
+  alone: the shop promises nothing it has not promised.
+
+  Accepts:
+  - variant: {Object} variant object
+
+  Usage:
+  {%- render 'variant-delivery-line', variant: product.selected_or_first_available_variant -%}
+{%- endcomment -%}
+{%- liquid
+  capture vdl_state
+    render 'variant-stock-state', variant: variant
+  endcapture
+  assign vdl_state = vdl_state | strip
+
+  assign vdl_lead = ''
+  case vdl_state
+    when 'own'
+      assign vdl_status = 'products.product.stock_state.detail_own' | t
+      assign vdl_lead = settings.stock_lead_own | default: ''
+    when 'available'
+      assign vdl_status = 'products.product.inventory_in_stock' | t
+    when 'partner'
+      assign vdl_status = 'products.product.stock_state.detail_partner' | t
+      assign vdl_lead = settings.stock_lead_partner | default: ''
+    else
+      assign vdl_status = 'products.product.sold_out' | t
+  endcase
+  assign vdl_lead = vdl_lead | strip
+-%}
+{%- comment -%}
+  The label is what stops this reading as more of the "Taxes included…" small
+  print. On a single-variant product there are no chips above it, so without a
+  label it is one unanchored sentence floating between the price block and the
+  quantity stepper. With it, the info column reads as a consistent stack of
+  labelled fields: SIZE / DELIVERY / QUANTITY.
+{%- endcomment -%}
+<p class="variant-delivery variant-delivery--{{ vdl_state }}">
+  <span class="variant-delivery__label">{{ 'products.product.stock_state.label' | t }}</span>
+  <span class="variant-delivery__status">{{ vdl_status }}</span>
+  {%- if vdl_lead != blank -%}
+    {%- comment -%}
+      A real element rather than a ::before on the lead. Generated content is not
+      part of the text layer, so the two halves ran together as "From our
+      supplierShips in 5-7 working days" for anything reading the DOM.
+    {%- endcomment -%}
+    <span class="variant-delivery__sep" aria-hidden="true">—</span>
+    <span class="variant-delivery__lead">{{ vdl_lead }}</span>
+  {%- endif -%}
+</p>

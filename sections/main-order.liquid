@@ -65,7 +65,7 @@
                     <div class="properties">
                       {%- unless line_item.product.has_only_default_variant -%}
                         <span>
-                          {{ line_item.variant.title | escape }}
+                          {%- render 'option-value-label', value: line_item.variant.title -%}
                         </span>
                       {%- endunless -%}
                       {%- unless line_item.selling_plan_allocation == null -%}

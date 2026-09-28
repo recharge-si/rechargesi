@@ -24,8 +24,51 @@ if (!customElements.get('media-gallery')) {
         if (this.dataset.desktopLayout.includes('thumbnail') && this.mql.matches) this.removeListSemantic();
 
         this.syncThumbnailWidth = this.syncThumbnailWidth.bind(this);
-        window.addEventListener('resize', debounce(this.syncThumbnailWidth, 200));
-        requestAnimationFrame(this.syncThumbnailWidth);
+      }
+
+      /*
+       * The constructor runs while the parser is still inside this element, so its
+       * `querySelector` calls come back empty and it bails at the thumbnails check.
+       * Sizing therefore has to be set up here, after the children exist.
+       */
+      connectedCallback() {
+        if (this.layoutInitialized) return;
+        this.layoutInitialized = true;
+
+        this.syncThumbnailWidth = this.syncThumbnailWidth.bind(this);
+        this.fitToViewport = this.fitToViewport.bind(this);
+        this.refreshLayout = this.refreshLayout.bind(this);
+        this.onWindowResize = debounce(this.refreshLayout, 200);
+        window.addEventListener('resize', this.onWindowResize);
+
+        const start = () => {
+          this.elements.viewer = this.elements.viewer || this.querySelector('[id^="GalleryViewer"]');
+          this.elements.thumbnails = this.elements.thumbnails || this.querySelector('[id^="GalleryThumbnails"]');
+          requestAnimationFrame(this.refreshLayout);
+        };
+
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', start, { once: true });
+        } else {
+          start();
+        }
+
+        // Web fonts change the height of the title above the gallery, which moves
+        // the measurement this sizing depends on.
+        if (document.fonts && document.fonts.ready) document.fonts.ready.then(this.refreshLayout);
+      }
+
+      /* Dawn replaces this element wholesale on variant change — drop the window
+         listener with it so handlers don't pile up on detached galleries. */
+      disconnectedCallback() {
+        if (this.onWindowResize) window.removeEventListener('resize', this.onWindowResize);
+        this.layoutInitialized = false;
+      }
+
+      refreshLayout() {
+        this.fitToViewport();
+        this.syncMediaColumnWidth();
+        this.syncThumbnailWidth();
       }
 
       onSlideChanged(event) {
@@ -163,6 +206,94 @@ if (!customElements.get('media-gallery')) {
 
         thumbSlider.prevButton.addEventListener('click', handleClick);
         thumbSlider.nextButton.addEventListener('click', handleClick);
+      }
+
+      /*
+       * The CSS constrain-height rule sizes the image from `100vh - var(--viewport-offset)`,
+       * but a static offset can't know how much page sits above the gallery — that varies
+       * with header height, breadcrumb depth, title length and browser zoom. Measure it
+       * instead, and reserve THUMBNAIL_PEEK so the thumbnail strip is half-visible at the
+       * fold: the image lands fully in view and the strip signals there is more to see.
+       */
+      fitToViewport() {
+        const containers = this.querySelectorAll('.product-media-container.constrain-height');
+        if (!containers.length) return;
+
+        if (!this.mql.matches) {
+          containers.forEach((container) => {
+            container.style.removeProperty('--viewport-offset');
+            container.style.removeProperty('--constrained-min-height');
+          });
+          return;
+        }
+
+        const THUMBNAIL_PEEK = 72;
+        const galleryTop = Math.round(this.getBoundingClientRect().top + window.scrollY);
+        const offset = galleryTop + THUMBNAIL_PEEK;
+
+        /* The floor has to know about width, not just height. A short viewport
+           (say 1700x740) leaves 100vh - offset around 360px, which the flat 400px
+           floor caught — and a 400px square image then sat in a 460px column
+           inside an 1100px grid, looking lost. The image should never be narrower
+           than the column it already owns, so derive the floor from that column:
+           the same gridWidth - MAX_INFO_WIDTH - padding that syncMediaColumnWidth
+           uses as its own floor.
+
+           On a tall viewport 100vh - offset wins and nothing changes; this only
+           bites when the screen is short, where it deliberately trades some of
+           the thumbnail peek for an image you can actually see. */
+        const grid = this.closest('.product.grid');
+        const infoWrapper = grid && grid.querySelector('.product__info-wrapper');
+        let minHeight = 0;
+
+        if (grid && infoWrapper) {
+          const MAX_INFO_WIDTH = 600;
+          const infoPadding = parseFloat(getComputedStyle(infoWrapper).paddingLeft) || 0;
+          const fairWidth = grid.getBoundingClientRect().width - MAX_INFO_WIDTH - infoPadding;
+
+          if (fairWidth > 0) {
+            containers.forEach((container) => {
+              const ratio = parseFloat(getComputedStyle(container).getPropertyValue('--aspect-ratio')) || 1;
+              minHeight = Math.round(fairWidth / ratio);
+              container.style.setProperty('--constrained-min-height', `${minHeight}px`);
+            });
+          }
+        }
+
+        containers.forEach((container) => container.style.setProperty('--viewport-offset', `${offset}px`));
+      }
+
+      /*
+       * A height-capped image is narrower than its 58% column, which would leave a hole
+       * between the image and the info panel. Shrink the column to the image and let the
+       * info column take the freed width, so both stay anchored to the page edges.
+       *
+       * Floor: the media column never shrinks so far that the info column outgrows
+       * MAX_INFO_WIDTH — a form much wider than that reads as stretched, and past the
+       * floor the leftover goes back to the gutter.
+       */
+      syncMediaColumnWidth() {
+        const grid = this.closest('.product.grid');
+        if (!grid) return;
+
+        grid.style.removeProperty('--media-column-width');
+        if (!this.mql.matches) return;
+
+        const active = this.querySelector('.is-active .product-media-container') ||
+          this.querySelector('.product-media-container');
+        const infoWrapper = grid.querySelector('.product__info-wrapper');
+        if (!active || !infoWrapper) return;
+
+        // Measured with the override cleared, so the image reports its natural width.
+        const imageWidth = active.getBoundingClientRect().width;
+        if (imageWidth <= 0) return;
+
+        const MAX_INFO_WIDTH = 600;
+        const gridWidth = grid.getBoundingClientRect().width;
+        const infoPadding = parseFloat(getComputedStyle(infoWrapper).paddingLeft) || 0;
+        const floor = gridWidth - MAX_INFO_WIDTH - infoPadding;
+
+        grid.style.setProperty('--media-column-width', `${Math.round(Math.max(imageWidth, floor))}px`);
       }
 
       syncThumbnailWidth() {
