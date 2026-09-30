@@ -16,7 +16,10 @@
       "Bash(perl:*)",
       "Bash(ls:*)",
       "WebFetch(domain:tomblanchard.co.uk)",
-      "WebFetch(domain:shopify.dev)"
+      "WebFetch(domain:shopify.dev)",
+      "Bash(cp \"C:/Users/grega/Documents/Personal/Family/Grega/03-Dev/Development/time-4-action/recharge-shopify-theme/assets/component-stock-locations.css\" .)",
+      "Bash(sed -i 's|file:///C:/Users/grega/Documents/Personal/Family/Grega/03-Dev/Development/time-4-action/recharge-shopify-theme/assets/component-stock-locations.css|component-stock-locations.css|' preview.html)",
+      "Bash(node -e ' *)"
     ]
   }
 }
