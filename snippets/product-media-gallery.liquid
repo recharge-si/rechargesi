@@ -89,7 +89,8 @@
             media_width: media_width,
             media_fit: section.settings.media_fit,
             constrain_to_viewport: section.settings.constrain_to_viewport,
-            lazy_load: false
+            lazy_load: false,
+            product_title: product.title
           %}
         </li>
       {%- endif -%}
@@ -131,7 +132,8 @@
             media_width: media_width,
             media_fit: section.settings.media_fit,
             constrain_to_viewport: section.settings.constrain_to_viewport,
-            lazy_load: lazy_load
+            lazy_load: lazy_load,
+            product_title: product.title
           %}
         </li>
       {%- endfor -%}
@@ -251,6 +253,9 @@
             {%- capture thumbnail_id -%}
               Thumbnail-{{ section.id }}-0
             {%- endcapture -%}
+            {%- capture featured_alt -%}
+              {%- render 'media-alt', alt: featured_media.alt, title: product.title, position: media_index -%}
+            {%- endcapture -%}
             <button
               class="thumbnail global-media-settings global-media-settings--no-shadow"
               aria-label="{%- if featured_media.media_type == 'image' -%}{{ 'products.product.media.load_image' | t: index: media_index }}{%- elsif featured_media.media_type == 'model' -%}{{ 'products.product.media.load_model' | t: index: media_index }}{%- elsif featured_media.media_type == 'video' or featured_media.media_type == 'external_video' -%}{{ 'products.product.media.load_video' | t: index: media_index }}{%- endif -%}"
@@ -266,7 +271,7 @@
                   sizes: sizes,
                   widths: '54, 74, 104, 162, 208, 324, 416',
                   id: thumbnail_id,
-                  alt: featured_media.alt
+                  alt: featured_alt
                 | escape
               }}
             </button>
@@ -313,6 +318,9 @@
               {%- capture thumbnail_id -%}
                 Thumbnail-{{ section.id }}-{{ forloop.index }}
               {%- endcapture -%}
+              {%- capture thumb_alt -%}
+                {%- render 'media-alt', alt: media.alt, title: product.title, position: media.position -%}
+              {%- endcapture -%}
               <button
                 class="thumbnail global-media-settings global-media-settings--no-shadow"
                 aria-label="{%- if media.media_type == 'image' -%}{{ 'products.product.media.load_image' | t: index: media_index }}{%- elsif media.media_type == 'model' -%}{{ 'products.product.media.load_model' | t: index: media_index }}{%- elsif media.media_type == 'video' or media.media_type == 'external_video' -%}{{ 'products.product.media.load_video' | t: index: media_index }}{%- endif -%}"
@@ -333,7 +341,7 @@
                     sizes: sizes,
                     widths: '54, 74, 104, 162, 208, 324, 416',
                     id: thumbnail_id,
-                    alt: media.alt
+                    alt: thumb_alt
                   | escape
                 }}
               </button>

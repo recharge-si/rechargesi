@@ -15,6 +15,7 @@
   - media_fit: {String} Method ("contain" or "cover") to fit image into container
   - media_width: {Float} The width percentage that the media column occupies on desktop.
   - lazy_load: {Boolean} Image should be lazy loaded. Default: true (optional)
+  - product_title: {String} Alt fallback when the image alt is blank or a URL. Default: product.title (optional)
 
   Usage:
   {% render 'product-thumbnail',
@@ -43,6 +44,11 @@
   if media.media_type == 'image'
     assign image_class = 'image-magnify-' | append: section.settings.image_zoom
   endif
+
+  assign alt_title = product_title | default: product.title
+  capture media_alt
+    render 'media-alt', alt: media.preview_image.alt, title: alt_title, position: position
+  endcapture
 -%}
 
 {%- capture sizes -%}
@@ -85,7 +91,8 @@
           class: image_class,
           loading: lazy,
           sizes: sizes,
-          widths: '246, 493, 600, 713, 823, 990, 1100, 1206, 1346, 1426, 1646, 1946'
+          widths: '246, 493, 600, 713, 823, 990, 1100, 1206, 1346, 1426, 1646, 1946',
+          alt: media_alt
       }}
     </div>
     <button
@@ -126,7 +133,8 @@
         | image_tag:
           loading: lazy,
           sizes: sizes,
-          widths: '246, 493, 600, 713, 823, 990, 1100, 1206, 1346, 1426, 1646, 1946'
+          widths: '246, 493, 600, 713, 823, 990, 1100, 1206, 1346, 1426, 1646, 1946',
+          alt: media_alt
       }}
     </button>
     <template>

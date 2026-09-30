@@ -22,7 +22,10 @@
   overflow: hidden;
 }
 
-.free-shipping-bar__fill {
+/* The fill is an empty div, and base.css hides div:empty (0,1,1); the extra
+   class outranks it. */
+.free-shipping-bar__track .free-shipping-bar__fill {
+  display: block;
   height: 100%;
   border-radius: inherit;
   background: var(--color-brand-primary);

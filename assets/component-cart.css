@@ -88,13 +88,14 @@
   gap: 4rem;
 }
 
+/* Sentence case and lighter than the uppercase page title above it, so the
+   two headings read as title + status instead of shouting the same thing. */
 .cart-empty__title {
   font-family: var(--font-heading-family);
-  font-size: clamp(2rem, calc(var(--font-heading-scale) * 2.6rem), 3rem);
-  font-weight: 700;
+  font-size: clamp(2rem, calc(var(--font-heading-scale) * 2.4rem), 2.8rem);
+  font-weight: 600;
   letter-spacing: -0.01em;
-  text-transform: uppercase;
-  line-height: 1.15;
+  line-height: 1.2;
   margin: 0 0 1.2rem;
   color: rgb(var(--color-foreground));
 }
@@ -154,10 +155,27 @@
   box-shadow: inset 0 0 0 1px var(--color-brand-primary);
 }
 
-.cart-empty__hint {
-  margin: 1.6rem 0 0;
-  font-size: 1.3rem;
-  color: rgba(var(--color-foreground), 0.5);
+.cart-empty__advice {
+  margin: 2.4rem 0 0;
+  padding-top: 1.6rem;
+  border-top: 1px solid rgba(var(--color-foreground), 0.08);
+  font-size: 1.4rem;
+  color: rgba(var(--color-foreground), 0.65);
+}
+
+.cart-empty__advice-link {
+  margin-left: 0.4rem;
+  font-weight: 600;
+  color: rgb(var(--color-foreground));
+  text-decoration: underline;
+  text-decoration-color: var(--color-brand-primary);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 0.3em;
+  transition: color 0.25s ease;
+}
+
+.cart-empty__advice-link:hover {
+  color: var(--color-brand-primary);
 }
 
 /* Small uppercase heading with red underline (mirrors .footer-block__heading) */
@@ -179,10 +197,14 @@
   margin-top: 0.5rem;
 }
 
-/* Category links */
+/* Category links — same pattern as the footer / mega-menu link lists
+   (uppercase, hairline dividers, red on hover), set in columns so the list
+   stays about as tall as the message beside it. */
 .cart-empty__category-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 3.2rem;
   margin: 0;
-  border-top: 1px solid rgba(var(--color-foreground), 0.08);
 }
 
 .cart-empty__category-list li {
@@ -195,13 +217,13 @@
   justify-content: space-between;
   gap: 1rem;
   padding: 1.2rem 0;
-  font-size: 1.4rem;
+  font-size: 1.3rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.06em;
   color: rgb(var(--color-foreground));
   text-decoration: none;
-  transition: color 0.25s ease, padding-left 0.25s ease;
+  transition: color 0.25s ease;
 }
 
 .cart-empty__category-arrow {
@@ -211,12 +233,23 @@
 
 .cart-empty__category-link:hover {
   color: var(--color-brand-primary);
-  padding-left: 0.6rem;
 }
 
 .cart-empty__category-link:hover .cart-empty__category-arrow {
   color: var(--color-brand-primary);
-  transform: translateX(-0.4rem);
+  transform: translateX(0.4rem);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cart-empty__category-arrow {
+    transition: none;
+  }
+}
+
+@media screen and (min-width: 750px) {
+  .cart-empty__category-list {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
 }
 
 /* Recommended products */
@@ -251,14 +284,9 @@
 
 @media screen and (min-width: 990px) {
   .cart-empty {
-    grid-template-columns: minmax(0, 7fr) minmax(0, 4fr);
-    gap: 8rem;
+    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+    gap: 6.4rem;
     align-items: start;
-  }
-
-  .cart-empty__categories {
-    padding-left: 4rem;
-    border-left: 1px solid rgba(var(--color-foreground), 0.08);
   }
 
   .cart-empty__recs {
@@ -289,24 +317,114 @@ cart-items {
 
 .cart__items {
   position: relative;
-  padding-bottom: 3rem;
-  border-bottom: 2px solid rgba(var(--color-foreground), 0.06);
 }
 
 .cart__items--disabled {
   pointer-events: none;
 }
 
+/* ── Two-column layout (990px+) ──
+   Items on the left, summary panel on the right, both starting on the same line
+   under the page title. The two live in separate sections, so the page itself
+   becomes the grid: the items section and its wrappers are display: contents,
+   which lifts the breadcrumb, title and form up to be grid items of <main>
+   alongside the footer section.
+
+   An earlier attempt put a small bordered card alone in a tall column, which read
+   as a floating object. The panel here is a filled block with the mega-menu's
+   red top rule, carrying the free-shipping meter, total, checkout, trust claims
+   and the way back to the catalogue, so it is a substantial column in its own
+   right rather than a card drifting beside the list.
+
+   Applies only while the cart has items; cart.js toggles .is-empty on
+   <cart-items>, so emptying the cart drops straight back to one column. */
+@media screen and (min-width: 990px) {
+  #MainContent:has(cart-items:not(.is-empty)):has(#main-cart-footer) {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 40rem;
+    grid-template-areas:
+      'crumb crumb'
+      'head head'
+      'items summary';
+    column-gap: 6rem;
+    align-items: start;
+    width: 100%;
+    max-width: var(--page-width);
+    margin: 0 auto;
+    padding: 3.6rem 5rem 8rem;
+  }
+
+  #MainContent:has(cart-items:not(.is-empty)) > * {
+    grid-column: 1 / -1;
+  }
+
+  #MainContent:has(cart-items:not(.is-empty)) > .shopify-section:has(> cart-items),
+  #MainContent:has(cart-items:not(.is-empty)) cart-items,
+  #MainContent:has(cart-items:not(.is-empty)) cart-items > .page-width {
+    display: contents;
+  }
+
+  #MainContent:has(cart-items:not(.is-empty)) .cart-breadcrumb {
+    grid-area: crumb;
+  }
+
+  #MainContent:has(cart-items:not(.is-empty)) .cart-header {
+    grid-area: head;
+  }
+
+  #MainContent:has(cart-items:not(.is-empty)) .cart__contents {
+    grid-area: items;
+  }
+
+  #MainContent:has(cart-items:not(.is-empty)) > .cart__footer-wrapper {
+    grid-area: summary;
+    position: sticky;
+    top: 3rem;
+    transition: top 0.15s ease;
+  }
+
+  /* The header is "on scroll up": while it is slid in, drop the panel below it
+     so the header never covers the summary heading. header.liquid sets
+     --header-height. */
+  body:has(.shopify-section-header-sticky:not(.shopify-section-header-hidden))
+    #MainContent:has(cart-items:not(.is-empty))
+    > .cart__footer-wrapper {
+    top: calc(var(--header-height, 14rem) + 2rem);
+  }
+
+  #MainContent:has(cart-items:not(.is-empty)) .cart__footer-wrapper .page-width {
+    padding: 0;
+  }
+}
+
+/* ── Summary panel ── */
+.cart__footer {
+  background: rgba(var(--color-foreground), 0.035);
+  border-top: 3px solid var(--color-brand-primary);
+  padding: 2.4rem 2rem;
+}
+
 .cart__footer-wrapper:last-child .cart__footer {
-  padding-bottom: 5rem;
+  padding-bottom: 2.4rem;
 }
 
-.cart__footer > div:only-child {
-  margin-left: auto;
+@media screen and (min-width: 750px) {
+  .cart__footer {
+    padding: 3.2rem;
+  }
+
+  .cart__footer-wrapper:last-child .cart__footer {
+    padding-bottom: 3.2rem;
+  }
 }
 
-.cart__footer > * + * {
-  margin-top: 6.5rem;
+/* Below 990px the panel stacks under the items; this is the gap before the
+   site footer. The section's padding settings are unused — the panel's own
+   padding and the grid gap do that job. */
+@media screen and (max-width: 989px) {
+  .cart__footer-wrapper {
+    padding-bottom: 4rem;
+  }
 }
 
 .cart__footer .discounts {
@@ -314,17 +432,13 @@ cart-items {
 }
 
 .cart__note {
-  height: fit-content;
-  top: 2.5rem;
+  display: block;
+  margin-bottom: 2.4rem;
 }
 
 .cart__note label {
-  display: flex;
-  align-items: flex-end;
-  position: absolute;
-  line-height: 1;
-  height: 1.8rem;
-  top: -3rem;
+  display: block;
+  margin-bottom: 0.8rem;
   color: rgba(var(--color-foreground), 0.6);
   font-size: 1.2rem;
   text-transform: uppercase;
@@ -332,63 +446,15 @@ cart-items {
 }
 
 .cart__note .field__input {
-  height: 100%;
   position: relative;
   border-radius: var(--inputs-radius);
-  padding: 1rem 2rem;
+  padding: 1rem 1.4rem;
+  min-height: 8rem;
+  background: rgb(var(--color-background));
 }
 
 .cart__note .text-area {
   resize: vertical;
-}
-
-.cart__note:after,
-.cart__note:hover.cart__note:after,
-.cart__note:before,
-.cart__note:hover.cart__note:before,
-.cart__note .field__input:focus,
-.cart__note .field__input {
-  border-bottom-right-radius: 0;
-}
-
-@media screen and (min-width: 750px) {
-  .cart__items {
-    grid-column-start: 1;
-    grid-column-end: 3;
-    padding-bottom: 4rem;
-  }
-
-  .cart__contents > * + * {
-    margin-top: 0;
-  }
-
-  .cart__items + .cart__footer {
-    grid-column: 2;
-  }
-
-  .cart__footer {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    border: 0;
-  }
-
-  .cart__footer-wrapper:last-child {
-    padding-top: 0;
-  }
-
-  /* One centred column, not a two-column row. The summary is the only thing on
-     this row worth reading, so it sits in the middle of the page rather than
-     hugging the right margin with dead space beside it. */
-  .cart__footer > .cart__blocks {
-    width: 44rem;
-    max-width: 100%;
-  }
-
-  .cart__footer > * + * {
-    margin-left: 0;
-    margin-top: 2.4rem;
-  }
 }
 
 .cart__ctas button {
@@ -404,8 +470,7 @@ cart-items {
 }
 
 .cart__dynamic-checkout-buttons {
-  max-width: 36rem;
-  margin: 0 auto;
+  margin: 1rem 0 0;
 }
 
 .cart__dynamic-checkout-buttons:has(.dynamic-checkout__content:empty) {
@@ -413,7 +478,7 @@ cart-items {
 }
 
 .cart__blocks > * + * {
-  margin-top: 1rem;
+  margin-top: 0;
 }
 
 .cart-note__label {
@@ -423,13 +488,20 @@ cart-items {
 }
 
 .tax-note {
-  margin: 1.6rem 0;
-  text-align: center;
   display: block;
+  margin: 0.8rem 0 2rem;
+  font-size: 1.2rem;
+  line-height: 1.5;
+  color: rgba(var(--color-foreground), 0.6);
+}
+
+.tax-note a {
+  color: inherit;
 }
 
 .cart__checkout-button {
   max-width: 100%;
+  min-height: 5.6rem;
   background-color: var(--color-brand-primary);
   color: #fff;
   text-transform: uppercase;
@@ -450,6 +522,12 @@ cart-items {
   transform: scale(0.98);
 }
 
+.cart__checkout-button:focus-visible {
+  outline: 2px solid rgb(var(--color-foreground));
+  outline-offset: 3px;
+  box-shadow: none;
+}
+
 .cart__checkout-button::before,
 .cart__checkout-button::after {
   content: none;
@@ -459,63 +537,30 @@ cart-items a:hover {
   color: var(--color-brand-primary);
 }
 
-cart-remove-button .button:hover {
-  color: var(--color-brand-primary);
-}
-
-.cart__ctas {
-  text-align: center;
-}
-
-@media screen and (min-width: 750px) {
-  .cart-note {
-    max-width: 35rem;
-  }
-
-  .cart__update-button {
-    margin-bottom: 0;
-    margin-right: 0.8rem;
-  }
-
-  .tax-note {
-    margin-bottom: 2.2rem;
-    text-align: center;
-  }
-
-  [data-shopify-buttoncontainer] {
-    justify-content: flex-end;
-  }
-
-  .cart__ctas {
-    display: flex;
-    gap: 1rem;
-  }
-}
-
-
-/* --- Cart footer aside ---
-   Fills the empty half of the footer row with a route back into the catalogue
-   and the same three claims the product page makes. Not filler: they are the two
-   things a customer wants at the moment they decide to check out. */
+/* Trust claims + continue link, inside the panel under the button */
 .cart__footer-aside {
   display: flex;
   flex-direction: column;
-  gap: 1.4rem;
-  align-items: center;
-  width: 44rem;
-  max-width: 100%;
+  gap: 2rem;
   margin-top: 2.4rem;
+  padding-top: 2.4rem;
+  border-top: 1px solid rgba(var(--color-foreground), 0.1);
+}
+
+.cart__footer-aside .product-trust-strip__item {
+  font-size: 1.3rem;
 }
 
 .cart__continue {
   display: inline-flex;
   align-items: center;
+  align-self: flex-start;
   gap: 0.6rem;
-  font-size: 1.3rem;
-  font-weight: 600;
-  letter-spacing: 0.04em;
+  font-size: 1.2rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: rgba(var(--color-foreground), 0.7);
+  color: rgb(var(--color-foreground));
   text-decoration: none;
   transition: color 0.15s ease;
 }
@@ -533,33 +578,7 @@ cart-remove-button .button:hover {
   transform: translateX(-0.3rem);
 }
 
-/* Express wallet buttons: match the height of CHECK OUT above them so the pair
-   reads as one stack rather than a big button with small chips under it. */
-.cart__dynamic-checkout-buttons {
-  max-width: none;
-  margin: 1rem 0 0;
-}
-
-@media screen and (max-width: 749px) {
-  .cart__footer-aside {
-    width: 100%;
-  }
-}
-
-/* --- Cart page: single stacked column, no sidebar ---
-   A two-column grid with the summary sticking alongside the items was tried and
-   reverted: even sticky and properly aligned to the breadcrumb, a small bordered
-   card sitting mostly alone in a tall column read as a floating, disconnected
-   object ("like a fly on the screen") rather than part of the page. Rather than
-   keep patching that shape — a filled-background column was the next idea — the
-   page goes back to one centred column (items, then summary, below — the plain
-   flex/centring rules above already produce this with no grid override needed),
-   and the fixed bottom bar becomes the sole mechanism for keeping checkout
-   reachable while scrolling, on every viewport, not just mobile. See the sticky
-   bar block below: it already re-queries the CHECK OUT button on every scroll
-   frame, so it needed no changes to take over this job on desktop too. */
-
-/* --- Sticky checkout bar ---
+/* --- Sticky checkout bar (below 990px) ---
    Shown whenever the real CHECK OUT button is off screen, hidden while it is
    visible, so the two are never visible at once. On mobile it's a full-width bar
    pinned to the bottom edge — thumb reach matters more than restraint on a
@@ -589,7 +608,8 @@ cart-remove-button .button:hover {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .cart__sticky-bar {
+  .cart__sticky-bar,
+  .cart__footer-wrapper {
     transition: none;
   }
 }
@@ -663,6 +683,14 @@ cart-remove-button .button:hover {
    clearance everywhere or it sits underneath it permanently. */
 #MainContent:has(.cart__sticky-bar) {
   padding-bottom: 8rem;
+}
+
+/* From 990px the summary panel is sticky beside the items, so checkout is
+   always on screen and the bar would only duplicate it. */
+@media screen and (min-width: 990px) {
+  .cart__sticky-bar {
+    display: none;
+  }
 }
 
 @media screen and (max-width: 749px) {

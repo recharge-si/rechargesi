@@ -1,0 +1,174 @@
+{{ 'section-shop-by-brand.css' | asset_url | stylesheet_tag }}
+
+{%- style -%}
+  .section-{{ section.id }}-padding {
+    padding-top: {{ section.settings.padding_top | times: 0.75 | round: 0 }}px;
+    padding-bottom: {{ section.settings.padding_bottom | times: 0.75 | round: 0 }}px;
+  }
+
+  @media screen and (min-width: 750px) {
+    .section-{{ section.id }}-padding {
+      padding-top: {{ section.settings.padding_top }}px;
+      padding-bottom: {{ section.settings.padding_bottom }}px;
+    }
+  }
+{%- endstyle -%}
+
+<div class="color-{{ section.settings.color_scheme }} gradient">
+  <div class="shop-by-brand page-width section-{{ section.id }}-padding">
+    {%- if section.settings.heading != blank -%}
+      <div class="shop-by-brand__header">
+        <h2 class="home-heading">{{ section.settings.heading }}</h2>
+      </div>
+    {%- endif -%}
+
+    {%- comment -%} Vendors with a bundled logo in assets/brand-<vendor handle>.png {%- endcomment -%}
+    {%- assign bundled_logos = 'patrik-international,loftsails,exocet,point-7,unifiber,select,plkb,dakine' | split: ',' -%}
+
+    <ul class="shop-by-brand__list" role="list">
+      {%- for block in section.blocks -%}
+        {%- liquid
+          assign label = block.settings.label | default: block.settings.vendor
+          if label == blank
+            assign label = 'onboarding.collection_title' | t
+          endif
+
+          assign vendor_handle = block.settings.vendor | handleize
+          assign bundled_logo = ''
+          if bundled_logos contains vendor_handle
+            assign bundled_logo = 'brand-' | append: vendor_handle | append: '.png'
+          endif
+
+          assign link = block.settings.link
+          if link == blank and block.settings.vendor != blank
+            assign link = block.settings.vendor | url_for_vendor
+          endif
+        -%}
+        <li class="shop-by-brand__item" {{ block.shopify_attributes }}>
+          <a
+            {% if link != blank %}
+              href="{{ link }}"
+            {% else %}
+              role="link" aria-disabled="true"
+            {% endif %}
+            class="shop-by-brand__tile"
+          >
+            {%- if block.settings.logo != blank -%}
+              {{
+                block.settings.logo
+                | image_url: width: 400
+                | image_tag:
+                  widths: '200, 300, 400',
+                  sizes: '200px',
+                  loading: 'lazy',
+                  alt: label,
+                  class: 'shop-by-brand__logo'
+              }}
+            {%- elsif bundled_logo != blank -%}
+              <img
+                src="{{ bundled_logo | asset_url }}"
+                alt="{{ label | escape }}"
+                class="shop-by-brand__logo"
+                loading="lazy"
+                width="200"
+                height="50"
+              >
+            {%- else -%}
+              <span class="shop-by-brand__name">{{ label | escape }}</span>
+            {%- endif -%}
+          </a>
+        </li>
+      {%- endfor -%}
+    </ul>
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Shop by brand",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "inline_richtext",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Shop by brand"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme",
+      "default": "scheme-1"
+    },
+    {
+      "type": "header",
+      "content": "Section padding"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Padding top",
+      "default": 36
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Padding bottom",
+      "default": 36
+    }
+  ],
+  "blocks": [
+    {
+      "type": "brand",
+      "name": "Brand",
+      "settings": [
+        {
+          "type": "text",
+          "id": "vendor",
+          "label": "Vendor",
+          "info": "Exact vendor name as set on products. Links to all of that vendor's products."
+        },
+        {
+          "type": "text",
+          "id": "label",
+          "label": "Display name",
+          "info": "Defaults to the vendor name."
+        },
+        {
+          "type": "image_picker",
+          "id": "logo",
+          "label": "Logo",
+          "info": "Shown instead of the name. Needed for vendors without a bundled logo. Transparent PNG or SVG works best."
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "Link",
+          "info": "Optional. Overrides the vendor link, e.g. to a brand collection."
+        }
+      ]
+    }
+  ],
+  "max_blocks": 16,
+  "presets": [
+    {
+      "name": "Shop by brand",
+      "blocks": [
+        { "type": "brand" },
+        { "type": "brand" },
+        { "type": "brand" },
+        { "type": "brand" }
+      ]
+    }
+  ]
+}
+{% endschema %}

@@ -5,6 +5,7 @@
   - media: {Object} Product Media object
   - loop: {Boolean} Enable video looping (optional)
   - variant_image: {Boolean} Whether or not media is associated with a variant
+  - product_title: {String} Alt fallback when the image alt is blank or a URL. Default: product.title (optional)
 
   Usage:
   {% render 'product-media',
@@ -13,6 +14,13 @@
     variant_image: true
   %}
 {% endcomment %}
+
+{%- liquid
+  assign alt_title = product_title | default: product.title
+  capture media_alt
+    render 'media-alt', alt: media.preview_image.alt, title: alt_title, position: media.position
+  endcapture
+-%}
 
 {%- if media.media_type == 'image' -%}
   <img
@@ -30,7 +38,7 @@
     "
     sizes="(min-width: 750px) calc(100vw - 22rem), 1100px"
     src="{{ media.preview_image | image_url: width: 1445 }}"
-    alt="{{ media.alt | escape }}"
+    alt="{{ media_alt | escape }}"
     loading="lazy"
     width="1100"
     height="{{ 1100 | divided_by: media.preview_image.aspect_ratio | ceil }}"
@@ -72,7 +80,7 @@
       loading="lazy"
       width="576"
       height="{{ 576 | divided_by: media.preview_image.aspect_ratio }}"
-      alt="{{ media.preview_image.alt | escape }}"
+      alt="{{ media_alt | escape }}"
     >
   </button>
   <template>

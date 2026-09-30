@@ -9,47 +9,86 @@
  */
 {
   "sections": {
-    "hero_banner_grid": {
-      "type": "hero-banner-grid",
+    "hero": {
+      "type": "hero-campaign",
+      "settings": {
+        "eyebrow": "Windsurf · Wing · Foil · SUP",
+        "heading": "Gear up. Get on the water.",
+        "text": "Boards, sails, foils and wetsuits from the brands riders trust.",
+        "button_label_1": "Shop windsurf",
+        "button_link_1": "shopify://collections/windsurf",
+        "button_label_2": "Shop all gear",
+        "button_link_2": "shopify://collections/all",
+        "trust_text": "Expert advice · Premium brands · Shop online or visit us in Ljubljana",
+        "image": "shopify://shop_images/slalom-action-1.jpg",
+        "layout": "text-left",
+        "color_scheme": "scheme-1"
+      }
+    },
+    "shop_by_sport": {
+      "type": "shop-by-sport",
       "blocks": {
-        "banner_1": {
-          "type": "banner",
+        "windsurf": {
+          "type": "category",
           "settings": {
-            "image": "shopify://shop_images/odprt_recharge.png",
-            "url": ""
+            "collection": "windsurf",
+            "label": "",
+            "image": "shopify://shop_images/fwave-action4.jpg"
           }
         },
-        "banner_2": {
-          "type": "banner",
+        "wing": {
+          "type": "category",
           "settings": {
-            "image": "shopify://shop_images/recharge-team-banner.png",
-            "url": ""
+            "collection": "wing",
+            "label": "",
+            "image": "shopify://shop_images/action4chacevxgen4.jpg"
           }
         },
-        "banner_3": {
-          "type": "banner",
+        "foil": {
+          "type": "category",
           "settings": {
-            "image": "shopify://shop_images/C-skin.png",
-            "url": ""
+            "collection": "foil",
+            "label": "",
+            "image": "shopify://shop_images/foilcomp-action4.jpg"
+          }
+        },
+        "sup": {
+          "type": "category",
+          "settings": {
+            "collection": "sup",
+            "label": "",
+            "image": "shopify://shop_images/s-wave-9-2-action1.jpg"
+          }
+        },
+        "neoprene": {
+          "type": "category",
+          "settings": {
+            "collection": "neoprene-suits",
+            "label": "Neoprene",
+            "image": "shopify://shop_images/C-skin.png"
           }
         }
       },
       "block_order": [
-        "banner_1",
-        "banner_2",
-        "banner_3"
+        "windsurf",
+        "wing",
+        "foil",
+        "sup",
+        "neoprene"
       ],
       "settings": {
-        "auto_rotate": true,
-        "rotation_speed": 3
+        "heading": "Shop by sport",
+        "color_scheme": "scheme-1",
+        "padding_top": 56,
+        "padding_bottom": 16
       }
     },
     "featured_collection": {
       "type": "featured-collection",
       "settings": {
         "collection": "windsurf-boards-freestyle-wave",
-        "products_to_show": 25,
-        "title": "Featured",
+        "products_to_show": 8,
+        "title": "Featured gear",
         "heading_size": "h2",
         "description": "",
         "show_description": false,
@@ -68,13 +107,116 @@
         "quick_add": "none",
         "columns_mobile": "2",
         "swipe_on_mobile": false,
-        "padding_top": 44,
-        "padding_bottom": 36
+        "padding_top": 48,
+        "padding_bottom": 56
+      }
+    },
+    "store_promo": {
+      "type": "store-promo",
+      "settings": {
+        "image": "shopify://shop_images/odprt_recharge.png",
+        "eyebrow": "Visit our store",
+        "heading": "Recharge has moved",
+        "text": "<p>Our shop and pickup point is now in Vič, Ljubljana — a bigger space, a wider range, and the same Recharge you know.</p>",
+        "address": "Koprska ulica 74, 1000 Ljubljana",
+        "button_label": "Get directions",
+        "button_link": "https://maps.google.com/?q=Koprska+ulica+74,+1000+Ljubljana",
+        "color_scheme": "scheme-2",
+        "padding_top": 36,
+        "padding_bottom": 72
+      }
+    },
+    "shop_by_brand": {
+      "type": "shop-by-brand",
+      "blocks": {
+        "patrik_international": {
+          "type": "brand",
+          "settings": {
+            "vendor": "Patrik International",
+            "label": "Patrik",
+            "link": ""
+          }
+        },
+        "loftsails": {
+          "type": "brand",
+          "settings": {
+            "vendor": "Loftsails",
+            "label": "",
+            "link": ""
+          }
+        },
+        "exocet": {
+          "type": "brand",
+          "settings": {
+            "vendor": "Exocet",
+            "label": "",
+            "link": ""
+          }
+        },
+        "point7": {
+          "type": "brand",
+          "settings": {
+            "vendor": "POINT-7",
+            "label": "",
+            "link": ""
+          }
+        },
+        "unifiber": {
+          "type": "brand",
+          "settings": {
+            "vendor": "Unifiber",
+            "label": "",
+            "link": ""
+          }
+        },
+        "select": {
+          "type": "brand",
+          "settings": {
+            "vendor": "Select",
+            "label": "",
+            "link": ""
+          }
+        },
+        "plkb": {
+          "type": "brand",
+          "settings": {
+            "vendor": "PLKB",
+            "label": "",
+            "link": ""
+          }
+        },
+        "dakine": {
+          "type": "brand",
+          "settings": {
+            "vendor": "Dakine",
+            "label": "",
+            "link": ""
+          }
+        }
+      },
+      "block_order": [
+        "patrik_international",
+        "loftsails",
+        "exocet",
+        "point7",
+        "unifiber",
+        "select",
+        "plkb",
+        "dakine"
+      ],
+      "settings": {
+        "heading": "Shop by brand",
+        "color_scheme": "scheme-1",
+        "padding_top": 24,
+        "padding_bottom": 48
       }
     }
   },
   "order": [
-    "hero_banner_grid",
-    "featured_collection"
+    "hero",
+    "shop_by_sport",
+    "shop_by_brand",
+    "featured_collection",
+    "store_promo"
   ]
 }

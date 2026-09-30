@@ -357,7 +357,11 @@
       "note": "Posebna navodila za naročilo",
       "checkout": "Zaključi nakup",
       "empty": "Vaša košarica je prazna",
-      "empty_subtext": "Videti je, da še niste dodali ničesar. Oglejte si našo opremo in poiščite nekaj zase.",
+      "empty_title": "Tukaj še ni ničesar",
+      "empty_subtext": "Oglejte si deske, jadra, krila in foile ali nam povejte, kako jadrate, in pomagali vam bomo izbrati pravo opremo.",
+      "empty_advice": "Niste prepričani, kaj izbrati?",
+      "empty_advice_call": "Pokličite {{ phone }}",
+      "empty_advice_email": "Pišite nam",
       "empty_login": "Prijava",
       "empty_login_hint": "Že imate račun? Prijavite se za hitrejši nakup.",
       "empty_recommendations": "Morda vam bo všeč",
@@ -374,6 +378,13 @@
         "image": "Slika izdelka"
       },
       "order_summary": "Povzetek naročila",
+      "price_each": "{{ price }} / kos",
+      "item_count": {
+        "one": "{{ count }} izdelek",
+        "two": "{{ count }} izdelka",
+        "few": "{{ count }} izdelki",
+        "other": "{{ count }} izdelkov"
+      },
       "variant": "Različica",
       "login": {
         "title": "Ali imate račun?",

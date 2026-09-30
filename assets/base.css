@@ -3742,3 +3742,23 @@ details-disclosure > details {
     transform: translateX(100%) scaleX(0);
   }
 }
+
+/* Homepage section heading — uppercase with the short red rule used by page headers.
+   Shared by shop-by-sport, featured-collection and store-promo. */
+.home-heading {
+  margin: 0;
+  font-size: clamp(2.2rem, calc(var(--font-heading-scale) * 2.8rem), 3.2rem);
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.home-heading::after {
+  content: '';
+  display: block;
+  width: 4rem;
+  height: 3px;
+  margin-top: 1.2rem;
+  background-color: var(--color-brand-primary);
+}

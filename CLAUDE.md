@@ -151,17 +151,23 @@ Key files:
 - Title: `clamp(2.2rem, calc(var(--font-heading-scale) * 3rem), 4rem)`, `font-weight: 700`, `letter-spacing: -0.02em`
 - Red bar: `width: 4rem`, `height: 3px`, `margin-top: 1.2rem`
 
-**Cart items table brand touches:**
-- Table headers: uppercase, `letter-spacing: 0.08em`, `font-weight: 600`
-- Product images: subtle 1px border, darker on row hover
-- Product names: brand red on hover (no underline)
-- Row separators: 1px borders between items (mobile + desktop)
-- Quantity buttons: brand red hover; remove button: 0.4 opacity → brand red on hover
-- Sale prices: brand red, bolder weight
+**Layout (990px+):** two columns — items left, sticky summary panel right (`40rem`), both starting under the title.
+- Items and summary are separate sections, so `#MainContent` itself becomes the grid (in `assets/component-cart.css`): the items section, `<cart-items>` and its `.page-width` are `display: contents`, lifting breadcrumb/header/form into grid areas `crumb`/`head`/`items`; `.cart__footer-wrapper` is area `summary`.
+- Only active via `:has(cart-items:not(.is-empty))` — emptying the cart (cart.js toggles `.is-empty`) drops back to one column.
+- Panel is `position: sticky`; drops below the header while the on-scroll-up header is slid in (uses `--header-height`).
+- Below 990px: one column, panel under the items, and the fixed `.cart__sticky-bar` keeps checkout reachable (hidden on desktop).
+- A small bordered card in the side column was tried before and rejected ("fly on the screen"); the fix is a filled panel (light tint + 3px red top rule, like the mega-menu dropdown) that carries real content.
 
-**Cart footer / order summary:**
-- "Order summary" heading with red accent bar, total row with flex label/value layout
-- Larger price: `2.2rem` mobile, `2.6rem` desktop
+**Line items** (`assets/component-cart-items.css`, rules scoped to `cart-items` so the drawer is unaffected):
+- Every row is a CSS grid at all widths: image (spans 2 rows) | name, SKU, options | line total top-right; stepper + remove on row 2 under the details
+- Table `<thead>` visually hidden (kept for screen readers)
+- Unit price ("€X each", `sections.cart.price_each`) only shown when quantity > 1
+
+**Summary panel** (`sections/main-cart-footer.liquid`, `assets/component-totals.css`):
+- Heading + item count (`sections.cart.item_count`, pluralised), free-shipping meter (moved here from above the items), subtotal/discount rows only when cart-level discounts exist, total, tax note, checkout, stacked trust strip, continue link
+- `.cart__footer` is the panel; it no longer uses the section padding settings
+- `cart-sticky-bar.js` copies the total from `.cart-summary__total-value` on every cart update (the bar sits outside the re-rendered `.js-contents`)
+- `.free-shipping-bar__fill` needs the two-class selector — `base.css` hides `div:empty`
 
 **Empty cart state:** Editorial layout matching `main-page-branded` / footer (no boxes or icons). Page header + red bar stays visible.
 - Left: uppercase title, subtext, red "Continue shopping" + outline "Log in" buttons (login only for guests)
@@ -180,3 +186,16 @@ Key files:
 - `assets/component-cart.css` — breadcrumb, header, empty state, checkout button styles
 - `assets/component-cart-items.css` — table, image, quantity, price brand styling
 - `assets/component-totals.css` — order summary totals layout
+
+### Homepage
+
+Order (`templates/index.json`): `hero-campaign` → `shop-by-sport` → `shop-by-brand` → `featured-collection` → `store-promo`. Replaced the old `hero-banner-grid` carousel (baked-text banners).
+
+- **Everything stays inside `.page-width`, light color schemes only.** A full-bleed hero and black panels were tried and rejected.
+- `sections/hero-campaign.liquid` — editable seasonal hero: eyebrow, heading, text, 2 CTAs, trust line, desktop + optional mobile image (`<picture>`), text-left/right. Heading is `h2` because the header logo is the homepage `h1`. Alt text containing `://` (CSV-import leftovers) is dropped.
+- `sections/shop-by-sport.liquid` — photo tiles per collection block (image falls back to `collection.featured_image`); snap-scroll row below 990px.
+- `sections/shop-by-brand.liquid` — vendor blocks link via `url_for_vendor`. Logos come from the block's image picker, else bundled `assets/brand-<vendor handle>.png` (list in the section's `bundled_logos`; sourced from the old recharge.si site). Shown greyscale, colour on hover.
+- `sections/store-promo.liquid` — store relocation band (square photo + text + directions CTA).
+- `.home-heading` (end of `base.css`) — uppercase heading + red rule, shared by these sections and the featured-collection title.
+- `assets/component-brand-button.css` — `.button--brand` (red) / `.button--brand-outline`, layered on Dawn `.button`.
+- Images with baked-in text (`C-skin.png`, `odprt_recharge.png`) need a focal point set in Admin → Files so the crop avoids the text.

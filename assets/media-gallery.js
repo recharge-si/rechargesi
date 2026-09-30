@@ -71,9 +71,15 @@ if (!customElements.get('media-gallery')) {
         this.syncThumbnailWidth();
       }
 
+      /* With the desktop thumbnail layout every slide is stacked in place, so
+         SliderComponent's sliderItemOffset is 0 and any scroll on the viewer
+         computes currentPage = NaN and fires slideChanged with no element. */
       onSlideChanged(event) {
+        const currentElement = event.detail.currentElement;
+        if (!currentElement || !this.elements.thumbnails) return;
+
         const thumbnail = this.elements.thumbnails.querySelector(
-          `[data-target="${event.detail.currentElement.dataset.mediaId}"]`
+          `[data-target="${currentElement.dataset.mediaId}"]`
         );
         this.setActiveThumbnail(thumbnail);
       }

@@ -1,0 +1,74 @@
+/* Brand CTA buttons — used by homepage sections (hero, store promo).
+   Builds on Dawn's .button (sizing, focus ring) but replaces the
+   color-scheme fill with the brand red / a plain outline. */
+
+.button--brand,
+.button--brand-outline {
+  min-height: 5.2rem;
+  padding: 0 3.2rem;
+  border-radius: 0;
+  font-size: 1.4rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  transition: background-color var(--duration-default) ease, color var(--duration-default) ease,
+    border-color var(--duration-default) ease;
+}
+
+.button--brand::before,
+.button--brand::after,
+.button--brand-outline::before,
+.button--brand-outline::after {
+  display: none;
+}
+
+.button--brand {
+  background-color: var(--color-brand-primary);
+  color: #fff;
+}
+
+.button--brand:hover {
+  background-color: var(--color-brand-primary-dark);
+}
+
+.button--brand:active {
+  background-color: var(--color-brand-primary-darker);
+}
+
+.button--brand-outline {
+  background-color: transparent;
+  color: rgb(var(--color-foreground));
+  border: 2px solid rgba(var(--color-foreground), 0.85);
+}
+
+.button--brand-outline:hover {
+  background-color: rgb(var(--color-foreground));
+  border-color: rgb(var(--color-foreground));
+  color: rgb(var(--color-background));
+}
+
+/* Arrow that nudges right on hover */
+.button__arrow {
+  display: inline-flex;
+  width: 1.4rem;
+  margin-left: 1rem;
+  flex-shrink: 0;
+  transition: transform var(--duration-default) ease;
+}
+
+.button__arrow svg {
+  width: 100%;
+  height: auto;
+}
+
+.button--brand:hover .button__arrow,
+.button--brand-outline:hover .button__arrow {
+  transform: translateX(0.3rem);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .button--brand:hover .button__arrow,
+  .button--brand-outline:hover .button__arrow {
+    transform: none;
+  }
+}

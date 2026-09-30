@@ -1,0 +1,158 @@
+{{ 'section-shop-by-sport.css' | asset_url | stylesheet_tag }}
+
+{%- style -%}
+  .section-{{ section.id }}-padding {
+    padding-top: {{ section.settings.padding_top | times: 0.75 | round: 0 }}px;
+    padding-bottom: {{ section.settings.padding_bottom | times: 0.75 | round: 0 }}px;
+  }
+
+  @media screen and (min-width: 750px) {
+    .section-{{ section.id }}-padding {
+      padding-top: {{ section.settings.padding_top }}px;
+      padding-bottom: {{ section.settings.padding_bottom }}px;
+    }
+  }
+{%- endstyle -%}
+
+<div class="color-{{ section.settings.color_scheme }} gradient">
+  <div class="shop-by-sport page-width section-{{ section.id }}-padding">
+    {%- if section.settings.heading != blank -%}
+      <div class="shop-by-sport__header">
+        <h2 class="home-heading">{{ section.settings.heading }}</h2>
+      </div>
+    {%- endif -%}
+
+    <ul
+      class="shop-by-sport__list"
+      style="--tile-count: {{ section.blocks.size | at_least: 1 }};"
+      role="list"
+    >
+      {%- for block in section.blocks -%}
+        {%- liquid
+          assign collection = block.settings.collection
+          assign label = block.settings.label | default: collection.title
+          assign image = block.settings.image | default: collection.featured_image
+          if label == blank
+            assign label = 'onboarding.collection_title' | t
+          endif
+        -%}
+        <li class="shop-by-sport__item" {{ block.shopify_attributes }}>
+          <a
+            {% if collection != blank %}
+              href="{{ collection.url }}"
+            {% else %}
+              role="link" aria-disabled="true"
+            {% endif %}
+            class="shop-by-sport__tile"
+          >
+            <span class="shop-by-sport__media">
+              {%- if image != blank -%}
+                {%- assign image_style = 'object-position: ' | append: image.presentation.focal_point | append: ';' -%}
+                {{
+                  image
+                  | image_url: width: 900
+                  | image_tag:
+                    widths: '300, 450, 600, 750, 900',
+                    sizes: '(min-width: 1400px) 280px, (min-width: 990px) 20vw, (min-width: 750px) 30vw, 44vw',
+                    loading: 'lazy',
+                    alt: '',
+                    style: image_style
+                }}
+              {%- else -%}
+                {{ 'collection-1' | placeholder_svg_tag: 'placeholder-svg' }}
+              {%- endif -%}
+            </span>
+            <span class="shop-by-sport__label">
+              {{- label | escape -}}
+              <span class="shop-by-sport__arrow" aria-hidden="true">{{- 'icon-arrow.svg' | inline_asset_content -}}</span>
+            </span>
+          </a>
+        </li>
+      {%- endfor -%}
+    </ul>
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Shop by sport",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "inline_richtext",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Shop by sport"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme",
+      "default": "scheme-1"
+    },
+    {
+      "type": "header",
+      "content": "Section padding"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Padding top",
+      "default": 56
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Padding bottom",
+      "default": 16
+    }
+  ],
+  "blocks": [
+    {
+      "type": "category",
+      "name": "Category",
+      "settings": [
+        {
+          "type": "collection",
+          "id": "collection",
+          "label": "Collection"
+        },
+        {
+          "type": "text",
+          "id": "label",
+          "label": "Label",
+          "info": "Defaults to the collection title."
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image",
+          "info": "Defaults to the collection image. Set a focal point to control cropping."
+        }
+      ]
+    }
+  ],
+  "max_blocks": 6,
+  "presets": [
+    {
+      "name": "Shop by sport",
+      "blocks": [
+        { "type": "category" },
+        { "type": "category" },
+        { "type": "category" },
+        { "type": "category" },
+        { "type": "category" }
+      ]
+    }
+  ]
+}
+{% endschema %}

@@ -4,7 +4,6 @@
 {{ 'component-price.css' | asset_url | stylesheet_tag }}
 {{ 'component-discounts.css' | asset_url | stylesheet_tag }}
 {{ 'quantity-popover.css' | asset_url | stylesheet_tag }}
-{{ 'component-free-shipping.css' | asset_url | stylesheet_tag }}
 
 {%- style -%}
   .section-{{ section.id }}-padding {
@@ -41,7 +40,10 @@
     <div class="cart__warnings">
       <div class="cart-empty">
         <div class="cart-empty__main">
-          <h2 class="cart-empty__title">{{ 'sections.cart.empty' | t }}</h2>
+          <h2 class="cart-empty__title">
+            {{- 'sections.cart.empty_title' | t -}}
+            <span class="visually-hidden"> – {{ 'sections.cart.empty' | t }}</span>
+          </h2>
           <p class="cart-empty__text">{{ 'sections.cart.empty_subtext' | t }}</p>
 
           <div class="cart-empty__actions">
@@ -55,8 +57,33 @@
             {%- endif -%}
           </div>
 
-          {%- if shop.customer_accounts_enabled and customer == null -%}
-            <p class="cart-empty__hint">{{ 'sections.cart.empty_login_hint' | t }}</p>
+          {%- comment -%} Advice uses the store contact from Settings → Store details. {%- endcomment -%}
+          {%- if shop.phone != blank or shop.email != blank -%}
+            <p class="cart-empty__advice">
+              {{ 'sections.cart.empty_advice' | t }}
+              {% if shop.phone != blank -%}
+                {%- liquid
+                  # Store details keeps the number unspaced (+38640240922); group
+                  # Slovenian numbers the way the footer writes them.
+                  assign phone_raw = shop.phone | remove: ' '
+                  assign phone_display = shop.phone
+                  assign phone_prefix = phone_raw | slice: 0, 4
+                  if phone_raw.size == 12 and phone_prefix == '+386'
+                    assign phone_a = phone_raw | slice: 4, 2
+                    assign phone_b = phone_raw | slice: 6, 3
+                    assign phone_c = phone_raw | slice: 9, 3
+                    assign phone_display = '+386 ' | append: phone_a | append: ' ' | append: phone_b | append: ' ' | append: phone_c
+                  endif
+                -%}
+                <a href="tel:{{ phone_raw }}" class="cart-empty__advice-link">
+                  {{- 'sections.cart.empty_advice_call' | t: phone: phone_display -}}
+                </a>
+              {%- else -%}
+                <a href="mailto:{{ shop.email }}" class="cart-empty__advice-link">
+                  {{- 'sections.cart.empty_advice_email' | t -}}
+                </a>
+              {%- endif %}
+            </p>
           {%- endif -%}
         </div>
 
@@ -66,8 +93,14 @@
             <h2 class="cart-empty__heading" id="CartEmptyCategories-{{ section.id }}">
               {{- 'sections.cart.empty_categories' | t -}}
             </h2>
+            {%- comment -%}
+              Laid out in columns instead of one long list: ten stacked rows ran far
+              below the message column and left a hole beside it. "All products"
+              is skipped — the Continue shopping button already goes there.
+            {%- endcomment -%}
             <ul class="cart-empty__category-list list-unstyled" role="list">
               {%- for link in empty_menu.links -%}
+                {%- if link.url == routes.all_products_collection_url -%}{%- continue -%}{%- endif -%}
                 <li>
                   <a href="{{ link.url }}" class="cart-empty__category-link">
                     <span>{{ link.title | escape }}</span>
@@ -113,12 +146,6 @@
       <div class="cart__items" id="main-cart-items" data-id="{{ section.id }}">
         <div class="js-contents">
           {%- if cart != empty -%}
-            {%- comment -%}
-              Inside .js-contents on purpose: cart.js swaps that container on
-              every quantity change, so the progress recomputes with the fresh
-              cart total for free.
-            {%- endcomment -%}
-            {%- render 'free-shipping-bar' -%}
             <table class="cart-items">
               <caption class="visually-hidden">
                 {{ 'sections.cart.title' | t }}
@@ -198,9 +225,11 @@
                             {{ item.final_price | money }}
                           </strong>
                         </div>
-                      {%- else -%}
-                        <div class="product-option">
-                          {{ item.original_price | money }}
+                      {%- elsif item.quantity > 1 -%}
+                        {%- comment -%} Unit price only when it differs from the line total. {%- endcomment -%}
+                        <div class="product-option cart-item__unit-price">
+                          {%- assign unit_price_money = item.original_price | money -%}
+                          {{ 'sections.cart.price_each' | t: price: unit_price_money }}
                         </div>
                       {%- endif -%}
 

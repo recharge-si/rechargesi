@@ -1,0 +1,215 @@
+{{ 'component-brand-button.css' | asset_url | stylesheet_tag }}
+{{ 'section-hero-campaign.css' | asset_url | stylesheet_tag }}
+
+{%- liquid
+  assign image = section.settings.image
+  assign image_mobile = section.settings.image_mobile
+  assign mobile_widths = '375,550,750,1100,1500' | split: ','
+  assign image_style = 'object-position: ' | append: image.presentation.focal_point | append: ';'
+
+  # CSV-imported media often has its source URL as alt text; treat that as no alt
+  assign image_alt = image.alt | escape
+  if image_alt contains '://'
+    assign image_alt = ''
+  endif
+
+  assign loading = 'lazy'
+  assign fetch_priority = 'auto'
+  if section.index == 1
+    assign loading = 'eager'
+    assign fetch_priority = 'high'
+  endif
+-%}
+
+<div class="color-{{ section.settings.color_scheme }} gradient">
+<div class="hero-campaign hero-campaign--{{ section.settings.layout }} page-width">
+  <div class="hero-campaign__media">
+    <div class="hero-campaign__image">
+      {%- if image != blank -%}
+        <picture>
+          {%- if image_mobile != blank -%}
+            <source
+              media="(max-width: 749px)"
+              srcset="
+                {%- for width in mobile_widths -%}
+                  {%- assign w = width | plus: 0 -%}
+                  {%- if w < image_mobile.width -%}{{ image_mobile | image_url: width: w }} {{ w }}w, {% endif -%}
+                {%- endfor -%}
+                {{ image_mobile | image_url }} {{ image_mobile.width }}w
+              "
+              sizes="100vw"
+              width="{{ image_mobile.width }}"
+              height="{{ image_mobile.height }}"
+            >
+          {%- endif -%}
+          {{
+            image
+            | image_url: width: 2400
+            | image_tag:
+              widths: '375, 550, 750, 1000, 1300, 1600, 2000, 2400',
+              sizes: '(min-width: 1200px) 620px, (min-width: 990px) 55vw, 100vw',
+              loading: loading,
+              fetchpriority: fetch_priority,
+              alt: image_alt,
+              style: image_style
+          }}
+        </picture>
+      {%- else -%}
+        {{ 'hero-apparel-1' | placeholder_svg_tag: 'placeholder-svg' }}
+      {%- endif -%}
+    </div>
+  </div>
+
+  <div class="hero-campaign__content">
+    <div class="hero-campaign__inner">
+      {%- if section.settings.eyebrow != blank -%}
+        <p class="hero-campaign__eyebrow">{{ section.settings.eyebrow | escape }}</p>
+      {%- endif -%}
+
+      {%- if section.settings.heading != blank -%}
+        <h2 class="hero-campaign__heading">{{ section.settings.heading }}</h2>
+      {%- endif -%}
+
+      {%- if section.settings.text != blank -%}
+        <p class="hero-campaign__text">{{ section.settings.text }}</p>
+      {%- endif -%}
+
+      {%- if section.settings.button_label_1 != blank or section.settings.button_label_2 != blank -%}
+        <div class="hero-campaign__buttons">
+          {%- if section.settings.button_label_1 != blank -%}
+            <a
+              {% if section.settings.button_link_1 != blank %}
+                href="{{ section.settings.button_link_1 }}"
+              {% else %}
+                role="link" aria-disabled="true"
+              {% endif %}
+              class="button button--brand"
+            >
+              {{- section.settings.button_label_1 | escape -}}
+              <span class="button__arrow" aria-hidden="true">{{- 'icon-arrow.svg' | inline_asset_content -}}</span>
+            </a>
+          {%- endif -%}
+          {%- if section.settings.button_label_2 != blank -%}
+            <a
+              {% if section.settings.button_link_2 != blank %}
+                href="{{ section.settings.button_link_2 }}"
+              {% else %}
+                role="link" aria-disabled="true"
+              {% endif %}
+              class="button button--brand-outline"
+            >
+              {{- section.settings.button_label_2 | escape -}}
+            </a>
+          {%- endif -%}
+        </div>
+      {%- endif -%}
+
+      {%- if section.settings.trust_text != blank -%}
+        <p class="hero-campaign__trust">{{ section.settings.trust_text | escape }}</p>
+      {%- endif -%}
+    </div>
+  </div>
+</div>
+</div>
+
+{% schema %}
+{
+  "name": "Campaign hero",
+  "tag": "section",
+  "class": "section section-hero-campaign",
+  "limit": 1,
+  "settings": [
+    {
+      "type": "header",
+      "content": "Content"
+    },
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow",
+      "info": "Short label above the heading, e.g. a season or campaign name."
+    },
+    {
+      "type": "inline_richtext",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Gear up. Get on the water."
+    },
+    {
+      "type": "inline_richtext",
+      "id": "text",
+      "label": "Text",
+      "default": "Windsurf, wing, foil and watersports equipment from the brands riders trust."
+    },
+    {
+      "type": "text",
+      "id": "button_label_1",
+      "label": "Primary button label",
+      "default": "Shop windsurf"
+    },
+    {
+      "type": "url",
+      "id": "button_link_1",
+      "label": "Primary button link"
+    },
+    {
+      "type": "text",
+      "id": "button_label_2",
+      "label": "Secondary button label",
+      "default": "Shop all gear"
+    },
+    {
+      "type": "url",
+      "id": "button_link_2",
+      "label": "Secondary button link"
+    },
+    {
+      "type": "text",
+      "id": "trust_text",
+      "label": "Trust line",
+      "info": "Small line under the buttons. Leave empty to hide."
+    },
+    {
+      "type": "header",
+      "content": "Image"
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Image",
+      "info": "Action or product photo without text. Set a focal point to control cropping."
+    },
+    {
+      "type": "image_picker",
+      "id": "image_mobile",
+      "label": "Mobile image",
+      "info": "Optional. Shown below 750px wide instead of the main image."
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "select",
+      "id": "layout",
+      "label": "Desktop layout",
+      "options": [
+        { "value": "text-left", "label": "Text left, image right" },
+        { "value": "text-right", "label": "Image left, text right" }
+      ],
+      "default": "text-left"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme",
+      "default": "scheme-1"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Campaign hero"
+    }
+  ]
+}
+{% endschema %}

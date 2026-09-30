@@ -1,0 +1,107 @@
+/* Shop by brand — grid of brand name / logo cells with shared hairline borders. */
+
+.shop-by-brand__header {
+  margin-bottom: 2.4rem;
+}
+
+.shop-by-brand__list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid rgba(var(--color-foreground), 0.12);
+  border-left: 1px solid rgba(var(--color-foreground), 0.12);
+}
+
+.shop-by-brand__item {
+  border-right: 1px solid rgba(var(--color-foreground), 0.12);
+  border-bottom: 1px solid rgba(var(--color-foreground), 0.12);
+}
+
+.shop-by-brand__tile {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  min-height: 8.8rem;
+  padding: 2rem 1.6rem;
+  color: rgb(var(--color-foreground));
+  text-align: center;
+  text-decoration: none;
+  transition: background-color var(--duration-default) ease;
+}
+
+.shop-by-brand__tile:focus-visible {
+  outline: 0.2rem solid rgb(var(--color-foreground));
+  outline-offset: -0.4rem;
+}
+
+.shop-by-brand__name {
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.shop-by-brand__logo {
+  display: block;
+  max-width: 70%;
+  max-height: 4rem;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  /* Uniform monochrome row; brand colour comes back on hover */
+  filter: grayscale(1) contrast(1.2);
+  opacity: 0.8;
+  transition: filter var(--duration-medium) ease, opacity var(--duration-medium) ease;
+}
+
+.shop-by-brand__tile:hover .shop-by-brand__logo,
+.shop-by-brand__tile:focus-visible .shop-by-brand__logo {
+  filter: none;
+  opacity: 1;
+}
+
+/* Red rule that grows along the bottom edge on hover/focus */
+.shop-by-brand__tile::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 3px;
+  background-color: var(--color-brand-primary);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform var(--duration-medium) var(--ease-out-slow);
+}
+
+.shop-by-brand__tile:hover {
+  background-color: rgba(var(--color-foreground), 0.03);
+}
+
+.shop-by-brand__tile:hover::after,
+.shop-by-brand__tile:focus-visible::after {
+  transform: scaleX(1);
+}
+
+@media screen and (min-width: 750px) {
+  .shop-by-brand__header {
+    margin-bottom: 3.2rem;
+  }
+
+  .shop-by-brand__list {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .shop-by-brand__tile {
+    min-height: 11.2rem;
+  }
+
+  .shop-by-brand__name {
+    font-size: 1.7rem;
+  }
+}

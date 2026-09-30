@@ -1,0 +1,40 @@
+{% comment %}
+  Outputs clean alt text for a product image (unescaped — escape at the call site).
+
+  Products imported from supplier CSVs carry the source image URL as alt text
+  (e.g. "https://www.patrikinternational.com/assets/.../fc73-gen3.jpg"), which
+  screen readers read out character by character. When the alt is blank or
+  looks like a URL/filename, fall back to the product title, numbered by
+  position so a gallery doesn't repeat the same label.
+
+  Accepts:
+  - alt: {String} The image's own alt text
+  - title: {String} Product title used as the fallback
+  - position: {Number} Media position (optional; appended when > 1)
+
+  Usage:
+  {%- capture media_alt -%}{% render 'media-alt', alt: media.alt, title: product.title, position: media.position %}{%- endcapture -%}
+{% endcomment %}
+
+{%- liquid
+  assign alt_text = alt | strip
+  assign alt_check = alt_text | downcase
+  assign alt_is_junk = false
+
+  if alt_text == blank
+    assign alt_is_junk = true
+  elsif alt_check contains '://' or alt_check contains 'www.'
+    assign alt_is_junk = true
+  elsif alt_check contains '.jpg' or alt_check contains '.jpeg' or alt_check contains '.png' or alt_check contains '.webp'
+    assign alt_is_junk = true
+  endif
+
+  if alt_is_junk and title != blank
+    assign alt_text = title
+    if position > 1
+      assign alt_text = alt_text | append: ' – ' | append: position
+    endif
+  endif
+
+  echo alt_text
+-%}

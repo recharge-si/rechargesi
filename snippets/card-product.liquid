@@ -59,6 +59,9 @@
           Products without media render a placeholder rather than a text-only card,
           so every card in a grid keeps the same height and alignment.
         {%- endcomment -%}
+        {%- capture card_alt -%}
+          {%- render 'media-alt', alt: card_product.featured_media.alt, title: card_product.title -%}
+        {%- endcapture -%}
         <div class="card__media{% if image_shape and image_shape != 'default' %} shape--{{ image_shape }} color-{{ settings.card_color_scheme }} gradient{% endif %}">
           {%- if card_product.featured_media -%}
             <div class="media media--transparent media--hover-effect">
@@ -75,7 +78,7 @@
                 "
                 src="{{ card_product.featured_media | image_url: width: 533 }}"
                 sizes="(min-width: {{ settings.page_width }}px) {{ settings.page_width | minus: 130 | divided_by: 4 }}px, (min-width: 990px) calc((100vw - 130px) / 4), (min-width: 750px) calc((100vw - 120px) / 3), calc((100vw - 35px) / 2)"
-                alt="{{ card_product.featured_media.alt | escape }}"
+                alt="{{ card_alt | escape }}"
                 class="motion-reduce"
                 {% unless lazy_load == false %}
                   loading="lazy"
@@ -136,6 +139,10 @@
                     assign hover_media = card_product.images[1]
                   endif
 
+                  capture hover_alt
+                    render 'media-alt', alt: hover_media.alt, title: card_product.title, position: 2
+                  endcapture
+
                 -%}
                 <img
                   srcset="
@@ -149,7 +156,7 @@
                   "
                   src="{{ hover_media | image_url: width: 533 }}"
                   sizes="(min-width: {{ settings.page_width }}px) {{ settings.page_width | minus: 130 | divided_by: 4 }}px, (min-width: 990px) calc((100vw - 130px) / 4), (min-width: 750px) calc((100vw - 120px) / 3), calc((100vw - 35px) / 2)"
-                  alt="{{ hover_media.alt | escape }}"
+                  alt="{{ hover_alt | escape }}"
                   class="motion-reduce"
                   loading="lazy"
                   width="{{ hover_media.width }}"
@@ -272,12 +279,36 @@
               </p>
             {%- endif -%}
 
-            {%- if card_product.price_varies -%}
+            {%- comment -%}
+              price_min/price_max span every variant, including sold-out sizes and
+              €0 placeholders left by CSV imports (a closeout showed "€0 – €2,899"
+              while only €1,199–€1,799 sizes could be bought). Range over the
+              variants a customer can actually buy. With none (fully sold out) the
+              standard price snippet is kept unchanged.
+            {%- endcomment -%}
+            {%- liquid
+              assign buyable_min = nil
+              assign buyable_max = 0
+              for card_variant in card_product.variants
+                if card_variant.available and card_variant.price > 0
+                  if buyable_min == nil or card_variant.price < buyable_min
+                    assign buyable_min = card_variant.price
+                  endif
+                  if card_variant.price > buyable_max
+                    assign buyable_max = card_variant.price
+                  endif
+                endif
+              endfor
+            -%}
+            {%- if buyable_min != nil and buyable_min != buyable_max -%}
               <div class="card__price-range">
-                <span class="card__price-range-value">{{ card_product.price_min | money }}</span>
+                <span class="card__price-range-value">{{ buyable_min | money }}</span>
                 <span class="card__price-range-sep">&ndash;</span>
-                <span class="card__price-range-value">{{ card_product.price_max | money }}</span>
+                <span class="card__price-range-value">{{ buyable_max | money }}</span>
               </div>
+            {%- elsif buyable_min != nil and card_product.price_varies -%}
+              {%- comment -%} One buyable price among varying ones: show that variant, not "From €0". {%- endcomment -%}
+              {% render 'price', product: card_product, use_variant: true, price_class: '', show_compare_at_price: true %}
             {%- else -%}
               {% render 'price', product: card_product, price_class: '', show_compare_at_price: true %}
             {%- endif -%}
@@ -560,7 +591,7 @@
                                 "
                                 src="{{ card_product.featured_media | image_url: width: 533 }}"
                                 sizes="(min-width: {{ settings.page_width }}px) {{ settings.page_width | minus: 130 | divided_by: 4 }}px, (min-width: 990px) calc((100vw - 130px) / 4), (min-width: 750px) calc((100vw - 120px) / 3), calc((100vw - 35px) / 2)"
-                                alt="{{ card_product.featured_media.alt | escape }}"
+                                alt="{{ card_alt | escape }}"
                                 class="motion-reduce"
                                 {% unless lazy_load == false %}
                                   loading="lazy"

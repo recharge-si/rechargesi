@@ -347,7 +347,11 @@
       "note": "Order special instructions",
       "checkout": "Check out",
       "empty": "Your cart is empty",
-      "empty_subtext": "Looks like you haven't added anything yet. Browse our gear and find your next setup.",
+      "empty_title": "Nothing in here yet",
+      "empty_subtext": "Browse boards, sails, wings and foils, or tell us how you ride and we'll help you pick the right setup.",
+      "empty_advice": "Not sure what fits?",
+      "empty_advice_call": "Call {{ phone }}",
+      "empty_advice_email": "Email us",
       "empty_login": "Log in",
       "empty_login_hint": "Have an account? Log in to check out faster.",
       "empty_recommendations": "You might like",
@@ -372,6 +376,11 @@
       },
       "update": "Update",
       "order_summary": "Order summary",
+      "price_each": "{{ price }} each",
+      "item_count": {
+        "one": "{{ count }} item",
+        "other": "{{ count }} items"
+      },
       "variant": "Variant",
       "login": {
         "title": "Have an account?",

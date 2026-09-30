@@ -3,6 +3,7 @@
 {{ 'component-price.css' | asset_url | stylesheet_tag }}
 {{ 'component-discounts.css' | asset_url | stylesheet_tag }}
 {{ 'component-trust-strip.css' | asset_url | stylesheet_tag }}
+{{ 'component-free-shipping.css' | asset_url | stylesheet_tag }}
 
 {%- style -%}
   .section-{{ section.id }}-padding {
@@ -24,7 +25,7 @@
   data-id="{{ section.id }}"
 >
   <div class="page-width">
-    <div class="cart__footer isolate section-{{ section.id }}-padding">
+    <div class="cart__footer isolate">
       {%- if settings.show_cart_note -%}
         <cart-note class="cart__note field">
           <label for="Cart-note">{{ 'sections.cart.note' | t }}</label>
@@ -47,19 +48,32 @@
               <div class="js-contents cart-summary" {{ block.shopify_attributes }}>
                 <div class="cart-summary__header">
                   <h2 class="cart-summary__title">{{ 'sections.cart.order_summary' | t }}</h2>
-                  <div class="cart-summary__accent"></div>
+                  <p class="cart-summary__count">{{ 'sections.cart.item_count' | t: count: cart.item_count }}</p>
                 </div>
 
+                {%- comment -%}
+                  In the summary rather than above the items: it is a statement about
+                  the total, so it sits next to the total. .js-contents is swapped on
+                  every quantity change, so the progress stays current.
+                {%- endcomment -%}
+                {%- render 'free-shipping-bar' -%}
+
                 {%- if cart.cart_level_discount_applications.size > 0 -%}
-                  <ul class="discounts list-unstyled" role="list" aria-label="{{ 'customer.order.discount' | t }}">
+                  <dl class="cart-summary__rows">
+                    <div class="cart-summary__row">
+                      <dt>{{ 'general.cart.subtotal' | t }}</dt>
+                      <dd>{{ cart.items_subtotal_price | money }}</dd>
+                    </div>
                     {%- for discount in cart.cart_level_discount_applications -%}
-                      <li class="discounts__discount discounts__discount--position">
-                        {{- 'icon-discount.svg' | inline_asset_content -}}
-                        {{ discount.title | escape }}
-                        (-{{ discount.total_allocated_amount | money }})
-                      </li>
+                      <div class="cart-summary__row cart-summary__row--discount">
+                        <dt>
+                          {{- 'icon-discount.svg' | inline_asset_content -}}
+                          {{ discount.title | escape }}
+                        </dt>
+                        <dd>-{{ discount.total_allocated_amount | money }}</dd>
+                      </div>
                     {%- endfor -%}
-                  </ul>
+                  </dl>
                 {%- endif -%}
 
                 <div class="cart-summary__total">
@@ -137,12 +151,11 @@
       </div>
 
       {%- comment -%}
-        Below the summary rather than beside it: the footer is one centred column,
-        so the way back into the catalogue and the reassurance both sit under the
-        decision instead of competing with it from the opposite margin.
+        Directly under the checkout button, inside the summary panel: the
+        reassurance and the way back into the catalogue belong to the decision.
       {%- endcomment -%}
       <div class="cart__footer-aside">
-        {%- render 'trust-strip' -%}
+        {%- render 'trust-strip', layout: 'stacked' -%}
         <a class="cart__continue" href="{{ routes.all_products_collection_url }}">
           <span class="cart__continue-arrow" aria-hidden="true">&larr;</span>
           {{ 'general.continue_shopping' | t }}

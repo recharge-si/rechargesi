@@ -32,6 +32,14 @@
         bar.classList.remove('is-visible');
         return;
       }
+      // The bar lives outside the re-rendered .js-contents, so copy the total
+      // from the freshly rendered summary rather than keeping the page-load value.
+      var total = document.querySelector('.cart-summary__total-value');
+      var barValue = bar.querySelector('.cart__sticky-bar-value');
+      if (total && barValue && barValue.textContent !== total.textContent) {
+        barValue.textContent = total.textContent;
+      }
+
       var rect = target.getBoundingClientRect();
       var buttonVisible = rect.bottom > 0 && rect.top < window.innerHeight - 20;
 
@@ -51,6 +59,9 @@
     window.addEventListener('scroll', schedule, { passive: true });
     window.addEventListener('resize', schedule, { passive: true });
     document.addEventListener('cart:refresh', schedule);
+    if (typeof subscribe === 'function' && typeof PUB_SUB_EVENTS !== 'undefined') {
+      subscribe(PUB_SUB_EVENTS.cartUpdate, schedule);
+    }
   }
 
   if (document.readyState === 'loading') {
