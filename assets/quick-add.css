@@ -404,3 +404,152 @@ quick-add-bulk .quantity__input {
 .quantity__input-disabled {
   pointer-events: none;
 }
+
+/* ==========================================================================
+   Recharge quick-add dialog
+   --------------------------------------------------------------------------
+   Only what it takes to add one item: image, name, price, size, delivery,
+   quantity + Add to cart, and the way to the full page. The product page's
+   breadcrumb, tax line, trust strip and spec sheet all came along with the
+   fetched section and turned a two-second decision into a second product
+   page. They stay on the product page; here they are hidden.
+   ========================================================================== */
+
+.quick-add-modal__content:not(.quick-add-modal__content--bulk) {
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+@media screen and (min-width: 750px) {
+  .quick-add-modal__content:not(.quick-add-modal__content--bulk) {
+    width: min(84rem, calc(100% - 6rem));
+    border-top: var(--accent-rule-height) solid var(--color-brand-primary);
+  }
+}
+
+.quick-add-modal__content-info:not(.quick-add-modal__content-info--bulk) {
+  --modal-padding: var(--space-5);
+}
+
+@media screen and (min-width: 750px) {
+  .quick-add-modal__content-info:not(.quick-add-modal__content-info--bulk) {
+    --modal-padding: var(--space-6);
+  }
+}
+
+quick-add-modal .product-breadcrumb,
+quick-add-modal .product__tax,
+quick-add-modal .installment,
+quick-add-modal .pbt-wrap,
+quick-add-modal .product-trust-strip,
+quick-add-modal .thumbnail-slider,
+quick-add-modal .slider-buttons {
+  display: none !important;
+}
+
+/* Close: a plain ✕ in the corner, no circle. */
+.quick-add-modal__toggle {
+  width: 4.4rem;
+  height: 4.4rem;
+  padding: 1.2rem;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--color-text-muted);
+  transition: color var(--dur-fast) var(--ease-standard);
+}
+
+.quick-add-modal__toggle:hover {
+  color: var(--color-text);
+}
+
+@media screen and (min-width: 750px) {
+  quick-add-modal .quick-add-modal__toggle {
+    top: var(--space-2);
+    right: var(--space-2);
+  }
+}
+
+/* Name: brand eyebrow + product name, small — no page-title scale, no rule. */
+quick-add-modal .product-page-header {
+  margin: 0 0 var(--space-4);
+  padding-right: var(--space-7);
+}
+
+quick-add-modal .product-page-header .product__text {
+  margin-bottom: var(--space-1) !important;
+}
+
+quick-add-modal .product-page-header .product__title {
+  padding: 0;
+}
+
+quick-add-modal .product-page-header .product__title::after {
+  display: none;
+}
+
+quick-add-modal .product-page-header .product__title > h1 {
+  display: block;
+  font-size: var(--type-h3);
+  font-weight: 700;
+  line-height: 1.25;
+  letter-spacing: 0;
+}
+
+/* Image and info side by side, image 40%. Selector out-scores the product
+   page's --media-column-width rule, which is meant for the full page. */
+@media screen and (min-width: 750px) {
+  quick-add-modal .product.grid.product--large:not(.product--no-media) .product__media-wrapper,
+  quick-add-modal .product:not(.product--no-media) .product__media-wrapper {
+    width: 40%;
+    max-width: 40%;
+    flex: 0 0 40%;
+  }
+
+  quick-add-modal .product.grid.product--large:not(.product--no-media) .product__info-wrapper,
+  quick-add-modal .product:not(.product--no-media) .product__info-wrapper {
+    padding-top: 0;
+    padding-left: var(--space-6);
+    width: auto;
+    max-width: none;
+    flex: 1 1 0;
+  }
+}
+
+@media screen and (max-width: 749px) {
+  quick-add-modal .product__media-wrapper {
+    max-width: 26rem;
+    margin: 0 auto var(--space-4);
+  }
+}
+
+quick-add-modal .product-media-container.constrain-height {
+  width: 100%;
+}
+
+quick-add-modal .price--large .price-item {
+  font-size: 2.2rem;
+}
+
+quick-add-modal .product__info-container > * + * {
+  margin-top: var(--space-4);
+}
+
+/* "View full details" in the shared arrow-link style. */
+quick-add-modal .product:not(.featured-product) .product__view-details {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: var(--space-5);
+  font-size: var(--type-meta);
+  font-weight: 700;
+  letter-spacing: var(--tracking-caps);
+  text-transform: uppercase;
+  color: var(--color-text);
+}
+
+quick-add-modal .product__view-details:hover {
+  color: var(--color-brand-primary);
+  text-decoration: none;
+}

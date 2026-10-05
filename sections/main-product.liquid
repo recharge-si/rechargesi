@@ -214,22 +214,36 @@
       endfor
     endif
   -%}
-  <nav class="product-breadcrumb page-width" aria-label="{{ 'general.breadcrumbs.aria_label' | t }}">
-    <a href="/">{{ 'general.breadcrumbs.home' | t }}</a>
+  {%- liquid
+    # The same trail, as "title||url" steps, for the spec sheet's Category row.
+    assign spec_trail = ''
+    if bc_depth >= 1
+      assign spec_trail = bc_l1_title | append: '||' | append: bc_l1_url
+    endif
+    if bc_depth >= 2
+      assign spec_trail = spec_trail | append: ';;' | append: bc_l2_title | append: '||' | append: bc_l2_url
+    endif
+    if bc_depth >= 3
+      assign spec_trail = spec_trail | append: ';;' | append: bc_l3_title | append: '||' | append: bc_l3_url
+    endif
+    assign spec_trail = spec_trail | split: ';;'
+  -%}
+  <nav class="rc-crumbs product-breadcrumb page-width" aria-label="{{ 'general.breadcrumbs.aria_label' | t }}">
+    <a href="{{ routes.root_url }}">{{ 'general.breadcrumbs.home' | t }}</a>
     {%- if bc_depth >= 1 -%}
-      <span class="product-breadcrumb__sep" aria-hidden="true">/</span>
-      <a href="{{ bc_l1_url }}" class="product-breadcrumb__segment">{{ bc_l1_title | escape }}</a>
+      <span class="rc-crumbs__sep" aria-hidden="true">/</span>
+      <a href="{{ bc_l1_url }}">{{ bc_l1_title | escape }}</a>
     {%- endif -%}
     {%- if bc_depth >= 2 -%}
-      <span class="product-breadcrumb__sep" aria-hidden="true">/</span>
-      <a href="{{ bc_l2_url }}" class="product-breadcrumb__segment">{{ bc_l2_title | escape }}</a>
+      <span class="rc-crumbs__sep" aria-hidden="true">/</span>
+      <a href="{{ bc_l2_url }}">{{ bc_l2_title | escape }}</a>
     {%- endif -%}
     {%- if bc_depth >= 3 -%}
-      <span class="product-breadcrumb__sep" aria-hidden="true">/</span>
-      <a href="{{ bc_l3_url }}" class="product-breadcrumb__segment">{{ bc_l3_title | escape }}</a>
+      <span class="rc-crumbs__sep" aria-hidden="true">/</span>
+      <a href="{{ bc_l3_url }}">{{ bc_l3_title | escape }}</a>
     {%- endif -%}
-    <span class="product-breadcrumb__sep" aria-hidden="true">/</span>
-    <span class="product-breadcrumb__current">{{ product.title | truncate: 40 }}</span>
+    <span class="rc-crumbs__sep" aria-hidden="true">/</span>
+    <span class="rc-crumbs__current" aria-current="page">{{ product.title | truncate: 40 }}</span>
   </nav>
   <div class="page-width">
     {%- comment -%} Full-width header above grid — so image top and price top align {%- endcomment -%}
@@ -403,7 +417,12 @@
                   {{- product.selected_or_first_available_variant.sku -}}
                 </p>
               {%- when 'barcode_token' -%}
-                {%- render 'product-barcode-token', product: product, section_id: section.id -%}
+                {%- render 'product-barcode-token',
+                  product: product,
+                  section_id: section.id,
+                  block: block,
+                  trail: spec_trail
+                -%}
               {%- when 'stock_locations' -%}
                 <div class="quick-add-hidden" {{ block.shopify_attributes }}>
                   {%- render 'product-stock-locations',
@@ -1060,8 +1079,20 @@
     },
     {
       "type": "barcode_token",
-      "name": "Barcode & Token",
-      "limit": 1
+      "name": "Specifications",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "paragraph",
+          "content": "Brand, category, available options, SKU and EAN, from the product's own data. SKU and EAN follow the selected variant."
+        },
+        {
+          "type": "textarea",
+          "id": "spec_rows",
+          "label": "Spec rows from metafields",
+          "info": "One per line: Label | namespace.key — e.g. Construction | specs.construction. Rows with no value on a product are skipped."
+        }
+      ]
     },
     {
       "type": "stock_locations",

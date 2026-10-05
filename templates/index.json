@@ -79,8 +79,9 @@
       "settings": {
         "heading": "Shop by sport",
         "color_scheme": "scheme-1",
-        "padding_top": 56,
-        "padding_bottom": 16
+        "feature_first": true,
+        "show_count": true,
+        "spacing": "default"
       }
     },
     "featured_collection": {
@@ -104,11 +105,11 @@
         "show_secondary_image": true,
         "show_vendor": false,
         "show_rating": false,
-        "quick_add": "none",
+        "quick_add": "standard",
         "columns_mobile": "2",
         "swipe_on_mobile": false,
-        "padding_top": 48,
-        "padding_bottom": 56
+        "padding_top": 72,
+        "padding_bottom": 0
       }
     },
     "store_promo": {
@@ -122,8 +123,7 @@
         "button_label": "Get directions",
         "button_link": "https://maps.google.com/?q=Koprska+ulica+74,+1000+Ljubljana",
         "color_scheme": "scheme-2",
-        "padding_top": 36,
-        "padding_bottom": 72
+        "spacing": "large"
       }
     },
     "shop_by_brand": {
@@ -207,8 +207,7 @@
       "settings": {
         "heading": "Shop by brand",
         "color_scheme": "scheme-1",
-        "padding_top": 24,
-        "padding_bottom": 48
+        "spacing": "tight"
       }
     }
   },

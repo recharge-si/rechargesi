@@ -1,13 +1,19 @@
-/* Campaign hero — text + photo inside .page-width.
-   Mobile/tablet: photo on top, text below. Desktop: text left, photo right. */
+/* ==========================================================================
+   Campaign hero — text + photo inside .page-width
+   --------------------------------------------------------------------------
+   Deliberately not a full-screen hero: Recharge is a specialist retailer and
+   the catalogue has to be reachable fast. On a 1440×900 screen the sport
+   tiles start above the fold. The section has no bottom padding of its own —
+   the next section's rhythm gap is the only space between them, so the hero
+   leads straight into the catalogue instead of ending in a white band.
+   ========================================================================== */
 
 .hero-campaign {
   display: flex;
   flex-direction: column;
-  gap: 2.4rem;
-  padding-top: 1.6rem;
-  padding-bottom: 3.2rem;
-  color: rgb(var(--color-foreground));
+  gap: var(--space-5);
+  padding-top: var(--space-4);
+  color: var(--color-text);
 }
 
 /* ── Media ── */
@@ -15,7 +21,7 @@
   position: relative;
   aspect-ratio: 4 / 3;
   overflow: hidden;
-  background-color: rgba(var(--color-foreground), 0.04);
+  background-color: var(--color-surface-strong);
 }
 
 .hero-campaign__image,
@@ -38,53 +44,38 @@
 
 /* ── Content ── */
 .hero-campaign__inner {
-  max-width: 52rem;
-}
-
-.hero-campaign__eyebrow {
-  margin: 0 0 1.2rem;
-  font-size: 1.2rem;
-  font-weight: 700;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: var(--color-brand-primary);
+  max-width: 48rem;
 }
 
 .hero-campaign__heading {
   margin: 0;
   font-family: var(--font-heading-family);
-  font-size: clamp(3.4rem, 9vw, 4.6rem);
+  font-size: var(--type-display);
   font-weight: 700;
   line-height: 1;
-  letter-spacing: -0.01em;
+  letter-spacing: var(--tracking-title);
   text-transform: uppercase;
   text-wrap: balance;
-  color: rgb(var(--color-foreground));
+  color: var(--color-text);
 }
 
-/* Short red rule under the heading — same accent as page headers */
-.hero-campaign__heading::after {
-  content: '';
-  display: block;
-  width: 4rem;
-  height: 3px;
-  margin-top: 1.8rem;
-  background-color: var(--color-brand-primary);
+.hero-campaign__heading.rc-rule::after {
+  margin-top: var(--space-5);
 }
 
 .hero-campaign__text {
-  margin: 1.8rem 0 0;
-  font-size: 1.6rem;
-  line-height: 1.5;
-  color: rgba(var(--color-foreground), 0.8);
-  max-width: 44rem;
+  margin: var(--space-5) 0 0;
+  max-width: 42rem;
+  font-size: var(--type-body);
+  line-height: 1.55;
+  color: var(--color-text-secondary);
 }
 
 .hero-campaign__buttons {
   display: flex;
   flex-direction: column;
-  gap: 1.2rem;
-  margin-top: 2.8rem;
+  gap: var(--space-3);
+  margin-top: var(--space-6);
 }
 
 .hero-campaign__buttons .button {
@@ -92,20 +83,19 @@
 }
 
 .hero-campaign__trust {
-  margin: 2.4rem 0 0;
-  font-size: 1.2rem;
+  margin: var(--space-5) 0 0;
+  font-size: var(--type-meta);
   line-height: 1.6;
-  letter-spacing: 0.08em;
+  letter-spacing: var(--tracking-caps);
   text-transform: uppercase;
-  color: rgba(var(--color-foreground), 0.65);
+  color: var(--color-text-muted);
 }
 
 /* ── Tablet ── */
 @media screen and (min-width: 750px) {
   .hero-campaign {
-    gap: 3.2rem;
-    padding-top: 2.4rem;
-    padding-bottom: 4rem;
+    gap: var(--space-6);
+    padding-top: var(--space-5);
   }
 
   .hero-campaign__media {
@@ -122,31 +112,30 @@
   }
 }
 
-/* ── Desktop: side by side ── */
+/* ── Desktop: side by side ──
+   Text on 5 of 12 columns, photo on 7. The text column is bottom-aligned
+   with the photo so the heading, buttons and image edge share one baseline
+   instead of the text floating mid-height in a tall white column. */
 @media screen and (min-width: 990px) {
   .hero-campaign {
     display: grid;
-    grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
-    align-items: center;
-    gap: 5.6rem;
-    padding-top: 3.2rem;
-    padding-bottom: 4.8rem;
+    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+    align-items: end;
+    gap: var(--space-7);
   }
 
   .hero-campaign__media {
     grid-column: 2;
     grid-row: 1;
-    aspect-ratio: auto;
-    height: clamp(44rem, 38vw, 52rem);
+    aspect-ratio: 4 / 3;
+    max-height: calc(100vh - 26rem);
+    min-height: 36rem;
   }
 
   .hero-campaign__content {
     grid-column: 1;
     grid-row: 1;
-  }
-
-  .hero-campaign__heading {
-    font-size: clamp(4.4rem, 4.2vw, 5.6rem);
+    padding-bottom: var(--space-2);
   }
 
   .hero-campaign__text {
@@ -155,7 +144,7 @@
 
   /* Mirrored: image left, text right */
   .hero-campaign--text-right {
-    grid-template-columns: minmax(0, 6fr) minmax(0, 5fr);
+    grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
   }
 
   .hero-campaign--text-right .hero-campaign__media {

@@ -15,18 +15,29 @@
 
 <script src="{{ 'main-search.js' | asset_url }}" defer="defer"></script>
 
+{%- comment -%} Same buy button as the collection grid: Choose size / Add to cart {%- endcomment -%}
+{%- if section.settings.quick_add == 'standard' -%}
+  {{ 'quick-add.css' | asset_url | stylesheet_tag }}
+  <script src="{{ 'quick-add.js' | asset_url }}" defer="defer"></script>
+  <script src="{{ 'product-form.js' | asset_url }}" defer="defer"></script>
+  <script src="{{ 'card-size-picker.js' | asset_url }}" defer="defer"></script>
+{%- endif -%}
+
 <style>
+  /* Same page head as collections: breadcrumb, title and search field all
+     start on the content edge. The field sits where a collection has its
+     sub-navigation — the next step down from the title. */
   .template-search__header {
-    margin-bottom: 3rem;
+    padding-top: var(--space-5);
+    margin-bottom: var(--space-5);
   }
 
   .template-search__search {
-    margin: 0 auto 3.5rem;
-    max-width: 74.1rem;
+    max-width: 64rem;
   }
 
   .template-search__search .search {
-    margin-top: 3rem;
+    margin-top: var(--space-5);
   }
 
   /* Only the true blank state (page loaded with no query yet) gets the tall
@@ -38,7 +49,7 @@
 
   @media screen and (min-width: 750px) {
     .template-search__header {
-      margin-bottom: 5rem;
+      padding-top: var(--space-6);
     }
   }
 
@@ -90,12 +101,12 @@
 {% paginate search.results by 24 %}
   <div class="template-search{% unless search.performed %} template-search--blank{% endunless %} section-{{ section.id }}-padding">
     <div class="template-search__header page-width{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--fade-in{% endif %}">
-      <nav class="template-search__breadcrumb" aria-label="{{ 'general.breadcrumbs.aria_label' | t }}">
-        <a href="/">{{ 'general.breadcrumbs.home' | t }}</a>
-        <span class="template-search__breadcrumb-sep" aria-hidden="true">/</span>
-        <span class="template-search__breadcrumb-current">{{ 'templates.search.title' | t }}</span>
+      <nav class="rc-crumbs" aria-label="{{ 'general.breadcrumbs.aria_label' | t }}">
+        <a href="{{ routes.root_url }}">{{ 'general.breadcrumbs.home' | t }}</a>
+        <span class="rc-crumbs__sep" aria-hidden="true">/</span>
+        <span class="rc-crumbs__current" aria-current="page">{{ 'templates.search.title' | t }}</span>
       </nav>
-      <h1 class="template-search__title">
+      <h1 class="rc-page-title">
         {%- if search.performed -%}
           {{- 'templates.search.title' | t -}}
         {%- else -%}
@@ -208,7 +219,9 @@
                   show_vendor: section.settings.show_vendor,
                   show_rating: section.settings.show_rating,
                   lazy_load: true,
-                  skip_styles: skip_card_product_styles
+                  skip_styles: skip_card_product_styles,
+                  quick_add: section.settings.quick_add,
+                  section_id: section.id
                 %}
                 {%- assign skip_card_product_styles = true -%}
               </li>
@@ -331,7 +344,9 @@
                           show_vendor: section.settings.show_vendor,
                           show_rating: section.settings.show_rating,
                           lazy_load: lazy_load,
-                          skip_styles: skip_card_product_styles
+                          skip_styles: skip_card_product_styles,
+                          quick_add: section.settings.quick_add,
+                          section_id: section.id
                         %}
                         {%- assign skip_card_product_styles = true -%}
                       {%- when 'article' -%}
@@ -497,6 +512,22 @@
       "default": false,
       "label": "t:sections.main-search.settings.show_rating.label",
       "info": "t:sections.main-search.settings.show_rating.info"
+    },
+    {
+      "type": "select",
+      "id": "quick_add",
+      "default": "standard",
+      "label": "t:sections.main-collection-product-grid.settings.quick_add.label",
+      "options": [
+        {
+          "value": "none",
+          "label": "t:sections.main-collection-product-grid.settings.quick_add.options.option_1"
+        },
+        {
+          "value": "standard",
+          "label": "t:sections.main-collection-product-grid.settings.quick_add.options.option_2"
+        }
+      ]
     },
     {
       "type": "header",

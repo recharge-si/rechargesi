@@ -28,9 +28,42 @@
     data-product-id="{{ product.id }}"
   >
     {% if recommendations.performed and recommendations.products_count > 0 %}
-      <h2 class="related-products__heading inline-richtext {{ section.settings.heading_size }}">
-        {{ section.settings.heading }}
-      </h2>
+      {%- comment -%}
+        Next step on from the product: its own discipline. The deepest
+        catalogue path tag ("Windsurf / Boards / Freestyle/wave") handleizes
+        to that collection's handle in this store; the link only renders if
+        the collection really exists and has products.
+      {%- endcomment -%}
+      {%- liquid
+        assign discipline_collection = nil
+        assign discipline_label = ''
+        assign deepest_path_size = 0
+        for tag in product.tags
+          if tag contains ' / '
+            assign tag_parts = tag | split: ' / '
+            if tag_parts.size > deepest_path_size
+              assign tag_handle = tag | handleize
+              assign candidate = collections[tag_handle]
+              if candidate.all_products_count > 1
+                assign deepest_path_size = tag_parts.size
+                assign discipline_collection = candidate
+                assign discipline_label = tag_parts | last
+              endif
+            endif
+          endif
+        endfor
+      -%}
+      <div class="rc-section-head">
+        <h2 class="rc-section-title inline-richtext">
+          {{ section.settings.heading }}
+        </h2>
+        {%- if discipline_collection != nil -%}
+          <a href="{{ discipline_collection.url }}" class="rc-arrow-link">
+            {{- 'sections.related_products.more_in' | t: title: discipline_label | escape -}}
+            {{- 'icon-arrow.svg' | inline_asset_content -}}
+          </a>
+        {%- endif -%}
+      </div>
       <ul
         class="grid product-grid grid--{{ section.settings.columns_desktop }}-col-desktop grid--{{ section.settings.columns_mobile }}-col-tablet-down"
         role="list"

@@ -1,8 +1,12 @@
-/* Shop by brand — grid of brand name / logo cells with shared hairline borders. */
-
-.shop-by-brand__header {
-  margin-bottom: 2.4rem;
-}
+/* ==========================================================================
+   Shop by brand — Recharge's brand portfolio
+   --------------------------------------------------------------------------
+   Logos on open ground between two hairlines, not a bordered table: every
+   cell used to carry its own box, which read as a spreadsheet of logos. The
+   rail keeps the grid's alignment without drawing it. Logos sit in a uniform
+   monochrome row and take their own colour back on hover, with the same red
+   sweep the sport tiles and product cards use.
+   ========================================================================== */
 
 .shop-by-brand__list {
   display: grid;
@@ -10,27 +14,25 @@
   margin: 0;
   padding: 0;
   list-style: none;
-  border-top: 1px solid rgba(var(--color-foreground), 0.12);
-  border-left: 1px solid rgba(var(--color-foreground), 0.12);
+  border-top: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border);
 }
 
 .shop-by-brand__item {
-  border-right: 1px solid rgba(var(--color-foreground), 0.12);
-  border-bottom: 1px solid rgba(var(--color-foreground), 0.12);
+  min-width: 0;
 }
 
 .shop-by-brand__tile {
-  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
   height: 100%;
   min-height: 8.8rem;
-  padding: 2rem 1.6rem;
-  color: rgb(var(--color-foreground));
+  padding: var(--space-5) var(--space-4);
+  color: var(--color-text);
   text-align: center;
   text-decoration: none;
-  transition: background-color var(--duration-default) ease;
+  transition: background-color var(--dur-base) var(--ease-standard);
 }
 
 .shop-by-brand__tile:focus-visible {
@@ -42,66 +44,48 @@
   font-size: 1.5rem;
   font-weight: 700;
   line-height: 1.2;
-  letter-spacing: 0.1em;
+  letter-spacing: var(--tracking-caps);
   text-transform: uppercase;
 }
 
 .shop-by-brand__logo {
   display: block;
-  max-width: 70%;
-  max-height: 4rem;
   width: auto;
   height: auto;
+  max-width: min(70%, 16rem);
+  max-height: 3.6rem;
   object-fit: contain;
-  /* Uniform monochrome row; brand colour comes back on hover */
-  filter: grayscale(1) contrast(1.2);
-  opacity: 0.8;
-  transition: filter var(--duration-medium) ease, opacity var(--duration-medium) ease;
+  filter: grayscale(1) contrast(1.15);
+  opacity: 0.72;
+  transition: filter var(--dur-slow) var(--ease-standard), opacity var(--dur-slow) var(--ease-standard),
+    transform var(--dur-slow) var(--ease-out);
+}
+
+.shop-by-brand__tile:hover,
+.shop-by-brand__tile:focus-visible {
+  background-color: var(--color-surface);
 }
 
 .shop-by-brand__tile:hover .shop-by-brand__logo,
 .shop-by-brand__tile:focus-visible .shop-by-brand__logo {
   filter: none;
   opacity: 1;
-}
-
-/* Red rule that grows along the bottom edge on hover/focus */
-.shop-by-brand__tile::after {
-  content: '';
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: -1px;
-  height: 3px;
-  background-color: var(--color-brand-primary);
-  transform: scaleX(0);
-  transform-origin: left;
-  transition: transform var(--duration-medium) var(--ease-out-slow);
-}
-
-.shop-by-brand__tile:hover {
-  background-color: rgba(var(--color-foreground), 0.03);
-}
-
-.shop-by-brand__tile:hover::after,
-.shop-by-brand__tile:focus-visible::after {
-  transform: scaleX(1);
+  transform: scale(1.04);
 }
 
 @media screen and (min-width: 750px) {
-  .shop-by-brand__header {
-    margin-bottom: 3.2rem;
-  }
-
   .shop-by-brand__list {
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 
   .shop-by-brand__tile {
-    min-height: 11.2rem;
+    min-height: 10.4rem;
   }
+}
 
-  .shop-by-brand__name {
-    font-size: 1.7rem;
+/* Wide screens: one rail, every brand in a single row (up to eight). */
+@media screen and (min-width: 1200px) {
+  .shop-by-brand__list--rail {
+    grid-template-columns: repeat(var(--brand-count), minmax(0, 1fr));
   }
 }

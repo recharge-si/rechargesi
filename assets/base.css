@@ -2894,7 +2894,7 @@ details[open] > .header__submenu {
   border: none;
   background: none;
   position: relative;
-  transition: color 0.3s ease, background-color 0.3s ease;
+  transition: color var(--dur-fast) var(--ease-standard), background-color var(--dur-fast) var(--ease-standard);
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
@@ -2911,7 +2911,7 @@ details[open] > .header__submenu {
   background: var(--color-brand-primary);
   transform: scaleX(0);
   transform-origin: left;
-  transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: transform var(--dur-slow) var(--ease-out);
 }
 
 .header__menu-item:hover {
@@ -2923,7 +2923,7 @@ details[open] > .header__submenu {
 }
 
 .header__menu-item span {
-  transition: color 0.3s ease;
+  transition: color var(--dur-fast) var(--ease-standard);
 }
 
 .header__menu-item:hover span {
@@ -3003,7 +3003,7 @@ details[open] > .header__menu-item .icon-caret {
 
 .header__menu-item .icon-caret {
   right: 0.8rem;
-  transition: transform 0.3s ease, filter 0.3s ease;
+  transition: transform var(--dur-base) var(--ease-standard), filter var(--dur-fast) var(--ease-standard);
 }
 
 .header__submenu .icon-caret {

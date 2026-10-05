@@ -60,6 +60,20 @@ Templates (`templates/*.json`) declare which sections appear and in what order. 
 
 ## Customizations
 
+### Design System (`assets/recharge.css`)
+
+Loaded globally straight after `base.css`. **Fix order: token here → shared component here → the section's own stylesheet.** If two templates need the same rule it belongs in this file — the page head used to be copy-pasted into six stylesheets and had drifted (breadcrumb alpha 0.4 on one page, 0.62 on another; 0.4 fails contrast).
+
+- **Tokens:** colour roles (`--color-text`, `-secondary`, `-muted` = 0.62, the lowest alpha that clears 4.5:1; `--color-border`, `--color-surface`; fixed `--color-ink-rgb` / `--color-paper-rgb` for things that sit on photos and must not inherit a colour scheme), type scale (`--type-display/h1/h2/h3/eyebrow/body/small/meta/price`), spacing (`--space-1…8`, `--page-gutter`), rhythm (`--section-gap-tight/-/-large`, `--heading-gap`, `--grid-gap`) and motion (`--ease-standard`, `--ease-out`, `--dur-fast/base/slow` = 150/200/250ms, all 0.01ms under reduced motion).
+- **Components:** `.rc-eyebrow`, `.rc-page-title` (H1 on collection/search/cart), `.rc-section-title` (`.home-heading` is an alias), `.rc-rule` (the red bar — one definition), `.rc-page-head` + `.rc-crumbs`, `.rc-section-head` (title left, action right), `.rc-arrow-link` (arrow moves 4px, same everywhere), `.rc-sweep` (red rule growing along a bottom edge — tiles, brands, cards), `.rc-subnav`, `.rc-spec`.
+- **Rhythm:** homepage sections use `.rc-section rc-section--{flush|tight|default|large}` from a "Space above" select instead of per-instance pixel padding. Hero leads into Shop by sport (default), Shop by brand is `tight` (same discovery chapter), Featured gear is a new chapter, Store promo is `large` (change of subject). Dawn sections still on px padding (featured-collection, related-products, collection grid) are set to 72px to match `--section-gap`.
+- **Scroll reveal** is retuned here, not removed: 350ms instead of 600ms, 40ms cascade instead of 75ms.
+- **Gotcha:** never put `margin` shorthand on a component that is also `.page-width` — it overrides `margin: 0 auto` and the element slides to the left edge. Happened twice (subnav, product breadcrumb); use `margin-top`/`margin-bottom`.
+
+### Page Navigation
+
+**No AJAX page swapping.** `page-transitions.js` (fetch the next page, swap `<main>` after a fixed 300ms exit animation, re-run section scripts by hand) was removed: it made every click slower than a plain navigation. Replaced by the browser's cross-document view transition (`@view-transition`, 150ms cross-fade, off under reduced motion — in `recharge.css`) and a `speculationrules` block in `theme.liquid` that prefetches on hover (cart/checkout/account excluded). Both are no-ops in browsers that lack them.
+
 ### Brand Colors
 
 Defined in `assets/base.css` `:root` block �� always use these variables, never hardcode hex values:
@@ -80,9 +94,12 @@ Defined in `assets/base.css` `:root` block �� always use these variables, ne
 - **Menu type** must be set to `mega` in Shopify Admin → Header section settings.
 - **Header layout** is `middle-left` with nav on its own full-width row below the logo (two-row grid — logo+icons top, nav bottom).
 - **Nav items** are uppercase with letter-spacing; bottom border is `3px solid var(--color-brand-primary)`.
-- **Hover behavior**: mega menu opens on mouse hover (not click); clicking a top-level item navigates to its collection URL.
-- **Open state**: active top-nav item gets a red background (`var(--color-brand-primary)`) with white text.
-- **Dropdown**: full-width panel with `3px solid var(--color-brand-primary)` top border, 4-column `CSS columns` layout (not grid — avoids cross-column row alignment).
+- **Hover behavior**: mega menu opens on mouse hover (not click); clicking a top-level item navigates to its collection URL (`window.location.assign`).
+- **Keyboard**: Enter follows the link (same as a click); **Space or ArrowDown opens the panel and focuses its first link**; Escape closes and returns focus to the tab. Before this, hover was the only way to reach levels 2–3.
+- **The header expands**: the header has no bottom padding on desktop, so the open item's red tab runs straight into the header's red rule and the panel hangs from that rule — one shape, not a white box under the nav. The rule stays visible while open. The nav starts at the content edge (no negative margin — pulling it left made the first tab overhang the rule); tabs are tighter below 1400px so all ten items fit one row down to 1024px.
+- **Motion**: 200ms fade + 6px drop on open (`@starting-style`), 150ms fade on close — `HeaderMenu.close()` keeps `[open]` with `.is-closing` until the fade ends. Moving between menus swaps instantly (`.is-instant`); re-animating on every item the pointer crosses is what makes mega menus feel slow.
+- **Backdrop**: `.section-header::after`, fixed, `z-index: -1` inside the header's stacking context — dims the page, not the header. The panel needs `z-index: 0`; Dawn's `.global-settings-popup` puts it at −1, which painted the backdrop over the panel.
+- **Panel**: level-2 links are uppercase micro-headings with a hairline (hierarchy by type, not indentation); 4-column `CSS columns` layout (not grid — avoids cross-column row alignment); footer row "All {sport} →" + product count (`sections.header.shop_all`). **One style in every menu**: each category is the same uppercase heading with a hairline; categories with sub-items come first as groups, categories without follow as a tight stack of headings (`mega-menu__leaf`). A menu with no sub-items at all (SUP, Other) is just that stack. Rejected: spacing childless headings like groups (looked empty), a "More" group (put Wing's main categories under "More"), and arrow tiles for SUP/Other (a different style per menu). In the size-picker modal, "View full details" is a full-width outline button under Add to cart, and long variant names wrap instead of truncating.
 
 Key files:
 - `assets/component-mega-menu.css` — all mega menu styles
@@ -185,6 +202,22 @@ Two measured details: Dawn puts `margin-top: 2.5rem` on `product-form`, which pu
 
 **Dynamic checkout is off** (`show_dynamic_checkout: false` in `templates/product.json`). Add to cart is the single primary action; the "or / Buy with Shop / More payment options" stack was three competing CTAs before the decision the customer actually came to make. Note the trade — Shop Pay express checkout does convert for returning Shop Pay users, particularly on mobile and on cheap accessories. Re-enable in the theme editor if that turns out to matter more than the cleaner column.
 
+### Catalogue Toolbar (filters + sort)
+
+Desktop horizontal filters sit directly under the category tabs as one block (`component-facets.css`, end of file, scoped to `.facets__form`): filters, product count and sort are **the same small outlined sentence-case field** ("Availability ▾", "Brand (1) ▾", "Sort: Best selling ▾"). An active filter's field turns ink and shows its count (the count span now renders in horizontal layout too); an open field gets a red bottom edge and its panel hangs below with a red top rule. "Filter:"/"Sort by:" labels are visually hidden. A boxed bar with vertical dividers and uppercase labels was rejected — it looked like a different component from the tabs. Active filters are flat grey chips + "Clear all". The bar is `z-index: 1` and `.product-grid-container` is isolated (`isolation: isolate; z-index: 0`): without that the cards paint over open panels, and with a higher bar z-index (5 was tried) the bar showed through the sticky header's mega menu. Tablet (750–989) tightens tabs and hides the sort label to stay on one row.
+
+### Collection Sub-navigation
+
+`main-collection-banner.liquid` walks `recharge-menu` (same source as the mega menu and breadcrumb) and renders `.rc-subnav` under the title: the level below the current collection, or — for a leaf like Boards / Freestyle-wave — its siblings, with "All" pointing at the parent (`sections.collection_subnav.all`). A tab row, not pills, so it continues the header nav's language. **Only shown for 2–8 items** — a sport's 14 categories, or a childless category like Footstraps falling back to all its siblings, read as a second nav bar ("too much"); the mega menu covers those. Collection description now sits inside the page head.
+
+### Product Spec Sheet
+
+The `barcode_token` block (renamed "Specifications" in the editor) renders `snippets/product-barcode-token.liquid` as a spec sheet: Brand (vendor link), Category (breadcrumb trail, linked), each option with all its values, then SKU and EAN of the selected variant. **Only data the store holds** — the catalogue has no spec metafields (specs live in description prose), so nothing is parsed or invented. The block's "Spec rows from metafields" textarea (`Label | namespace.key`) adds rows once such metafields exist; empty values are skipped. The wrapper keeps `id="ProductBarcodeToken-{section}"` because `product-info.js` swaps it on variant change.
+
+Related products has a section head with "All {discipline} →" — the deepest path tag handleized (matches this store's collection handles), shown only if that collection exists with >1 product.
+
+The product info column's staggered entrance animation was removed: Add to cart was the last thing to appear.
+
 ### Product Breadcrumbs
 
 `Home / Wing / Boards / Product` — every category segment clickable. The path is derived by walking the navigation menu three levels deep and matching each link against the collections the product belongs to (`product.collections` flattened into a pipe-delimited string so `contains` can test it). Deepest match wins.
@@ -204,6 +237,17 @@ Rows were ~200px tall for a 110px thumbnail: `.cart-items td` carried `padding-t
 Result: **130px rows instead of 199px** — three line items now occupy the space two used to.
 
 **SKU shows under the product name**, `SKU: {value}`, using `item.sku` (Shopify's line-item shortcut for `item.variant.sku` — no need to reach through `.variant`) and the same `products.product.sku_label` locale key `snippets/product-barcode-token.liquid` uses on the product page. Explicitly requested for the **cart**, not the product page or collection cards — a version of this was first added to collection-grid cards (`snippets/card-product.liquid`) and reverted once that turned out to be the wrong surface. Hidden entirely when a line item has no SKU, same convention as the rest of the cart's optional rows. Present in all three cart surfaces that render a line item's details: the cart page (`sections/main-cart-items.liquid`), the drawer (`snippets/cart-drawer.liquid`, inert while `cart_type` is `notification`), and the "item added" toast (`sections/cart-notification-product.liquid`) — verified live in the toast, which is the surface this store's `cart_type` setting actually uses.
+
+### Added-to-cart Panel (`cart_type: notification`)
+
+`snippets/cart-notification.liquid` + `sections/cart-notification-product.liquid` + `assets/component-cart-notification.css`. Dawn's AJAX flow is untouched (`product-form.js` → `renderContents` → section re-fetch); only markup, styles and two JS details changed.
+
+- **Desktop:** 42rem panel hanging from the header's red rule at the content edge (like the mega menu — 6px drop + fade in over `--dur-slow`, faster fade out). **Below 750px:** full-width bottom sheet over a dimmed backdrop (`.cart-notification-wrapper::before`).
+- **Content:** "✓ Added to cart" header → image (10rem tile, `contain` + multiply) | title, `Size: 59` on one line, muted SKU, line price (+ `Qty: N · €X each` when N > 1) → "N items in cart  €total" → free shipping → Check out (red, primary) / View cart · N items (outline) / Continue shopping (text). The image + text row is one stretched link to the product.
+- **Free shipping:** `render 'free-shipping-bar', compact: true` — thin bar while short of the threshold, a single green ✓ line once reached. The cart page still gets the full bar.
+- **JS:** focus falls back to a 400ms timer because a second add while open (or reduced motion) fires no `transitionend`; outside-click uses `notification.contains()` so a tap on the backdrop (inside `<cart-notification>`, outside the panel) closes it.
+- Remember `getSectionInnerHTML` returns the per-item div's *contents* — `__item` and `__footer` are direct children of `#cart-notification-product`.
+- Locale: `general.cart.{item_added,qty,items_in_cart}` (en + sl).
 
 ### Cart Layout history (superseded)
 
@@ -316,13 +360,37 @@ Stock Dawn just shows `media[1]` on hover, which is another variant's identical-
 
 **Enabled via section settings:** `show_secondary_image: true` in both `templates/collection.json` and `templates/index.json` (featured collection "Izpostavljeno").
 
+### Product Card (visual layer)
+
+Flat and square: no lift, no drop shadow, no radius, no vignette (all removed as "floating object" styling). Hover = red sweep along the image bottom + 3% zoom + red title — the same language as sport tiles and brand items.
+
+- **1:1 frame always** — `card-product.liquid` fixes `ratio = 1` whatever the section's image-ratio setting ("adapt" put titles at different heights in one row). **Square images `cover`, off-square ones `contain` on white** (`card__media--cover/--contain`, decided in Liquid from `featured_media.aspect_ratio`). A grey surface behind contained images was tried and rejected — it showed as grey bands.
+- **Chips** (category + variant count) keep the original translucent smoke + blur look, by request, after solid-ink ("too dark") and light-paper ("too light") versions were both rejected. Fixed 2.2rem height so they align.
+- **Category chip = last segment of the deepest path tag** (`Windsurf / Boards / Freestyle/wave`). Only tags containing ` / ` count — "longest tag" surfaced import tags like `portal-source:sc_d84804ed69e9`. No path tag, no chip.
+- **Layout follows the owner's mockup**: bold name, a grey category line (the path levels *above* the chip, e.g. "Windsurf / Boards" under chip "Freestyle/wave" — never the same word twice), price, then a full-width buy button. Price sits directly under the text (no reserved title height); the card is a flex column so **the button is pinned to the card foot and buttons line up across a row**.
+- **"N sizes" chip** bottom-left on the image (`products.product.card_sizes`, or `card_options` when the first option isn't size-like).
+- **Image tile**: light grey (`--color-card-tile-rgb`) behind every card image with the image `mix-blend-mode: multiply`, so packshot whites become the tile — white-on-white packshots "floated in space", and a grey surface without the blend showed as bands.
+- **Primary image is scaled 1.06** — catalogue packshots carry wide white margins; 1.1 clipped products that fill their photo.
+- **Top-level nav items have no underline** — the nav row sits on the red header rule and a bar under the tab doubled up with it. Hover = the red tab on every item (plain links too, so the row behaves as one control), active = full-strength text, open = red tab.
+- **Buy button** (quick add = `standard` in `collection.json` / `index.json`): "CHOOSE SIZE →" for multi-variant, "ADD TO CART" for single-variant, disabled "SOLD OUT" otherwise; outline, red fill on hover. Rejected along the way: stock Dawn full-width buttons (too heavy), an icon-only bag square on the price line ("nobody will get it").
+- **Size picker** (`<card-size-picker>`, `assets/card-size-picker.js`): Choose size opens a **native `<dialog>` via `showModal()`** — centred over a dimmed page (bottom sheet on phones), head with thumbnail + name + close, sizes as rows with price and stock state (via `variant-stock-state`: In stock / On order / Sold out), red "ADD TO CART {size}". An anchored popover was tried first and rejected: it covered the card above. Rendered in Liquid, no fetch; replaces Dawn's quick-add dialog, which loaded a whole product page. Radios hold the choice and a hidden `name="id"` input is submitted — `product-form.js` force-enables the *first* `[name=id]`, which must never be a sold-out radio. Closes on backdrop click / ✕ / Escape (native) / successful add (pubsub `cartUpdate`), and returns focus to the button. **Products with 2+ options** (Size + Color…) get one group per option (legend = the option name from admin, current value beside it) with square chips; the variant list is embedded as JSON (`.card-size-picker__data`) and the script resolves the picks to a variant — price and stock line (sticky at the bottom of the scroll area), Add button label and disabled state follow; values with no buyable variant for the current picks are struck through but still selectable. The card button reads "Choose options" for these. Products with quantity rules still use Dawn's dialog, now trimmed to name/price/size/add (`quick-add.css`).
+- **Ranges read "From €X"** via Dawn's `from_price_html`, formatted with the same currency-code setting as single prices.
+- **Sold out**: fixed ink-on-paper badge (the badge's own colour-scheme class used to render dark on dark) and image at 0.6 opacity. `product-card-wrapper--sold-out` is set in Liquid.
+- The CSS-hidden duplicate title inside `.card__inner` is gone; the badge id is `Badge-{section}-{product}`, which the title link's `aria-labelledby` already referenced.
+
+### Homepage Sport / Brand Sections
+
+- **Shop by sport**: "Feature the first category" (default on) makes Windsurf a 2×2 tile with the other four in a 2×2 block; on phones Windsurf is full-width and the rest a 2×2 grid (the old sideways scroll hid three sports). Tiles show the product count (`products.facets.product_count_simple`).
+- **Shop by brand**: logos on open ground between two hairlines, not a bordered table; one row of up to eight at 1200px+ (`--brand-count`, gated by `shop-by-brand__list--rail`). Greyscale → colour + 4% scale on hover.
+- **Featured gear**: "View all →" moved into the section head; the bottom button stays for phones only.
+
 Key files:
 - `snippets/card-product.liquid` — hover image selection logic (lines ~86–140)
 - `assets/component-card.css` — CSS hover transition (fade out primary, fade in + scale secondary)
 
 ### Search Results (Empty State)
 
-Stock Dawn's search page was the one template still wearing default typography — a bare centred `<h1>`, no breadcrumb, and on zero results just one grey status line followed by a dead end. Rebuilt to match the rest of the site (breadcrumb + accent-bar title, same values as `.cart-header__title`) and, more importantly, to stop being a dead end: a customer who searches and finds nothing is exactly the customer most likely to leave, so the empty state now ends in real products instead of white space.
+Stock Dawn's search page was the one template still wearing default typography — a bare centred `<h1>`, no breadcrumb, and on zero results just one grey status line followed by a dead end. Rebuilt to match the rest of the site (shared `.rc-crumbs` + `.rc-page-title`; left-aligned like every other page head, search field under the title at 64rem — it was centred until the system pass, the only centred page head on the site) and, more importantly, to stop being a dead end: a customer who searches and finds nothing is exactly the customer most likely to leave, so the empty state now ends in real products instead of white space.
 
 **`show_empty_state` is deliberately narrower than "zero results."** It's true only when `search.performed and search.results_count == 0 and search.filters == empty` — the same condition the stock template already used for its single no-results line, kept as-is rather than loosened. A *filtered* zero-result state (facets exist, current filter combination just matches nothing) still gets the original "use fewer filters" handling further down; showing fallback products there would bury the actual fix (loosen the filters) under an unrelated product grid.
 
@@ -331,6 +399,8 @@ Stock Dawn's search page was the one template still wearing default typography �
 **Fallback products come from `section.settings.empty_state_collection`, a new collection-picker setting, defaulting to `collections.all`.** Merchant can point it at a "bestsellers" or "new arrivals" collection; left blank, it just shows from the full catalogue (whatever sort order `collections.all` has in Admin). Guarded on `fallback_collection.products.size > 0` so an empty or misconfigured collection never renders a heading over nothing. Reuses `snippets/card-product.liquid` and the same grid classes as real search results — not a second card style to maintain.
 
 **`.template-search--blank` replaced `.template-search--empty`.** The old class fired for both "page loaded, no query yet" and "searched, found nothing" and gave both the same 18rem bottom padding — appropriate for the former (genuinely nothing to show), wrong for the latter now that it's full of chips and products. The blank pre-search state is untouched; only the zero-results state changed.
+
+**Result cards match the collection grid.** `main-search` has a `quick_add` setting (`standard` in `templates/search.json`) and passes `quick_add` + `section_id` to `card-product`, loading `quick-add.css`, `quick-add.js`, `product-form.js` and `card-size-picker.js` — without them search cards had no Choose size / Add to cart button. Hover image (`show_secondary_image`) is on too.
 
 Key files:
 - `sections/main-search.liquid` — `show_empty_state` logic, category chips, fallback grid

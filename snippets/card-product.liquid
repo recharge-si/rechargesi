@@ -29,18 +29,25 @@
   {{ 'quantity-popover.css' | asset_url | stylesheet_tag }}
 {%- endunless -%}
 {%- if card_product and card_product != empty -%}
+  {%- comment -%}
+    Every card is a 1:1 frame regardless of the section's image-ratio setting.
+    "Adapt" sized each card to its own first image, so a portrait sail and a
+    square board in one row put their titles and prices at different heights.
+    The image is contained inside the frame (component-card.css), so nothing
+    is cropped. media_aspect_ratio is still accepted, just not used.
+  {%- endcomment -%}
   {%- liquid
     assign ratio = 1
-    if card_product.featured_media and media_aspect_ratio == 'portrait'
-      assign ratio = 0.8
-    elsif card_product.featured_media and media_aspect_ratio == 'adapt'
-      assign ratio = card_product.featured_media.aspect_ratio
-    endif
-    if ratio == 0 or ratio == null
-      assign ratio = 1
+    # Square photos fill the frame; anything off-square (a wide board line-up,
+    # a tall sail) is contained on white, so nothing is cropped and no grey
+    # band shows around it.
+    assign card_media_fit = 'cover'
+    assign card_ar = card_product.featured_media.aspect_ratio | default: 1
+    if card_ar < 0.95 or card_ar > 1.05
+      assign card_media_fit = 'contain'
     endif
   -%}
-  <div class="card-wrapper product-card-wrapper underline-links-hover">
+  <div class="card-wrapper product-card-wrapper underline-links-hover{% unless card_product.available %} product-card-wrapper--sold-out{% endunless %}">
     <div
       class="
         card card--{{ settings.card_style }} card--media
@@ -62,7 +69,7 @@
         {%- capture card_alt -%}
           {%- render 'media-alt', alt: card_product.featured_media.alt, title: card_product.title -%}
         {%- endcapture -%}
-        <div class="card__media{% if image_shape and image_shape != 'default' %} shape--{{ image_shape }} color-{{ settings.card_color_scheme }} gradient{% endif %}">
+        <div class="card__media card__media--{{ card_media_fit }}{% if image_shape and image_shape != 'default' %} shape--{{ image_shape }} color-{{ settings.card_color_scheme }} gradient{% endif %}">
           {%- if card_product.featured_media -%}
             <div class="media media--transparent media--hover-effect">
               {% comment %}theme-check-disable ImgLazyLoading{% endcomment %}
@@ -169,52 +176,73 @@
               {% render 'media-placeholder' %}
             </div>
           {%- endif -%}
+            {%- comment -%}
+              Category chip = last segment of the deepest catalogue path tag
+              ("Windsurf / Boards / Freestyle/wave" → "Freestyle/wave"). Only
+              path tags count: picking the longest tag of any kind surfaced
+              import bookkeeping such as "portal-source:sc_d84804ed69e9".
+              No path tag, no chip.
+            {%- endcomment -%}
             {%- liquid
-              assign longest_tag = ''
+              assign card_category_tag = ''
+              assign card_category_path = ''
+              assign deepest_path_size = 0
               for tag in card_product.tags
-                if tag.size > longest_tag.size
-                  assign longest_tag = tag
+                if tag contains ' / '
+                  assign tag_parts = tag | split: ' / '
+                  if tag_parts.size > deepest_path_size
+                    assign deepest_path_size = tag_parts.size
+                    assign card_category_tag = tag_parts | last
+                    # Under the title: the levels above the chip, e.g. "Windsurf / Boards"
+                    # for chip "Freestyle/wave" - never the chip's own word twice.
+                    assign card_path_size = tag_parts.size | minus: 1
+                    assign card_category_path = tag_parts | slice: 0, card_path_size | join: ' / '
+                  endif
                 endif
               endfor
-              assign tag_parts = longest_tag | split: ' / '
-              assign card_category_tag = tag_parts | last
+
+              # "5 sizes" when the first option is a size, "5 options" otherwise.
+              assign card_option_name = card_product.options.first | downcase
+              assign card_size_like = false
+              if card_option_name contains 'size' or card_option_name contains 'velikost' or card_option_name contains 'volum' or card_option_name contains 'length'
+                assign card_size_like = true
+              endif
             -%}
             <div class="card__image-overlays">
               {%- if card_category_tag != blank -%}
                 <span class="card__category-tag">{{ card_category_tag }}</span>
               {%- endif -%}
-              {%- if card_product.variants_count > 1 -%}
+              {%- if card_product.variants_count > 1 and card_product.available -%}
                 <span class="card__variant-count">
                   <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
-                  {{- card_product.variants_count -}}
+                  {%- if card_size_like -%}
+                    {{- 'products.product.card_sizes' | t: count: card_product.variants_count -}}
+                  {%- else -%}
+                    {{- 'products.product.card_options' | t: count: card_product.variants_count -}}
+                  {%- endif -%}
                 </span>
               {%- endif -%}
             </div>
         </div>
+        {%- comment -%}
+          Only the status badge lives on the image. Stock Dawn also rendered a
+          second, CSS-hidden copy of the title and link here, which left every
+          card with two headings in the DOM; the title below is the only one.
+          The badge id is what the title link's aria-labelledby points at, so
+          a screen reader hears "Patrik QTS-Wave, Sold out".
+        {%- endcomment -%}
         <div class="card__content">
-          <div class="card__information">
-            <h3 class="card__heading">
-              <a
-                href="{{ card_product.url }}"
-                id="StandardCardNoMediaLink-{{ section_id }}-{{ card_product.id }}"
-                class="full-unstyled-link"
-                aria-labelledby="StandardCardNoMediaLink-{{ section_id }}-{{ card_product.id }} NoMediaStandardBadge-{{ section_id }}-{{ card_product.id }}"
-              >
-                {{ card_product.title | escape }}
-              </a>
-            </h3>
-          </div>
           <div class="card__badge {{ settings.badge_position }}">
             {%- if card_product.available == false -%}
               <span
-                id="NoMediaStandardBadge-{{ section_id }}-{{ card_product.id }}"
+                id="Badge-{{ section_id }}-{{ card_product.id }}"
                 class="badge badge--bottom-left color-{{ settings.sold_out_badge_color_scheme }}"
               >
                 {{- 'products.product.sold_out' | t -}}
               </span>
             {%- elsif card_product.compare_at_price > card_product.price and card_product.available -%}
               <span
-                id="NoMediaStandardBadge-{{ section_id }}-{{ card_product.id }}"
+                id="Badge-{{ section_id }}-{{ card_product.id }}"
                 class="badge badge--bottom-left color-{{ settings.sale_badge_color_scheme }}"
               >
                 {{- 'products.product.on_sale' | t -}}
@@ -235,6 +263,9 @@
               {{ card_product.title | escape }}
             </a>
           </h3>
+          {%- if card_category_path != blank -%}
+            <p class="card__category-path">{{ card_category_path | escape }}</p>
+          {%- endif -%}
           <div class="card-information">
             {%- if show_vendor -%}
               <span class="visually-hidden">{{ 'accessibility.vendor' | t }}</span>
@@ -300,11 +331,23 @@
                 endif
               endfor
             -%}
+            {%- comment -%}
+              A range reads "From €2.799,00" — the same wording and currency
+              format the price snippet uses for a single price, so every card
+              in a grid prints its price the same way.
+            {%- endcomment -%}
             {%- if buyable_min != nil and buyable_min != buyable_max -%}
-              <div class="card__price-range">
-                <span class="card__price-range-value">{{ buyable_min | money }}</span>
-                <span class="card__price-range-sep">&ndash;</span>
-                <span class="card__price-range-value">{{ buyable_max | money }}</span>
+              {%- liquid
+                if settings.currency_code_enabled
+                  assign card_from_price = buyable_min | money_with_currency
+                else
+                  assign card_from_price = buyable_min | money
+                endif
+              -%}
+              <div class="price card__price-range">
+                <span class="price-item price-item--regular">
+                  {{- 'products.product.price.from_price_html' | t: price: card_from_price -}}
+                </span>
               </div>
             {%- elsif buyable_min != nil and card_product.price_varies -%}
               {%- comment -%} One buyable price among varying ones: show that variant, not "From €0". {%- endcomment -%}
@@ -404,7 +447,222 @@
                 assign qty_rules = true
               endif
             -%}
-            {%- if card_product.variants_count > 1 or qty_rules -%}
+            {%- comment -%}
+              Every buyable card carries the same compact, labelled "Add to
+              cart" button under the price (component-card.css). One-variant
+              products add straight from the card; products with sizes open
+              the quick-add dialog to pick one first. aria-labelledby adds the
+              product title ("Add to cart Patrik QTS-Wave"). Sold out: no
+              button in the same slot, disabled. An icon-only version was tried and
+              rejected: nobody reads a bare bag icon as "add to cart".
+            {%- endcomment -%}
+            {%- if card_product.available == false -%}
+              <button type="button" class="quick-add__submit button button--full-width button--secondary" disabled>
+                <span>{{ 'products.product.sold_out' | t }}</span>
+              </button>
+            {%- elsif card_product.variants_count > 1 and qty_rules == false -%}
+              {%- comment -%}
+                Size picker: "Choose size" opens a native <dialog> (modal: dimmed
+                page, focus kept inside, Escape closes). Its content is rendered
+                here in Liquid - no product page fetched into it. Each size shows
+                its price and stock state; the red button names the size it adds.
+                Radios carry the choice; a hidden name="id" input is what
+                product-form.js submits (it enables the first [name=id], which
+                must never be a sold-out size). card-size-picker.js keeps the two
+                in step and closes the dialog after a successful add. An anchored
+                popover was tried first and rejected: it covered the card above.
+              {%- endcomment -%}
+              {%- liquid
+                if card_size_like and card_product.options.size == 1
+                  assign picker_label = 'products.product.choose_size' | t
+                else
+                  assign picker_label = 'products.product.choose_options' | t
+                endif
+                assign picker_variant = card_product.selected_or_first_available_variant
+                capture picker_variant_label
+                  if card_product.options.size == 1
+                    render 'option-value-label', value: picker_variant.option1
+                  else
+                    render 'option-value-label', value: picker_variant.title
+                  endif
+                endcapture
+              -%}
+              <card-size-picker class="card-size-picker">
+                <button
+                  type="button"
+                  class="quick-add__submit button button--full-width button--secondary card-size-picker__open"
+                  aria-haspopup="dialog"
+                  aria-label="{{ picker_label }}: {{ card_product.title | escape }}"
+                >
+                  <span>{{ picker_label }}</span>
+                  {{- 'icon-arrow.svg' | inline_asset_content -}}
+                </button>
+                <dialog class="card-size-picker__dialog" aria-labelledby="{{ product_form_id }}-picker-name">
+                  <div class="card-size-picker__head">
+                    {%- if card_product.featured_media -%}
+                      <div class="card-size-picker__thumb">
+                        {{
+                          card_product.featured_media
+                          | image_url: width: 160
+                          | image_tag: loading: 'lazy', alt: '', width: 80, height: 80
+                        }}
+                      </div>
+                    {%- endif -%}
+                    <div class="card-size-picker__heading">
+                      <p class="card-size-picker__name" id="{{ product_form_id }}-picker-name">{{ card_product.title | escape }}</p>
+                      <p class="card-size-picker__title" id="{{ product_form_id }}-picker-title">{{ picker_label }}</p>
+                    </div>
+                    <button type="button" class="card-size-picker__close" aria-label="{{ 'accessibility.close' | t }}">
+                      {{- 'icon-close.svg' | inline_asset_content -}}
+                    </button>
+                  </div>
+                  <div class="card-size-picker__panel">
+                    <product-form data-section-id="{{ section_id }}">
+                      {%- form 'product',
+                        card_product,
+                        id: product_form_id,
+                        class: 'form',
+                        novalidate: 'novalidate',
+                        data-type: 'add-to-cart-form'
+                      -%}
+                        <input type="hidden" name="id" value="{{ picker_variant.id }}" class="product-variant-id">
+                        {%- if card_product.options.size > 1 -%}
+                          {%- comment -%}
+                            Two or more options (Size + Color…): one group per option,
+                            named as in admin, values as chips. card-size-picker.js
+                            resolves the chosen combination against the variant list
+                            below, updates price / stock / the Add button, and strikes
+                            through values that would lead to no buyable variant.
+                          {%- endcomment -%}
+                          <div class="card-size-picker__groups" data-multi>
+                            {%- for option in card_product.options_with_values -%}
+                              <fieldset class="card-size-picker__group">
+                                <legend class="card-size-picker__legend">
+                                  {{- option.name | escape -}}
+                                  <span class="card-size-picker__legend-value"></span>
+                                </legend>
+                                <div class="card-size-picker__chips">
+                                  {%- for value in option.values -%}
+                                    {%- capture chip_label %}{% render 'option-value-label', value: value %}{% endcapture -%}
+                                    {%- assign picker_option_key = 'option' | append: option.position -%}
+                                    <label class="card-size-picker__chip">
+                                      <input
+                                        type="radio"
+                                        name="{{ product_form_id }}-opt{{ option.position }}"
+                                        value="{{ value | escape }}"
+                                        data-position="{{ option.position }}"
+                                        data-label="{{ chip_label | strip | escape }}"
+                                        {% if picker_variant[picker_option_key] == value %}
+                                          checked
+                                        {% endif %}
+                                      >
+                                      <span>{{ chip_label | strip | escape }}</span>
+                                    </label>
+                                  {%- endfor -%}
+                                </div>
+                              </fieldset>
+                            {%- endfor -%}
+                            <p class="card-size-picker__summary" aria-live="polite">
+                              <span class="card-size-picker__summary-price"></span>
+                              <span class="card-size-picker__state card-size-picker__summary-state"></span>
+                            </p>
+                            <script type="application/json" class="card-size-picker__data">
+                              [
+                                {%- for variant in card_product.variants -%}
+                                  {%- liquid
+                                    capture v_state
+                                      render 'variant-stock-state', variant: variant
+                                    endcapture
+                                    assign v_state = v_state | strip
+                                    case v_state
+                                      when 'partner'
+                                        assign v_state_label = 'products.product.stock_state.on_order' | t
+                                      when 'none'
+                                        assign v_state_label = 'products.product.sold_out' | t
+                                      else
+                                        assign v_state_label = 'products.product.inventory_in_stock' | t
+                                    endcase
+                                  -%}
+                                  {
+                                    "id": {{ variant.id }},
+                                    "options": {{ variant.options | json }},
+                                    "available": {{ variant.available | json }},
+                                    "price": {{ variant.price | money | json }},
+                                    "state": {{ v_state | json }},
+                                    "stateLabel": {{ v_state_label | json }}
+                                  }{% unless forloop.last %},{% endunless %}
+                                {%- endfor -%}
+                              ]
+                            </script>
+                          </div>
+                        {%- else -%}
+                        <fieldset class="card-size-picker__options" aria-labelledby="{{ product_form_id }}-picker-title">
+                          {%- for variant in card_product.variants -%}
+                            {%- liquid
+                              capture row_label
+                                if card_product.options.size == 1
+                                  render 'option-value-label', value: variant.option1
+                                else
+                                  render 'option-value-label', value: variant.title
+                                endif
+                              endcapture
+                              assign row_label = row_label | strip
+                              capture row_state
+                                render 'variant-stock-state', variant: variant
+                              endcapture
+                              assign row_state = row_state | strip
+                            -%}
+                            <label class="card-size-picker__row{% unless variant.available %} is-unavailable{% endunless %}">
+                              <input
+                                type="radio"
+                                name="{{ product_form_id }}-choice"
+                                value="{{ variant.id }}"
+                                data-label="{{ row_label | escape }}"
+                                {% if variant.id == picker_variant.id %}
+                                  checked
+                                {% endif %}
+                                {% unless variant.available %}
+                                  disabled
+                                {% endunless %}
+                              >
+                              <span class="card-size-picker__size">{{ row_label | escape }}</span>
+                              <span class="card-size-picker__price">{{ variant.price | money }}</span>
+                              <span class="card-size-picker__state card-size-picker__state--{{ row_state }}">
+                                {%- case row_state -%}
+                                  {%- when 'partner' -%}
+                                    {{- 'products.product.stock_state.on_order' | t -}}
+                                  {%- when 'none' -%}
+                                    {{- 'products.product.sold_out' | t -}}
+                                  {%- else -%}
+                                    {{- 'products.product.inventory_in_stock' | t -}}
+                                {%- endcase -%}
+                              </span>
+                            </label>
+                          {%- endfor -%}
+                        </fieldset>
+                        {%- endif -%}
+                        <button
+                          id="{{ product_form_id }}-submit"
+                          type="submit"
+                          name="add"
+                          class="card-size-picker__add button"
+                        >
+                          <span>
+                            {{- 'products.product.add_to_cart' | t }}
+                            <span class="card-size-picker__chosen">{{ picker_variant_label | strip | escape }}</span>
+                          </span>
+                          <span class="sold-out-message hidden">{{ 'products.product.sold_out' | t }}</span>
+                          {%- render 'loading-spinner' -%}
+                        </button>
+                      {%- endform -%}
+                    </product-form>
+                    <a href="{{ card_product.url }}" class="card-size-picker__details">
+                      {{- 'products.product.view_full_details' | t -}}
+                    </a>
+                  </div>
+                </dialog>
+              </card-size-picker>
+            {%- elsif card_product.variants_count > 1 or qty_rules -%}
               <modal-opener data-modal="#QuickAdd-{{ card_product.id }}">
                 <button
                   id="{{ product_form_id }}-submit"
@@ -415,12 +673,8 @@
                   aria-labelledby="{{ product_form_id }}-submit title-{{ section_id }}-{{ card_product.id }}"
                   data-product-url="{{ card_product.url }}"
                 >
-                  {{ 'products.product.choose_options' | t }}
-                  {%- if horizontal_quick_add -%}
-                    <span class="icon-wrap">
-                      {{- 'icon-arrow.svg' | inline_asset_content -}}
-                    </span>
-                  {%- endif -%}
+                  {{- 'icon-bag-add.svg' | inline_asset_content -}}
+                  <span class="quick-add__label">{{ 'products.product.add_to_cart' | t }}</span>
                   {%- render 'loading-spinner' -%}
                 </button>
               </modal-opener>
@@ -474,21 +728,17 @@
                       disabled
                     {% endif %}
                   >
-                    <span>
+                    {{- 'icon-bag-add.svg' | inline_asset_content -}}
+                    <span class="quick-add__label">
                       {%- if card_product.selected_or_first_available_variant.available -%}
                         {{ 'products.product.add_to_cart' | t }}
                       {%- else -%}
                         {{ 'products.product.sold_out' | t }}
                       {%- endif -%}
                     </span>
-                    <span class="sold-out-message hidden">
+                    <span class="sold-out-message quick-add__label hidden">
                       {{ 'products.product.sold_out' | t }}
                     </span>
-                    {%- if horizontal_quick_add -%}
-                      <span class="icon-wrap">
-                        {{- 'icon-plus.svg' | inline_asset_content -}}
-                      </span>
-                    {%- endif -%}
                     {%- render 'loading-spinner' -%}
                   </button>
                 {%- endform -%}

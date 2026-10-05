@@ -12,6 +12,11 @@
   the Section Rendering API on every cart change and the snippet recomputes
   from the fresh cart object. No JS.
 
+  Accepts:
+  - compact: {Boolean} once the threshold is reached, show a one-line
+    "✓ ships free" confirmation instead of a full green bar (added-to-cart
+    panel). The bar only earns its space while there is still a gap to close.
+
   Usage:
   {%- render 'free-shipping-bar' -%}
 {%- endcomment -%}
@@ -24,14 +29,20 @@
     assign fs_pct = cart.total_price | times: 100 | divided_by: fs_threshold | at_most: 100
     assign fs_remaining_money = fs_remaining | money
   -%}
-  <div class="free-shipping-bar{% if fs_remaining <= 0 %} free-shipping-bar--reached{% endif %}">
+  <div class="free-shipping-bar{% if fs_remaining <= 0 %} free-shipping-bar--reached{% endif %}{% if compact %} free-shipping-bar--compact{% endif %}">
     <p class="free-shipping-bar__text">
       {%- if fs_remaining > 0 -%}
         {{ 'general.free_shipping.remaining' | t: amount: fs_remaining_money }}
       {%- else -%}
+        {%- if compact -%}
+          <span class="free-shipping-bar__check" aria-hidden="true">
+            {{- 'icon-checkmark.svg' | inline_asset_content -}}
+          </span>
+        {%- endif -%}
         {{ 'general.free_shipping.reached' | t }}
       {%- endif -%}
     </p>
+    {%- unless compact and fs_remaining <= 0 -%}
     <div
       class="free-shipping-bar__track"
       role="progressbar"
@@ -42,5 +53,6 @@
     >
       <div class="free-shipping-bar__fill" style="width: {{ fs_pct }}%"></div>
     </div>
+    {%- endunless -%}
   </div>
 {%- endif -%}

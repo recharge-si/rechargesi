@@ -13,21 +13,31 @@ class CartNotification extends HTMLElement {
   }
 
   open() {
+    const wasOpen = this.notification.classList.contains('active');
     this.notification.classList.add('animate', 'active');
 
-    this.notification.addEventListener(
-      'transitionend',
-      () => {
-        this.notification.focus();
-        trapFocus(this.notification);
-      },
-      { once: true }
-    );
+    // Focus once the panel has settled. A second add while it is already open
+    // (or reduced motion) runs no transition, so transitionend never comes —
+    // the timer covers that, and whichever fires first wins.
+    clearTimeout(this.focusTimer);
+    const focusPanel = () => {
+      clearTimeout(this.focusTimer);
+      this.notification.removeEventListener('transitionend', focusPanel);
+      this.notification.focus();
+      trapFocus(this.notification);
+    };
+    if (wasOpen) {
+      focusPanel();
+    } else {
+      this.notification.addEventListener('transitionend', focusPanel, { once: true });
+      this.focusTimer = setTimeout(focusPanel, 400);
+    }
 
     document.body.addEventListener('click', this.onBodyClick);
   }
 
   close() {
+    clearTimeout(this.focusTimer);
     this.notification.classList.remove('active');
     document.body.removeEventListener('click', this.onBodyClick);
 
@@ -68,7 +78,9 @@ class CartNotification extends HTMLElement {
 
   handleBodyClick(evt) {
     const target = evt.target;
-    if (target !== this.notification && !target.closest('cart-notification')) {
+    // contains(), not closest('cart-notification'): the mobile backdrop is the
+    // wrapper's ::before, inside <cart-notification> but outside the panel.
+    if (!this.notification.contains(target)) {
       const disclosure = target.closest('details-disclosure, header-menu');
       this.activeElement = disclosure ? disclosure.querySelector('summary') : null;
       this.close();
