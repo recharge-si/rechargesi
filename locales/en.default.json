@@ -59,14 +59,9 @@
       "reset": "Clear search term"
     },
     "cart": {
-      "qty": "Qty: {{ count }}",
-      "items_in_cart": {
-        "one": "{{ count }} item in cart",
-        "other": "{{ count }} items in cart"
-      },
       "view": "View cart ({{ count }})",
       "view_empty_cart": "View cart",
-      "item_added": "Added to cart",
+      "item_added": "Item added to your cart",
       "subtotal": "Subtotal"
     },
     "share": {
@@ -230,21 +225,7 @@
       "taxes_included": "Taxes included.",
       "duties_included": "Duties included.",
       "duties_and_taxes_included": "Duties and taxes included.",
-      "shipping_policy_html": "<a href=\"{{ link }}\">Shipping</a> calculated at checkout.",
-      "specs": {
-        "title": "Specifications",
-        "brand": "Brand",
-        "category": "Category"
-      },
-      "choose_size": "Choose size",
-      "card_sizes": {
-        "one": "{{ count }} size",
-        "other": "{{ count }} sizes"
-      },
-      "card_options": {
-        "one": "{{ count }} option",
-        "other": "{{ count }} options"
-      }
+      "shipping_policy_html": "<a href=\"{{ link }}\">Shipping</a> calculated at checkout."
     },
     "modal": {
       "label": "Media gallery"
@@ -278,8 +259,7 @@
       "sort_button": "Sort",
       "sort_by_label": "Sort by:",
       "to": "To",
-      "clear_filter": "Remove filter",
-      "sort_prefix": "Sort:"
+      "clear_filter": "Remove filter"
     }
   },
   "templates": {
@@ -344,14 +324,14 @@
       "announcement": "Announcement",
       "announcement_bar": "Announcement bar"
     },
+
     "header": {
       "announcement": "Announcement",
       "menu": "Menu",
       "cart_count": {
         "one": "{{ count }} item",
         "other": "{{ count }} items"
-      },
-      "shop_all": "All {{ title }}"
+      }
     },
     "cart": {
       "pickup_notice": {
@@ -469,12 +449,6 @@
       "min_error": "This item has a minimum of {{ min }}",
       "max_error": "This item has a maximum of {{ max }}",
       "step_error": "You can only add this item in increments of {{ step }}"
-    },
-    "collection_subnav": {
-      "all": "All"
-    },
-    "related_products": {
-      "more_in": "All {{ title }}"
     }
   },
   "rig_builder": {
