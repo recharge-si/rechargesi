@@ -11,7 +11,7 @@
 if (!customElements.get('rig-builder')) {
   const ROLE_ORDER = ['board', 'sail', 'mast', 'extension', 'boom', 'base', 'fin', 'harness'];
   const OWN_ROLES = ['board', 'sail', 'boom', 'fin'];
-  const SKILL_KEY = { intermediate: 'level_improving', beginner: 'level_start', advanced: 'level_confident' };
+  const SKILL_KEY = { intermediate: 'chip_skill_intermediate', beginner: 'chip_skill_beginner', advanced: 'chip_skill_advanced' };
   const CHECK_GROUP = {
     'sail-fit': 'check_size',
     'board-fit': 'check_size',

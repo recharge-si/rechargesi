@@ -4,13 +4,13 @@
  * (--color-foreground, --color-background) and the brand variables in base.css.
  */
 .rig-builder {
-  --rig-line: rgba(var(--color-foreground), 0.15);
+  --rig-line: rgba(var(--color-foreground), 0.16);
   --rig-soft: rgba(var(--color-foreground), 0.04);
-  --rig-muted: rgba(var(--color-foreground), 0.7);
+  --rig-muted: rgba(var(--color-foreground), 0.69);
   --rig-focus: var(--color-info);
 
   display: block;
-  max-width: 110rem;
+  max-width: 106.8rem;
   margin: 0 auto;
   color: rgb(var(--color-foreground));
   font-size: 1.6rem;
@@ -146,7 +146,7 @@
 
 .rig-builder__privacy {
   max-width: none;
-  margin: 0.8rem 0 0;
+  margin: 0.8rem 0 1.3rem;
   color: var(--rig-muted);
   font-size: 1.3rem;
 }
@@ -155,7 +155,7 @@
   display: flex;
   flex-wrap: wrap;
   gap: 1.2rem;
-  margin-top: 2rem;
+  margin-top: 0;
 }
 
 /* Buttons */
@@ -454,7 +454,7 @@
 
 .rig-builder__disclaimer {
   max-width: 70ch;
-  margin: 2rem 0 0;
+  margin: 2rem 0 1.3rem;
   color: var(--rig-muted);
   font-size: 1.3rem;
 }
@@ -496,13 +496,23 @@
   }
 
   .rig-builder__img {
+    grid-column: 1;
     width: 5.6rem;
     height: 5.6rem;
+  }
+
+  .rig-builder__part > div:nth-child(2) {
+    grid-column: 2;
+    min-width: 0;
   }
 
   .rig-builder__price {
     grid-column: 2;
     text-align: left;
+  }
+
+  .rig-builder__price:empty {
+    display: none;
   }
 
   .rig-builder__total .rig-builder__btn {
