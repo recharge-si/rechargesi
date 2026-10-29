@@ -21,11 +21,12 @@ const readJsonc = (file) => JSON.parse(fs.readFileSync(path.join(ROOT, file), 'u
 
 export const DEFAULTS = {
   delayMs: 0,
-  build: 'ok', // ok | partial | 503 | 429 | network | 400
+  build: 'ok', // ok | partial | unchecked | legacy | noimage | 503 | 429 | network | 400
+  ignoreExclude: false, // true: an older hub that does not know excludeVariantIds
   explain: 'ai', // ai | plain | 503 | 429 | network | notread
   verify: 'ok', // ok | bad
   cart: 'ok', // ok | 422 | 422-silent | 500
-  soldOutVariant: 45500000015, // the mast; used by cart 422 and /products/*.js
+  soldOutVariant: 45500000023, // the mast (no alternative in the fixture); used by cart 422 and /products/*.js
   retryAfter: 720,
 };
 
@@ -178,27 +179,64 @@ ${body}
 
 /* ---------------------------------------------------------------- stub hub */
 
-const BOOM = { role: 'boom', productId: 'gid://shopify/Product/123', variantId: 45500000025, title: 'Carbon Boom 150-190', variantTitle: '150-190', url: '/products/carbon-boom', image: '', price: '299.00', currency: 'EUR', available: true, quantity: 1, why: 'This boom opens from 150 to 190 cm, which covers the sail.', specs: { boomMinCm: 150, boomMaxCm: 190 } };
+// What an older hub (before the display fields) sent for a boom: no productUrl, imageUrl, vendor or facts.
+const BOOM_LEGACY = { role: 'boom', productId: 'gid://shopify/Product/123', variantId: 45500000025, title: 'Carbon Boom 150-190', variantTitle: '150-190', url: '/products/carbon-boom', image: '', price: '299.00', currency: 'EUR', available: true, quantity: 1, why: 'This boom opens from 150 to 190 cm, which covers the sail.', specs: { boomMinCm: 150, boomMaxCm: 190 } };
+const SAIL_ID = 45500000004; // sail of build-response.json; excluding it gives build-response-exclude.json
 
 export function createHarness({ port = 0 } = {}) {
   const state = { scenario: { ...DEFAULTS }, log: [], cartCount: 0 };
-  const catalog = new Map(); // variantId -> {title, price, role}
+  const catalog = new Map(); // variantId -> {title, price, role, handle}
 
-  function buildResponse(answers = {}) {
+  // The hub's image URLs are https on a CDN; the harness serves a local placeholder instead (no external requests).
+  const localImage = (p) => {
+    const out = { ...p };
+    if (typeof out.imageUrl === 'string') out.imageUrl = `/img/${p.variantId}.svg`;
+    if (typeof out.image === 'string' && out.image) out.image = `/img/${p.variantId}.svg`;
+    return out;
+  };
+
+  function buildResponse(answers = {}, exclude = []) {
     if (answers.weightKg == null) return { ...fx('build-response-needs') };
-    const base = fx('build-response');
+    const sc = state.scenario;
+    const legacy = sc.build === 'legacy';
+    const excluded = new Set(sc.ignoreExclude ? [] : exclude);
     const owns = answers.owns || [];
+    const withExclude = !legacy && excluded.has(SAIL_ID);
+    const base = fx(legacy ? 'build-response-legacy' : withExclude ? 'build-response-exclude' : 'build-response');
     const rig = base.rigs[0];
-    let items = rig.items.map((i) => ({ ...i, image: `/img/${i.variantId}.svg` }));
-    if (!owns.includes('boom')) items.push({ ...BOOM, image: `/img/${BOOM.variantId}.svg` });
-    items = items.filter((i) => !owns.includes(i.role) || i.role === 'mast');
+    let items = rig.items.map(localImage);
+    let alternatives = rig.alternatives.map(localImage);
+    if (!withExclude && !owns.includes('boom')) {
+      // The default fixture is for a rider who owns a boom; add a boom the way the hub sent it for one who does not.
+      if (legacy) {
+        items.push({ ...BOOM_LEGACY, image: `/img/${BOOM_LEGACY.variantId}.svg` });
+      } else {
+        const withBoom = fx('build-response-exclude').rigs[0];
+        items.push(...withBoom.items.filter((i) => i.role === 'boom').map(localImage));
+        alternatives.push(...withBoom.alternatives.filter((a) => a.role === 'boom').map(localImage));
+      }
+    }
+    items = items.filter((i) => !owns.includes(i.role));
+    alternatives = alternatives.filter((a) => !owns.includes(a.role));
     let unmet = [];
-    if (state.scenario.build === 'partial') {
+    if (sc.build === 'partial') {
       items = items.filter((i) => i.role !== 'base');
       unmet = [{ role: 'base', reason: 'no_compatible_in_stock' }];
     }
-    items.forEach((i) => catalog.set(i.variantId, { title: i.title, price: i.price, role: i.role }));
-    rig.alternatives.forEach((a) => catalog.set(a.variantId, { title: a.title, price: a.price, role: a.role }));
+    if (sc.build === 'noimage') items = items.map((i) => (i.role === 'board' ? { ...i, imageUrl: null, image: null } : i));
+    // Like the hub: excluded variants are in neither the rig nor the alternatives; the next one of the role steps in.
+    alternatives = alternatives.filter((a) => !excluded.has(a.variantId));
+    items = items.flatMap((i) => {
+      if (!excluded.has(i.variantId)) return [i];
+      const alt = alternatives.find((a) => a.role === i.role);
+      if (alt) {
+        alternatives = alternatives.filter((a) => a !== alt);
+        return [{ ...alt, available: true, quantity: 1 }];
+      }
+      unmet.push({ role: i.role, reason: 'no_compatible_in_stock' });
+      return [];
+    });
+    [...items, ...alternatives].forEach((i) => catalog.set(i.variantId, { title: i.title, price: i.price, role: i.role, handle: String(i.productUrl || i.url || '').split('/').pop() }));
     const total = (items.reduce((a, i) => a + Math.round(Number(i.price) * 100), 0) / 100).toFixed(2);
     const profile = {
       ...base.profile,
@@ -208,12 +246,12 @@ export function createHarness({ port = 0 } = {}) {
       windMaxKn: answers.windMaxKn ?? base.profile.windMaxKn,
       owns,
     };
-    return {
-      ...base,
-      profile,
-      rigs: [{ ...rig, items, total, alternatives: rig.alternatives.filter((a) => !owns.includes(a.role)) }],
-      unmet,
-    };
+    const out = { ...rig, items, total, alternatives };
+    if (sc.build === 'unchecked') {
+      out.unchecked = fx('build-response-exclude').rigs[0].unchecked;
+      out.checks = out.checks.filter((c) => !out.unchecked.some((u) => u.id === c.id));
+    }
+    return { ...base, profile, rigs: [out], unmet };
   }
 
   const send = (res, status, body, headers = {}) => {
@@ -265,7 +303,7 @@ export function createHarness({ port = 0 } = {}) {
 
     if (/^\/products\/[^/]+\.js$/.test(url.pathname)) {
       const handle = url.pathname.slice(10, -3);
-      const hit = [...catalog.entries()].find(([, v]) => v.title.toLowerCase().replace(/[^a-z0-9]+/g, '-') === handle);
+      const hit = [...catalog.entries()].find(([, v]) => v.handle === handle);
       const id = hit ? hit[0] : 0;
       return send(res, 200, { variants: [{ id, available: id !== sc.soldOutVariant }] });
     }
@@ -288,13 +326,17 @@ export function createHarness({ port = 0 } = {}) {
       if (mode === '429') return send(res, 429, { code: 'rate_limited', retryAfterSeconds: sc.retryAfter }, { 'Retry-After': String(sc.retryAfter) });
       if (mode === '400') return send(res, 400, { code: 'invalid_body', field: 'answers.weightKg', message: 'Too small' });
 
-      if (which === 'build') return send(res, 200, buildResponse(body && body.answers));
+      if (which === 'build') return send(res, 200, buildResponse(body && body.answers, (body && body.excludeVariantIds) || []));
       if (which === 'verify') {
         const base = fx('verify-response');
         const ids = body.variantIds;
         const total = (ids.reduce((a, id) => a + Math.round(Number(catalog.get(id)?.price || 0) * 100), 0) / 100).toFixed(2);
         const checks = sc.verify === 'bad' ? base.checks.map((c, n) => (n === 3 ? { ...c, ok: false } : c)) : base.checks;
-        return send(res, 200, { ...base, ok: sc.verify !== 'bad', checks, total });
+        const hit = ids.filter((id) => (body.excludeVariantIds || []).includes(id));
+        const all = [...checks, ...hit.map((id) => ({ id: `excluded-variant-${id}`, ok: false }))];
+        const out = { ...base, ok: sc.verify !== 'bad' && !hit.length, checks: all, total };
+        if (sc.build === 'unchecked') out.unchecked = fx('build-response-exclude').rigs[0].unchecked;
+        return send(res, 200, out);
       }
       if (which === 'explain') {
         const text = (body && body.text) || '';
@@ -307,7 +349,7 @@ export function createHarness({ port = 0 } = {}) {
           skill: answers.skill || (/third season|intermediate/.test(text) ? 'intermediate' : undefined),
           owns: answers.owns || (/boom/.test(text) ? ['boom'] : undefined),
         };
-        const built = buildResponse(weight == null ? {} : merged);
+        const built = buildResponse(weight == null ? {} : merged, (body && body.excludeVariantIds) || []);
         const src = {};
         if (m && answers.weightKg == null) src.weightKg = 'text';
         const profile = { ...built.profile, source: { discipline: 'form', ...src } };

@@ -12,19 +12,27 @@ if (!customElements.get('rig-builder')) {
   const ROLE_ORDER = ['board', 'sail', 'mast', 'extension', 'boom', 'base', 'fin', 'harness'];
   const OWN_ROLES = ['board', 'sail', 'boom', 'fin'];
   const SKILL_KEY = { intermediate: 'chip_skill_intermediate', beginner: 'chip_skill_beginner', advanced: 'chip_skill_advanced' };
-  const CHECK_GROUP = {
-    'sail-fit': 'check_size',
-    'board-fit': 'check_size',
+  // Human names for the hub's check ids (docs/rig-builder.md, "Checks"). Older ids stay for older hubs.
+  const CHECK_LABEL = {
+    'sail-fit': 'check_sail',
+    'board-fit': 'check_board',
     'board-sail-range': 'check_board_sail',
-    'sail-mast-rdm': 'check_mast',
-    'sail-mast-length': 'check_mast',
+    'rider-fit': 'check_rider',
+    'sail-mast-diameter': 'check_mast_diameter',
+    'sail-mast-rdm': 'check_mast_diameter',
+    'sail-mast-length': 'check_mast_length',
+    'sail-mast-imcs': 'check_mast_imcs',
+    'mast-boom-diameter': 'check_boom_mast',
     'sail-boom-range': 'check_boom',
+    'mast-extension-diameter': 'check_extension',
+    'mast-extension-type': 'check_extension',
+    'extension-base-connection': 'check_base',
     'mast-base-type': 'check_base',
-    'mast-extension-type': 'check_base',
-    'fin-box': 'check_fin',
-    'fin-length': 'check_fin',
+    'fin-box': 'check_fin_box',
+    'fin-length': 'check_fin_length',
     'owned-boom': 'check_owned_boom',
   };
+  const MAX_EXCLUDED = 50;
   const STAGE_MS = 600;
   const MAX_TEXT = 1000;
 
@@ -114,7 +122,7 @@ if (!customElements.get('rig-builder')) {
         stage: 1,
         profile: null,
         warnings: [],
-        rig: null, // { items, alternatives, total, currency, checks }
+        rig: null, // { items, alternatives, total, currency, checks, unchecked }
         unmet: [],
         whys: {},
         mode: null, // explain mode: 'ai' | 'plain' | null
@@ -358,7 +366,7 @@ if (!customElements.get('rig-builder')) {
       this.startStages();
       this.render();
 
-      const body = { answers, locale: this.lang2 };
+      const body = this.withExcluded({ answers, locale: this.lang2 });
       if (this.requestId) body.requestId = this.requestId;
 
       let r;
@@ -410,6 +418,7 @@ if (!customElements.get('rig-builder')) {
         items: rig.items || [],
         alternatives: rig.alternatives || [],
         checks: rig.checks || [],
+        unchecked: Array.isArray(rig.unchecked) ? rig.unchecked : [],
         total: rig.total,
         currency: rig.currency || this.currency,
       };
@@ -425,7 +434,16 @@ if (!customElements.get('rig-builder')) {
       if (swapped) this.verify();
     }
 
-    /** The hub has no exclude key, so a sold-out variant is swapped for an alternative here. */
+    /** Sold-out variants (cart 422) go to the hub as excludeVariantIds, newest last, at most 50. */
+    withExcluded(body) {
+      if (this.excluded.size) body.excludeVariantIds = [...this.excluded].slice(-MAX_EXCLUDED);
+      return body;
+    }
+
+    /**
+     * Fallback for a hub that ignores excludeVariantIds: a sold-out variant that is still in the
+     * response is swapped for an alternative here. With a current hub nothing is left to do.
+     */
     applyExcluded() {
       const s = this.s;
       const rig = s.rig;
@@ -478,6 +496,7 @@ if (!customElements.get('rig-builder')) {
       if (this.requestId) body.requestId = this.requestId;
       if (text) body.text = text;
       body.locale = this.lang2;
+      this.withExcluded(body);
 
       let r;
       try {
@@ -691,15 +710,8 @@ if (!customElements.get('rig-builder')) {
       if (idx < 0) return;
       rig.items[idx] = { ...alt, quantity: 1, available: true };
       rig.alternatives = rig.alternatives.filter((a) => a !== alt);
-      rig.alternatives.push({
-        role: item.role,
-        variantId: item.variantId,
-        title: item.title,
-        variantTitle: item.variantTitle,
-        price: item.price,
-        currency: item.currency,
-        why: item.why,
-      });
+      const { quantity, available, ...demoted } = item;
+      rig.alternatives.push(demoted);
       rig.total = this.sum(rig.items);
       this.s.openAlt = item.role;
       this.focusAfter = `[data-swap="${item.role}"]`;
@@ -713,10 +725,11 @@ if (!customElements.get('rig-builder')) {
       const answers = this.collect() || { discipline: 'windsurf' };
       const seq = this.seq;
       try {
-        const r = await this.post('/verify', { variantIds: ids, answers, locale: this.lang2 });
+        const r = await this.post('/verify', this.withExcluded({ variantIds: ids, answers, locale: this.lang2 }));
         if (seq !== this.seq || r.status !== 200 || !r.json) return;
         if (ids.join() !== s.rig.items.map((i) => i.variantId).join()) return; // swapped again meanwhile
         s.rig.checks = r.json.checks || [];
+        s.rig.unchecked = Array.isArray(r.json.unchecked) ? r.json.unchecked : [];
         if (r.json.total) s.rig.total = r.json.total;
         this.render();
       } catch (e) {
@@ -790,7 +803,7 @@ if (!customElements.get('rig-builder')) {
       }
     }
 
-    /** 422: nothing was added. Find the part, drop it and rebuild without it. */
+    /** 422: nothing was added. Find the part and rebuild with it in excludeVariantIds (sent from now on). */
     async soldOut(json, items) {
       const s = this.s;
       const rigItems = s.rig.items.slice();
@@ -1048,14 +1061,59 @@ if (!customElements.get('rig-builder')) {
       return bits.join(' · ');
     }
 
-    imageEl(item) {
-      const url = item && item.image;
-      if (typeof url === 'string' && (url.startsWith('/') || url.startsWith('https://'))) {
-        const img = h('img', { class: 'rig-builder__img', src: url, alt: '', width: 72, height: 72, loading: 'lazy' });
-        img.addEventListener('error', () => img.replaceWith(h('div', { class: 'rig-builder__img', 'aria-hidden': 'true' })), { once: true });
+    /** The product image (imageUrl, else the older image key), https or storefront-relative only; else a neutral block. */
+    imageEl(item, size = 72, small = false) {
+      const url = item && (item.imageUrl !== undefined ? item.imageUrl : item.image);
+      const cls = `rig-builder__img${small ? ' rig-builder__img--small' : ''}`;
+      if (typeof url === 'string' && ((url.startsWith('/') && !url.startsWith('//')) || url.startsWith('https://'))) {
+        const img = h('img', { class: cls, src: url, alt: item.title || '', width: size, height: size, loading: 'lazy', decoding: 'async' });
+        img.addEventListener('error', () => img.replaceWith(h('div', { class: cls, 'aria-hidden': 'true' })), { once: true });
         return img;
       }
-      return h('div', { class: 'rig-builder__img', 'aria-hidden': 'true' });
+      return h('div', { class: cls, 'aria-hidden': 'true' });
+    }
+
+    /** Same-tab link to the product page; storefront-relative paths only. */
+    nameEl(item) {
+      const href = item.productUrl !== undefined ? item.productUrl : item.url;
+      const ok = typeof href === 'string' && href.startsWith('/') && !href.startsWith('//');
+      return ok ? h('a', { class: 'rig-builder__name-link', href }, item.title) : item.title;
+    }
+
+    vendorEl(item) {
+      return typeof item.vendor === 'string' && item.vendor.trim() ? h('span', { class: 'rig-builder__spec rig-builder__vendor' }, ` · ${item.vendor.trim()}`) : null;
+    }
+
+    /**
+     * The hub's `facts` as one compact line, "Label value · Label value". A value read off the product
+     * title is marked with * and the line says so. Without facts (an older hub) the old spec line stays.
+     */
+    specNodes(item) {
+      const facts = (Array.isArray(item.facts) ? item.facts : []).filter((x) => x && typeof x.label === 'string' && x.value != null && String(x.value) !== '');
+      if (!facts.length) {
+        const text = this.specLine(item);
+        return text ? [h('div', { class: 'rig-builder__spec' }, text)] : [];
+      }
+      const derivedFields = new Set(Array.isArray(item.derived) ? item.derived : []);
+      let anyDerived = false;
+      const line = [];
+      facts.forEach((fact, i) => {
+        if (i) line.push(' · ');
+        const derived = fact.derived === true || derivedFields.has(fact.field);
+        anyDerived = anyDerived || derived;
+        line.push(
+          h(
+            'span',
+            { class: 'rig-builder__fact', 'data-fact': fact.field || null },
+            `${fact.label} ${fact.value}`,
+            derived && h('span', { class: 'rig-builder__derived', 'aria-hidden': 'true' }, '*'),
+            derived && h('span', { class: 'visually-hidden' }, ` (${this.strings.derived_note})`)
+          )
+        );
+      });
+      const out = [h('div', { class: 'rig-builder__spec', 'data-facts': '' }, line)];
+      if (anyDerived) out.push(h('div', { class: 'rig-builder__spec rig-builder__derived-note', 'data-derived-note': '' }, `* ${this.strings.derived_note}`));
+      return out;
     }
 
     renderRig(missing) {
@@ -1095,7 +1153,6 @@ if (!customElements.get('rig-builder')) {
       const open = s.openAlt === item.role && alts.length > 0;
       const listId = `Rig-Alts-${this.dataset.sectionId}-${item.role}`;
       const why = s.whys[String(item.variantId)] || item.why;
-      const spec = this.specLine(item);
       return h(
         'div',
         { class: 'rig-builder__part', 'data-role': item.role, 'data-variant': item.variantId },
@@ -1104,8 +1161,8 @@ if (!customElements.get('rig-builder')) {
           'div',
           {},
           h('div', { class: 'rig-builder__role' }, this.roleName(item.role)),
-          h('div', { class: 'rig-builder__name' }, item.title),
-          spec && h('div', { class: 'rig-builder__spec' }, spec),
+          h('div', { class: 'rig-builder__name' }, this.nameEl(item), this.vendorEl(item)),
+          this.specNodes(item),
           why && h('div', { class: 'rig-builder__why' }, why),
           h('div', { class: 'rig-builder__stock' }, item.checkAvailability ? this.strings.check_availability : this.strings.in_stock),
           alts.length
@@ -1123,7 +1180,17 @@ if (!customElements.get('rig-builder')) {
                   h(
                     'li',
                     { class: 'rig-builder__alt' },
-                    h('span', { class: 'rig-builder__alt-text' }, h('span', { class: 'rig-builder__name' }, alt.title), ' ', h('span', { class: 'rig-builder__spec' }, this.money(alt.price, alt.currency)), alt.why ? h('div', { class: 'rig-builder__spec' }, alt.why) : null),
+                    this.imageEl(alt, 48, true),
+                    h(
+                      'span',
+                      { class: 'rig-builder__alt-text' },
+                      h('span', { class: 'rig-builder__name' }, this.nameEl(alt)),
+                      this.vendorEl(alt),
+                      ' ',
+                      h('span', { class: 'rig-builder__spec' }, this.money(alt.price, alt.currency)),
+                      this.specNodes(alt),
+                      alt.why ? h('div', { class: 'rig-builder__spec' }, alt.why) : null
+                    ),
                     h('button', { type: 'button', class: 'rig-builder__btn rig-builder__btn--ghost', 'data-use': alt.variantId, 'aria-label': this.t('alt_swap', { role: this.roleLower(item.role), title: alt.title }), onclick: () => this.swap(item, alt) }, this.strings.alt_use)
                   )
                 )
@@ -1162,20 +1229,35 @@ if (!customElements.get('rig-builder')) {
       );
     }
 
+    checkLabel(id) {
+      const key = CHECK_LABEL[id] || (/^(excluded|unavailable|unknown)-variant-/.test(id) ? 'check_other' : /^duplicate-/.test(id) ? 'check_other' : 'check_unknown');
+      return this.strings[key] || this.strings.check_unknown;
+    }
+
+    /**
+     * One calm sentence: what ran, then what could not run because the shop has no data for it.
+     * A rig with anything in `unchecked` is never described as simply verified.
+     */
     renderChecks(missing) {
-      const checks = this.s.rig.checks || [];
+      const rig = this.s.rig;
       const ok = [];
       const bad = [];
-      checks.forEach((c) => {
-        const label = this.strings[CHECK_GROUP[c.id] || 'check_other'];
+      (rig.checks || []).forEach((c) => {
+        const label = this.checkLabel(String(c.id));
         const list = c.ok ? ok : bad;
         if (!list.includes(label)) list.push(label);
       });
       const good = ok.filter((l) => !bad.includes(l));
-      const nodes = [];
-      if (good.length) nodes.push(this.t('checked', { list: good.join(' · ') }));
-      if (missing.length) nodes.push(' ' + this.t('not_checked', { list: missing.map((m) => this.roleLower(m.role)).join(', ') }));
-      const out = [h('p', { class: 'rig-builder__checks', 'data-checks': '' }, nodes)];
+      const unchecked = [];
+      (rig.unchecked || []).forEach((u) => {
+        const label = this.checkLabel(String(u && u.id));
+        if (!unchecked.includes(label)) unchecked.push(label);
+      });
+      const parts = [];
+      if (good.length) parts.push(this.t('checked', { list: good.join(' · ') }));
+      if (unchecked.length) parts.push(this.t('not_checked_data', { list: unchecked.join(' · ') }));
+      if (missing.length) parts.push(this.t('not_checked', { list: missing.map((m) => this.roleLower(m.role)).join(', ') }));
+      const out = [h('p', { class: 'rig-builder__checks', 'data-checks': '', 'data-unchecked': unchecked.length ? '' : null }, parts.join(' '))];
       if (bad.length) out.push(h('p', { class: 'rig-builder__note rig-builder__note--attn', role: 'status' }, this.t('checks_failed', { list: bad.join(' · ') })));
       return out;
     }
