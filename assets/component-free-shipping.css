@@ -41,6 +41,29 @@
   background: var(--color-success);
 }
 
+/* Compact (added-to-cart panel): a thin track while there is a gap to close,
+   one green confirmation line once there isn't. */
+.free-shipping-bar--compact .free-shipping-bar__track {
+  height: 0.3rem;
+}
+
+.free-shipping-bar--compact.free-shipping-bar--reached .free-shipping-bar__text {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  margin: 0;
+}
+
+.free-shipping-bar__check {
+  display: inline-flex;
+  flex-shrink: 0;
+}
+
+.free-shipping-bar__check .icon {
+  width: 1.3rem;
+  height: auto;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .free-shipping-bar__fill {
     transition: none;

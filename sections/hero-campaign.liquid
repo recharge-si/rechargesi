@@ -47,7 +47,7 @@
             | image_url: width: 2400
             | image_tag:
               widths: '375, 550, 750, 1000, 1300, 1600, 2000, 2400',
-              sizes: '(min-width: 1200px) 620px, (min-width: 990px) 55vw, 100vw',
+              sizes: '(min-width: 1400px) 700px, (min-width: 990px) 55vw, 100vw',
               loading: loading,
               fetchpriority: fetch_priority,
               alt: image_alt,
@@ -63,11 +63,11 @@
   <div class="hero-campaign__content">
     <div class="hero-campaign__inner">
       {%- if section.settings.eyebrow != blank -%}
-        <p class="hero-campaign__eyebrow">{{ section.settings.eyebrow | escape }}</p>
+        <p class="rc-eyebrow hero-campaign__eyebrow">{{ section.settings.eyebrow | escape }}</p>
       {%- endif -%}
 
       {%- if section.settings.heading != blank -%}
-        <h2 class="hero-campaign__heading">{{ section.settings.heading }}</h2>
+        <h2 class="hero-campaign__heading rc-rule">{{ section.settings.heading }}</h2>
       {%- endif -%}
 
       {%- if section.settings.text != blank -%}

@@ -9,12 +9,17 @@
   }
 {%- endstyle -%}
 
+{%- comment -%}
+  Walks the header menu to find where this collection sits in the catalogue,
+  so the breadcrumb and the sub-navigation both come from the same source the
+  mega menu uses. The page is then one step deeper into the structure the
+  customer just navigated, not a generic collection template.
+{%- endcomment -%}
 {%- liquid
-  assign bc_l1_title = ''
-  assign bc_l1_url = ''
-  assign bc_l2_title = ''
-  assign bc_l2_url = ''
+  assign bc_l1 = nil
+  assign bc_l2 = nil
   assign bc_current_title = ''
+  assign bc_depth = -1
   assign bc_found = false
 
   assign col_url_check = '|' | append: collection.url | append: '|'
@@ -24,11 +29,9 @@
     for childlink in link.links
       for grandchildlink in childlink.links
         assign gc_check = '|' | append: grandchildlink.url | append: '|'
-        if gc_check == col_url_check
-          assign bc_l1_title = link.title
-          assign bc_l1_url = link.url
-          assign bc_l2_title = childlink.title
-          assign bc_l2_url = childlink.url
+        if bc_found == false and gc_check == col_url_check
+          assign bc_l1 = link
+          assign bc_l2 = childlink
           assign bc_current_title = grandchildlink.title
           assign bc_depth = 2
           assign bc_found = true
@@ -38,8 +41,8 @@
       unless bc_found
         assign cl_check = '|' | append: childlink.url | append: '|'
         if cl_check == col_url_check
-          assign bc_l1_title = link.title
-          assign bc_l1_url = link.url
+          assign bc_l1 = link
+          assign bc_l2 = childlink
           assign bc_current_title = childlink.title
           assign bc_depth = 1
           assign bc_found = true
@@ -50,6 +53,7 @@
     unless bc_found
       assign l_check = '|' | append: link.url | append: '|'
       if l_check == col_url_check
+        assign bc_l1 = link
         assign bc_current_title = link.title
         assign bc_depth = 0
         assign bc_found = true
@@ -60,33 +64,79 @@
   if bc_current_title == blank
     assign bc_current_title = collection.title
   endif
--%}
-<nav class="collection-breadcrumb page-width" aria-label="{{ 'general.breadcrumbs.aria_label' | t }}">
-  <a href="/">{{ 'general.breadcrumbs.home' | t }}</a>
-  {%- if bc_depth >= 1 -%}
-    <span class="collection-breadcrumb__sep" aria-hidden="true">/</span>
-    <a href="{{ bc_l1_url }}" class="collection-breadcrumb__segment">{{ bc_l1_title | escape }}</a>
-  {%- endif -%}
-  {%- if bc_depth >= 2 -%}
-    <span class="collection-breadcrumb__sep" aria-hidden="true">/</span>
-    <a href="{{ bc_l2_url }}" class="collection-breadcrumb__segment">{{ bc_l2_title | escape }}</a>
-  {%- endif -%}
-  <span class="collection-breadcrumb__sep" aria-hidden="true">/</span>
-  <span class="collection-breadcrumb__current">{{ bc_current_title | escape }}</span>
-</nav>
 
-<div class="collection-header page-width">
-  <h1 class="collection-header__title">{{ bc_current_title | escape }}</h1>
+  # Sub-navigation: the level below this collection (Boards -> its
+  # disciplines), or, on a discipline page, its siblings so the customer can
+  # move sideways. "All" is the parent level. Only short lists: a sport's
+  # 14 categories, or a leaf like Footstraps falling back to all of them, is
+  # a second navigation bar, not a sub-navigation - the mega menu has those.
+  assign subnav_parent = nil
+  case bc_depth
+    when 0
+      assign subnav_parent = bc_l1
+    when 1
+      if bc_l2.links.size > 0
+        assign subnav_parent = bc_l2
+      endif
+    when 2
+      assign subnav_parent = bc_l2
+  endcase
+  if subnav_parent != nil and subnav_parent.links.size > 8
+    assign subnav_parent = nil
+  endif
+-%}
+
+<div class="rc-page-head page-width">
+  <nav class="rc-crumbs" aria-label="{{ 'general.breadcrumbs.aria_label' | t }}">
+    <a href="{{ routes.root_url }}">{{ 'general.breadcrumbs.home' | t }}</a>
+    {%- if bc_depth >= 1 -%}
+      <span class="rc-crumbs__sep" aria-hidden="true">/</span>
+      <a href="{{ bc_l1.url }}">{{ bc_l1.title | escape }}</a>
+    {%- endif -%}
+    {%- if bc_depth >= 2 -%}
+      <span class="rc-crumbs__sep" aria-hidden="true">/</span>
+      <a href="{{ bc_l2.url }}">{{ bc_l2.title | escape }}</a>
+    {%- endif -%}
+    <span class="rc-crumbs__sep" aria-hidden="true">/</span>
+    <span class="rc-crumbs__current" aria-current="page">{{ bc_current_title | escape }}</span>
+  </nav>
+
+  <h1 class="rc-page-title">{{ bc_current_title | escape }}</h1>
+
+  {%- if section.settings.show_collection_description and collection.description != blank -%}
+    <div class="collection-hero__description rte">{{ collection.description }}</div>
+  {%- endif -%}
 </div>
 
-{%- if section.settings.show_collection_description and collection.description != blank -%}
-  <div class="collection-hero color-{{ section.settings.color_scheme }} gradient">
-    <div class="collection-hero__inner page-width {% if settings.animations_reveal_on_scroll %} scroll-trigger animate--fade-in{% endif %}">
-      <div class="collection-hero__text-wrapper">
-        <div class="collection-hero__description rte">{{ collection.description }}</div>
-      </div>
-    </div>
-  </div>
+{%- if subnav_parent != nil and subnav_parent.links.size > 1 -%}
+  <nav class="rc-subnav page-width" aria-label="{{ subnav_parent.title | escape }}">
+    <ul class="rc-subnav__list" role="list">
+      <li class="rc-subnav__item">
+        <a
+          href="{{ subnav_parent.url }}"
+          class="rc-subnav__link"
+          {% if subnav_parent.url == collection.url %}
+            aria-current="page"
+          {% endif %}
+        >
+          {{- 'sections.collection_subnav.all' | t -}}
+        </a>
+      </li>
+      {%- for sublink in subnav_parent.links -%}
+        <li class="rc-subnav__item">
+          <a
+            href="{{ sublink.url }}"
+            class="rc-subnav__link"
+            {% if sublink.url == collection.url %}
+              aria-current="page"
+            {% endif %}
+          >
+            {{- sublink.title | escape -}}
+          </a>
+        </li>
+      {%- endfor -%}
+    </ul>
+  </nav>
 {%- endif -%}
 
 {%- if section.settings.show_collection_image and collection.image -%}

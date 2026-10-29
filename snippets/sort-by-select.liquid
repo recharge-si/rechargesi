@@ -44,7 +44,7 @@
     aria-expanded="false"
     aria-controls="sbs-panel-{{ uid }}"
   >
-    <span class="sbs__trigger-value">
+    <span class="sbs__trigger-value" data-prefix="{{ 'products.facets.sort_prefix' | t }} ">
       {%- for option in results.sort_options -%}
         {%- if option.value == sort_by -%}{{ option.name | escape }}{%- endif -%}
       {%- endfor -%}

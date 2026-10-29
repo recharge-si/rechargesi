@@ -27,14 +27,14 @@
 
 <cart-items class="gradient color-{{ section.settings.color_scheme }} isolate section-{{ section.id }}-padding{% if cart == empty %} is-empty{% endif %}">
   <div class="page-width">
-    <nav class="cart-breadcrumb" aria-label="{{ 'general.breadcrumbs.aria_label' | t }}">
-      <a href="/">{{ 'general.breadcrumbs.home' | t }}</a>
-      <span class="cart-breadcrumb__sep" aria-hidden="true">/</span>
-      <span class="cart-breadcrumb__current">{{ 'sections.cart.title' | t }}</span>
+    <nav class="rc-crumbs cart-breadcrumb" aria-label="{{ 'general.breadcrumbs.aria_label' | t }}">
+      <a href="{{ routes.root_url }}">{{ 'general.breadcrumbs.home' | t }}</a>
+      <span class="rc-crumbs__sep" aria-hidden="true">/</span>
+      <span class="rc-crumbs__current" aria-current="page">{{ 'sections.cart.title' | t }}</span>
     </nav>
 
     <div class="cart-header">
-      <h1 class="cart-header__title">{{ 'sections.cart.title' | t }}</h1>
+      <h1 class="rc-page-title cart-header__title">{{ 'sections.cart.title' | t }}</h1>
     </div>
 
     <div class="cart__warnings">
@@ -117,11 +117,11 @@
       {%- if empty_collection != blank and empty_collection.products_count > 0 -%}
         {{ 'component-card.css' | asset_url | stylesheet_tag }}
         <div class="cart-empty__recs">
-          <div class="cart-empty__recs-header">
-            <h2 class="cart-empty__heading">{{ 'sections.cart.empty_recommendations' | t }}</h2>
-            <a href="{{ empty_collection.url }}" class="cart-empty__recs-link">
+          <div class="rc-section-head">
+            <h2 class="rc-section-title">{{ 'sections.cart.empty_recommendations' | t }}</h2>
+            <a href="{{ empty_collection.url }}" class="rc-arrow-link">
               {{- 'sections.cart.empty_view_all' | t -}}
-              <span aria-hidden="true">&rarr;</span>
+              {{- 'icon-arrow.svg' | inline_asset_content -}}
             </a>
           </div>
           <ul class="grid product-grid contains-card contains-card--product{% if settings.card_style == 'standard' %} contains-card--standard{% endif %} grid--4-col-desktop grid--2-col-tablet-down" role="list">

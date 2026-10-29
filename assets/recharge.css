@@ -1,0 +1,562 @@
+/* ==========================================================================
+   Recharge design system
+   --------------------------------------------------------------------------
+   Tokens and the handful of components every template shares. Loaded
+   globally, straight after base.css, so section stylesheets can rely on it.
+
+   Order of preference when fixing something: token here → shared component
+   here → the section's own stylesheet. If two templates need the same rule,
+   it belongs in this file, not copied into both.
+   ========================================================================== */
+
+:root {
+  /* ── Colour roles ─────────────────────────────────────────────────────
+     Built on the colour-scheme foreground so they stay correct inside any
+     scheme. Muted is the lowest alpha that still clears 4.5:1 on white. */
+  --color-text: rgb(var(--color-foreground));
+  --color-text-secondary: rgba(var(--color-foreground), 0.78);
+  --color-text-muted: rgba(var(--color-foreground), 0.62);
+  --color-border: rgba(var(--color-foreground), 0.12);
+  --color-border-strong: rgba(var(--color-foreground), 0.28);
+  --color-surface: rgba(var(--color-foreground), 0.035);
+  --color-surface-strong: rgba(var(--color-foreground), 0.06);
+  /* Fixed ink and paper, for elements that sit on photography and must not
+     inherit a colour scheme (card chips and badges). */
+  --color-ink-rgb: 18, 18, 18;
+  --color-paper-rgb: 255, 255, 255;
+  /* Product image tile: packshot whites are multiplied into this. */
+  --color-card-tile-rgb: 243, 243, 242;
+
+  /* ── Type scale ───────────────────────────────────────────────────────
+     One scale for every template. Headings are uppercase and tight; the
+     scale steps are what separates a chapter from supporting information. */
+  --type-display: clamp(3.4rem, 2.2rem + 3vw, 5.6rem);
+  --type-h1: clamp(2.8rem, 2rem + 2vw, 4rem);
+  --type-h2: clamp(2.2rem, 1.8rem + 1vw, 3rem);
+  --type-h3: clamp(1.6rem, 1.4rem + 0.4vw, 1.8rem);
+  --type-eyebrow: 1.2rem;
+  --type-body: 1.6rem;
+  --type-small: 1.4rem;
+  --type-meta: 1.2rem;
+  --type-price: 1.6rem;
+  --tracking-caps: 0.08em;
+  --tracking-eyebrow: 0.16em;
+  --tracking-title: -0.01em;
+
+  /* ── Spacing scale ────────────────────────────────────────────────────
+     4px base. Section gaps scale with the viewport so rhythm holds from
+     390px to 1440px+ instead of being one fixed number of pixels. */
+  --space-1: 0.4rem;
+  --space-2: 0.8rem;
+  --space-3: 1.2rem;
+  --space-4: 1.6rem;
+  --space-5: 2.4rem;
+  --space-6: 3.2rem;
+  --space-7: 4.8rem;
+  --space-8: 6.4rem;
+
+  --page-gutter: 1.5rem;
+  --content-width: var(--page-width);
+
+  /* Supporting information: same chapter, new beat. */
+  --section-gap-tight: clamp(3.2rem, 2.4rem + 2vw, 4.8rem);
+  /* New chapter. */
+  --section-gap: clamp(4.8rem, 3rem + 3vw, 7.2rem);
+  /* Change of subject (e.g. from shopping to the physical store). */
+  --section-gap-large: clamp(6.4rem, 4rem + 4vw, 9.6rem);
+  /* Heading → its content. */
+  --heading-gap: clamp(2rem, 1.6rem + 1vw, 3.2rem);
+  --grid-gap: clamp(1.2rem, 0.8rem + 1vw, 2rem);
+  --card-gap: clamp(2.4rem, 1.6rem + 2vw, 3.6rem);
+
+  /* ── Motion ───────────────────────────────────────────────────────────
+     Motion communicates state. Nothing here is slower than 250ms. */
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --dur-fast: 150ms;
+  --dur-base: 200ms;
+  --dur-slow: 250ms;
+
+  /* Dawn's scroll reveal, retuned: shorter travel time, same keyframes. It
+     was 600ms per element plus a 75ms cascade, so the last card of an
+     eight-card grid finished animating well over a second after it scrolled
+     into view. */
+  --animation-slide-in: slideIn 350ms var(--ease-out) forwards;
+  --animation-fade-in: fadeIn 350ms var(--ease-out);
+
+  /* ── Accent ─────────────────────────────────────────────────────────── */
+  --accent-rule-width: 4rem;
+  --accent-rule-height: 3px;
+}
+
+@media screen and (min-width: 750px) {
+  :root {
+    --page-gutter: 5rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --dur-fast: 0.01ms;
+    --dur-base: 0.01ms;
+    --dur-slow: 0.01ms;
+  }
+}
+
+.scroll-trigger.animate--slide-in[data-cascade],
+.scroll-trigger.animate--fade-in[data-cascade] {
+  animation-delay: calc(var(--animation-order) * 40ms);
+}
+
+/* ==========================================================================
+   Typography components
+   ========================================================================== */
+
+/* Small red uppercase label above a heading. */
+.rc-eyebrow {
+  margin: 0 0 var(--space-3);
+  font-size: var(--type-eyebrow);
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: var(--tracking-eyebrow);
+  text-transform: uppercase;
+  color: var(--color-brand-primary);
+}
+
+/* The short red rule under every Recharge title. One definition, so the
+   width, weight and gap can never drift between templates again. */
+.rc-rule::after,
+.rc-page-title::after,
+.rc-section-title::after,
+.home-heading::after {
+  content: '';
+  display: block;
+  width: var(--accent-rule-width);
+  height: var(--accent-rule-height);
+  margin-top: var(--space-3);
+  background-color: var(--color-brand-primary);
+}
+
+/* Page title: the H1 of collection, search, cart and content pages. */
+.rc-page-title {
+  margin: 0;
+  font-family: var(--font-heading-family);
+  font-size: var(--type-h1);
+  font-weight: 700;
+  line-height: 1.05;
+  letter-spacing: var(--tracking-title);
+  text-transform: uppercase;
+  color: var(--color-text);
+  overflow-wrap: anywhere;
+}
+
+/* Section title: a chapter heading inside a page. .home-heading is the
+   original name and stays as an alias so existing markup keeps working. */
+.rc-section-title,
+.home-heading {
+  margin: 0;
+  font-family: var(--font-heading-family);
+  font-size: var(--type-h2);
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+  color: var(--color-text);
+}
+
+/* ==========================================================================
+   Page head: breadcrumb → title, identical on every template
+   ========================================================================== */
+
+.rc-page-head {
+  padding-top: var(--space-5);
+  margin-bottom: var(--space-6);
+}
+
+@media screen and (min-width: 750px) {
+  .rc-page-head {
+    padding-top: var(--space-6);
+  }
+}
+
+.rc-crumbs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0 var(--space-2);
+  margin-top: 0;
+  margin-bottom: var(--space-4);
+  font-size: var(--type-meta);
+  line-height: 1.5;
+  letter-spacing: 0.06em;
+  color: var(--color-text-muted);
+}
+
+.rc-crumbs a {
+  color: inherit;
+  text-decoration: none;
+  transition: color var(--dur-fast) var(--ease-standard);
+}
+
+.rc-crumbs a:hover {
+  color: var(--color-brand-primary);
+}
+
+.rc-crumbs__sep {
+  opacity: 0.5;
+}
+
+.rc-crumbs__current {
+  color: var(--color-text-secondary);
+}
+
+@media screen and (max-width: 749px) {
+  /* One scrollable line on phones: a wrapped trail pushes the title down. */
+  .rc-crumbs {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    white-space: nowrap;
+    scrollbar-width: none;
+  }
+
+  .rc-crumbs::-webkit-scrollbar {
+    display: none;
+  }
+
+  .rc-crumbs a,
+  .rc-crumbs span {
+    padding: var(--space-1) 0;
+  }
+}
+
+/* ==========================================================================
+   Section head: title left, optional action right, one baseline
+   ========================================================================== */
+
+.rc-section-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-3) var(--space-5);
+  margin-bottom: var(--heading-gap);
+}
+
+.rc-section-head > :first-child {
+  margin: 0;
+}
+
+/* ==========================================================================
+   Arrow link — "View all →". The arrow moves the same 4px everywhere
+   ========================================================================== */
+
+.rc-arrow-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) 0;
+  font-size: var(--type-meta);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: var(--tracking-caps);
+  text-transform: uppercase;
+  text-decoration: none;
+  color: var(--color-text);
+  transition: color var(--dur-fast) var(--ease-standard);
+}
+
+.rc-arrow-link svg,
+.rc-arrow {
+  display: inline-block;
+  width: 1.4rem;
+  height: auto;
+  flex-shrink: 0;
+  transition: transform var(--dur-base) var(--ease-out);
+}
+
+.rc-arrow-link:hover {
+  color: var(--color-brand-primary);
+}
+
+.rc-arrow-link:hover svg,
+a:hover .rc-arrow,
+a:focus-visible .rc-arrow {
+  transform: translateX(0.4rem);
+}
+
+/* ==========================================================================
+   Accent sweep — the red rule that grows along an element's bottom edge.
+   Used by category tiles, brand items and product cards so every hover in
+   the catalogue speaks the same way.
+   ========================================================================== */
+
+.rc-sweep {
+  position: relative;
+}
+
+.rc-sweep::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 2;
+  height: var(--accent-rule-height);
+  background-color: var(--color-brand-primary);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform var(--dur-slow) var(--ease-out);
+  pointer-events: none;
+}
+
+.rc-sweep:hover::after,
+.rc-sweep:focus-visible::after,
+.rc-sweep-host:hover .rc-sweep::after,
+.rc-sweep-host:focus-within .rc-sweep::after {
+  transform: scaleX(1);
+}
+
+/* ==========================================================================
+   Sub-navigation — the catalogue's next level down, under a page title.
+   A tab row rather than pills: it continues the header navigation's
+   language (uppercase, red underline) instead of introducing a new one.
+   ========================================================================== */
+
+.rc-subnav {
+  margin-top: calc(var(--space-6) * -0.5);
+  margin-bottom: var(--space-2);
+}
+
+.rc-subnav__list {
+  display: flex;
+  border-bottom: 1px solid var(--color-border);
+  gap: var(--space-5);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  overflow-x: auto;
+  scrollbar-width: none;
+  scroll-padding-inline: var(--page-gutter);
+}
+
+.rc-subnav__list::-webkit-scrollbar {
+  display: none;
+}
+
+/* A long row (Windsurf has 14 categories) scrolls sideways; the fade on the
+   trailing edge says so without a scrollbar. Short rows never reach it. */
+.rc-subnav__list {
+  -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 4.8rem), transparent);
+  mask-image: linear-gradient(to right, #000 calc(100% - 4.8rem), transparent);
+}
+
+.rc-subnav__item {
+  flex-shrink: 0;
+}
+
+.rc-subnav__link {
+  position: relative;
+  z-index: 1;
+  display: block;
+  padding: var(--space-3) 0 var(--space-3);
+  font-size: var(--type-meta);
+  font-weight: 700;
+  line-height: 1.4;
+  letter-spacing: var(--tracking-caps);
+  text-transform: uppercase;
+  text-decoration: none;
+  white-space: nowrap;
+  color: var(--color-text-muted);
+  transition: color var(--dur-fast) var(--ease-standard);
+}
+
+.rc-subnav__link::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: var(--accent-rule-height);
+  background: var(--color-brand-primary);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform var(--dur-base) var(--ease-out);
+}
+
+.rc-subnav__link:hover {
+  color: var(--color-text);
+}
+
+.rc-subnav__link:hover::after {
+  transform: scaleX(1);
+  opacity: 0.35;
+}
+
+.rc-subnav__link[aria-current='page'] {
+  color: var(--color-text);
+}
+
+.rc-subnav__link[aria-current='page']::after {
+  transform: scaleX(1);
+  opacity: 1;
+}
+
+.rc-subnav__link:focus-visible {
+  outline: 0.2rem solid rgb(var(--color-foreground));
+  outline-offset: -0.2rem;
+}
+
+.rc-subnav__count {
+  margin-left: var(--space-1);
+  font-weight: 400;
+  opacity: 0.7;
+}
+
+@media screen and (max-width: 749px) {
+  /* Bleed to the screen edge so the row visibly continues off-screen. */
+  .rc-subnav__list {
+    margin-inline: calc(var(--page-gutter) * -1);
+    padding-inline: var(--page-gutter);
+  }
+}
+
+/* ==========================================================================
+   Spec sheet — label / value rows, hairlines only.
+   ========================================================================== */
+
+.rc-spec {
+  margin: 0;
+}
+
+.rc-spec__title {
+  margin: 0 0 var(--space-3);
+  font-size: var(--type-meta);
+  font-weight: 700;
+  letter-spacing: var(--tracking-eyebrow);
+  text-transform: uppercase;
+  color: var(--color-text);
+}
+
+.rc-spec__list {
+  margin: 0;
+  border-top: 1px solid var(--color-border-strong);
+}
+
+.rc-spec__row {
+  display: grid;
+  grid-template-columns: minmax(9rem, 34%) minmax(0, 1fr);
+  gap: var(--space-4);
+  padding: var(--space-3) 0;
+  border-bottom: 1px solid var(--color-border);
+  font-size: var(--type-small);
+  line-height: 1.45;
+}
+
+.rc-spec__row dt {
+  font-size: var(--type-meta);
+  font-weight: 700;
+  letter-spacing: var(--tracking-caps);
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  padding-top: 0.15rem;
+}
+
+.rc-spec__row dd {
+  margin: 0;
+  color: var(--color-text);
+  overflow-wrap: anywhere;
+}
+
+.rc-spec__row dd a {
+  color: inherit;
+  text-underline-offset: 0.3rem;
+  text-decoration-color: var(--color-border-strong);
+  transition: color var(--dur-fast) var(--ease-standard), text-decoration-color var(--dur-fast) var(--ease-standard);
+}
+
+.rc-spec__row dd a:hover {
+  color: var(--color-brand-primary);
+  text-decoration-color: currentColor;
+}
+
+/* ==========================================================================
+   Page rhythm
+   --------------------------------------------------------------------------
+   Every Recharge section on the homepage uses .rc-section and one of the
+   gap modifiers instead of per-instance pixel padding, so the page reads
+   as chapters of one layout rather than blocks that each chose a number.
+   ========================================================================== */
+
+.rc-section {
+  padding-top: var(--section-gap);
+}
+
+.rc-section--tight {
+  padding-top: var(--section-gap-tight);
+}
+
+.rc-section--large {
+  padding-top: var(--section-gap-large);
+}
+
+.rc-section--flush {
+  padding-top: 0;
+}
+
+/* The last section before the footer closes the page with the same gap
+   that separates chapters. */
+#MainContent > .shopify-section:last-child .rc-section {
+  padding-bottom: var(--section-gap);
+}
+
+/* ==========================================================================
+   Navigation between pages
+   --------------------------------------------------------------------------
+   The browser's own cross-document view transition: a 150ms cross-fade that
+   runs only once the next page is ready, so it never adds time to a click.
+   It replaced a script that intercepted every link, fetched the page itself
+   and swapped <main> after a fixed 300ms exit animation — slower than a plain
+   navigation, and it had to re-run section scripts by hand.
+   ========================================================================== */
+
+@view-transition {
+  navigation: auto;
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 150ms;
+  animation-timing-function: var(--ease-standard);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  @view-transition {
+    navigation: none;
+  }
+}
+
+/* Dawn's title wrappers carry their own margins; when they hold a Recharge
+   section head, the head's --heading-gap is the only spacing. */
+.title-wrapper:has(> .rc-section-head),
+.collection__title.title-wrapper:has(> .rc-section-head) {
+  margin-bottom: 0;
+}
+
+.rc-section-head > .title {
+  margin: 0;
+}
+
+/* An action in a section head lines up with the title text, not with the
+   red rule hanging below it. */
+.rc-section-head > .rc-arrow-link {
+  margin-bottom: calc(var(--space-3) + var(--accent-rule-height) - var(--space-2));
+}
+
+.rc-spec__code {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.03em;
+}
+
+.rc-spec__code--empty {
+  color: var(--color-text-muted);
+}

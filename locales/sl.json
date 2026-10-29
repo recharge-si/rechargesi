@@ -59,8 +59,15 @@
       "reset": "Počisti iskalni izraz"
     },
     "cart": {
+      "qty": "Kol.: {{ count }}",
+      "items_in_cart": {
+        "one": "{{ count }} izdelek v košarici",
+        "two": "{{ count }} izdelka v košarici",
+        "few": "{{ count }} izdelki v košarici",
+        "other": "{{ count }} izdelkov v košarici"
+      },
       "view": "Prikaži košarico ({{ count }})",
-      "item_added": "Artikel je dodan v košarico",
+      "item_added": "Dodano v košarico",
       "view_empty_cart": "Prikaži košarico",
       "subtotal": "Vmesna vsota"
     },
@@ -227,7 +234,25 @@
       },
       "taxes_included": "Davki vključeni.",
       "duties_included": "Dajatve vključene.",
-      "duties_and_taxes_included": "Dajatve in davki vključeni."
+      "duties_and_taxes_included": "Dajatve in davki vključeni.",
+      "specs": {
+        "title": "Specifikacije",
+        "brand": "Znamka",
+        "category": "Kategorija"
+      },
+      "choose_size": "Izberi velikost",
+      "card_sizes": {
+        "one": "{{ count }} velikost",
+        "two": "{{ count }} velikosti",
+        "few": "{{ count }} velikosti",
+        "other": "{{ count }} velikosti"
+      },
+      "card_options": {
+        "one": "{{ count }} možnost",
+        "two": "{{ count }} možnosti",
+        "few": "{{ count }} možnosti",
+        "other": "{{ count }} možnosti"
+      }
     },
     "modal": {
       "label": "Galerija predstavnostnih vsebin"
@@ -267,7 +292,8 @@
       "filter_selected_accessibility": "{{ type }} (št. izbranih filtrov: {{ count }})",
       "show_more": "Prikaži več",
       "show_less": "Prikaži manj",
-      "filter_and_operator_subtitle": "Ustreza vsem"
+      "filter_and_operator_subtitle": "Ustreza vsem",
+      "sort_prefix": "Razvrsti:"
     }
   },
   "templates": {
@@ -343,7 +369,8 @@
         "other": "Št. elementov: {{ count }}",
         "few": "Št. elementov: {{ count }}",
         "two": "Št. elementov: {{ count }}"
-      }
+      },
+      "shop_all": "Vse iz kategorije {{ title }}"
     },
     "cart": {
       "pickup_notice": {
@@ -474,6 +501,12 @@
       "min_error": "Ta artikel ima najmanj {{ min }}",
       "max_error": "Ta artikel ima največ {{ max }}",
       "step_error": "Ta artikel lahko dodate samo v korakih po {{ step }}."
+    },
+    "collection_subnav": {
+      "all": "Vse"
+    },
+    "related_products": {
+      "more_in": "Vse iz kategorije {{ title }}"
     }
   },
   "rig_builder": {

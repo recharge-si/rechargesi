@@ -601,10 +601,18 @@
 }
 
 /* ============================================================
-   PREMIUM PRODUCT CARD — Editorial Watersports
+   RECHARGE PRODUCT CARD
+   ------------------------------------------------------------
+   Flat and square-edged: photography and the text hierarchy do
+   the work. No lift, no drop shadow, no rounded corners, no
+   frosted chips — those made the card a floating object instead
+   of part of the catalogue grid.
+
+   Hover language is shared with category tiles and brand items:
+   the red rule sweeps along the image's bottom edge, the image
+   zooms 3%, the title turns red. Nothing moves the layout.
    ============================================================ */
 
-/* --- Strip default Dawn borders & box-shadow for clean slate --- */
 .product-card-wrapper .card--standard .card__inner {
   border: 0;
 }
@@ -613,65 +621,90 @@
   box-shadow: none;
 }
 
-/* --- Soft image rounding --- */
-.product-card-wrapper .card .card__inner .card__media {
-  border-radius: 6px;
-  overflow: hidden;
+/* ── Image frame ──
+   Every card is a 1:1 frame (card-product.liquid fixes the ratio). Square
+   photos fill it edge to edge. Off-square ones (a wide line-up of boards, a
+   tall sail) are contained on white rather than cropped — and on white, not
+   a grey surface, because the grey showed as bands above and below every
+   packshot. The hover image is a lifestyle shot, so it always fills. */
+/* Every image sits on a light grey tile and is multiplied into it, so a
+   packshot's white background becomes the tile colour. Plain white made
+   packshots float on the white page with no edge; a grey surface behind
+   contained images (an earlier try) showed as bands because the photo's
+   own white stayed white. Multiply removes both problems. The background is
+   on .media, not .card__media: sold-out cards dim .media with opacity, which
+   isolates it, and the blend has to happen inside that group. */
+.product-card-wrapper .card__media .media {
+  background-color: rgb(var(--color-card-tile-rgb));
 }
 
-/* --- Card hover: lift + shadow --- */
-.product-card-wrapper .card {
-  transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+.product-card-wrapper .card__media .media > img {
+  mix-blend-mode: multiply;
 }
 
-@media screen and (min-width: 990px) {
-  .product-card-wrapper:hover .card {
-    transform: translateY(-6px);
-  }
-
-  /* Shadow lives on wrapper so it doesn't clip with overflow hidden */
-  .product-card-wrapper {
-    transition: filter 0.45s cubic-bezier(0.22, 1, 0.36, 1);
-    filter: drop-shadow(0 0 0 transparent);
-  }
-
-  .product-card-wrapper:hover {
-    filter: drop-shadow(0 20px 40px rgba(0, 0, 0, 0.10))
-            drop-shadow(0 6px 12px rgba(0, 0, 0, 0.05));
-  }
+.product-card-wrapper .card__media--cover .media > img:first-child {
+  object-fit: cover;
 }
 
-/* --- Smoother, stronger image zoom on hover --- */
-@media screen and (min-width: 990px) {
-  .product-card-wrapper .media.media--hover-effect > img:first-child:only-child {
-    transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1) !important;
+.product-card-wrapper .card__media--contain .media > img:first-child {
+  object-fit: contain;
+}
+
+.product-card-wrapper .card__media .media > img + img {
+  object-fit: cover;
+}
+
+/* Catalogue packshots arrive with wide white margins; a 6% zoom tightens
+   the frame. 10% was tried and clipped products that already fill their
+   photo (hooks, straps). */
+.product-card-wrapper .card__media .media > img:first-child {
+  transform: scale(1.06);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .product-card-wrapper .media.media--hover-effect > img:first-child:only-child,
+  .product-card-wrapper .media.media--hover-effect > img + img {
+    transition: transform var(--dur-slow) var(--ease-out), opacity var(--dur-base) var(--ease-standard);
+  }
+
+  .product-card-wrapper .media.media--hover-effect > img:first-child:not(:only-child) {
+    transition: opacity var(--dur-base) var(--ease-standard);
   }
 
   .product-card-wrapper:hover .media.media--hover-effect > img:first-child:only-child {
-    transform: scale(1.06) !important;
+    transform: scale(1.09);
+  }
+
+  .product-card-wrapper:hover .media.media--hover-effect > img + img {
+    transform: scale(1.03);
   }
 }
 
-/* --- Brand accent stripe — sweeps in on hover --- */
+/* ── Accent sweep along the image's bottom edge ── */
 .product-card-wrapper .card__media::before {
   content: '';
   position: absolute;
   bottom: 0;
   left: 0;
   right: 0;
-  height: 2px;
+  height: var(--accent-rule-height);
   background: var(--color-brand-primary);
   z-index: 4;
   transform: scaleX(0);
   transform-origin: left;
-  transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: transform var(--dur-slow) var(--ease-out);
 }
 
-.product-card-wrapper:hover .card__media::before {
+.product-card-wrapper:hover .card__media::before,
+.product-card-wrapper:focus-within .card__media::before {
   transform: scaleX(1);
 }
 
-/* --- Image overlay container --- */
+/* ── On-image labels ──
+   Category (top-left) and variant count (top-right) share one chip: the
+   original translucent smoke with a light blur, fixed height so the chips
+   line up across the grid. Tried both ways and rejected: solid ink (too
+   heavy, black blocks on dark photos) and light paper (too faint). */
 .card__image-overlays {
   position: absolute;
   inset: 0;
@@ -679,145 +712,129 @@
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  padding: 0.7rem;
+  gap: var(--space-2);
+  padding: var(--space-2);
   pointer-events: none;
 }
 
-/* --- Shared chip style for both overlays --- */
 .card__category-tag,
-.card__variant-count {
-  font-size: 0.95rem;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  line-height: 1;
-  color: #fff;
-  background: rgba(0, 0, 0, 0.45);
-  backdrop-filter: blur(12px) saturate(1.4);
-  -webkit-backdrop-filter: blur(12px) saturate(1.4);
-  padding: 0.5rem 0.7rem;
-  border-radius: 3px;
-  transition: background 0.3s ease, transform 0.3s ease;
-}
-
-/* --- Category tag — top-left --- */
-.card__category-tag {
-  position: absolute;
-  top: 0.7rem;
-  left: 0.7rem;
-  border-left: 2px solid var(--color-brand-primary);
-  padding-left: 0.6rem;
-}
-
-.product-card-wrapper:hover .card__category-tag {
-  background: var(--color-brand-primary);
-  border-left-color: rgba(255, 255, 255, 0.4);
-}
-
-/* --- Variant count — top-right --- */
 .card__variant-count {
   display: inline-flex;
   align-items: center;
-  gap: 0.35rem;
+  gap: 0.4rem;
+  height: 2.2rem;
+  padding: 0 0.7rem;
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: var(--tracking-caps);
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: rgb(var(--color-paper-rgb));
+  background: rgba(var(--color-ink-rgb), 0.45);
+  -webkit-backdrop-filter: blur(12px) saturate(1.4);
+  backdrop-filter: blur(12px) saturate(1.4);
+  border-radius: 3px;
+}
+
+.card__category-tag {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  box-shadow: inset 2px 0 0 var(--color-brand-primary);
+  padding-left: 0.8rem;
+}
+
+.card__variant-count {
+  flex-shrink: 0;
   margin-left: auto;
 }
 
 .card__variant-count svg {
-  opacity: 0.7;
   flex-shrink: 0;
-  transition: opacity 0.3s ease;
+  opacity: 0.8;
 }
 
-.product-card-wrapper:hover .card__variant-count {
-  background: var(--color-brand-primary);
-}
-
-.product-card-wrapper:hover .card__variant-count svg {
-  opacity: 1;
-}
-
-/* --- Info area below image — minimal & tight --- */
+/* ── Text ── */
 .product-card-wrapper .card__information {
-  padding: 1rem 0.2rem 0.8rem;
+  padding: var(--space-3) 0 var(--space-2);
 }
 
-@media screen and (min-width: 750px) {
-  .product-card-wrapper .card__information {
-    padding: 1.1rem 0.2rem 0.9rem;
-  }
-}
-
-/* Collapse spacing between info children */
 .product-card-wrapper .card-information > *:not(.visually-hidden:first-child) + *:not(.rating):not(.card__information-volume-pricing-note) {
-  margin-top: 0.4rem;
+  margin-top: var(--space-1);
 }
 
-/* --- Title --- */
+/* Title: at most two lines. No reserved height — the price sits directly
+   under the name it belongs to, even if that staggers prices slightly
+   between a one-line and a two-line title in the same row. */
 .product-card-wrapper .card__heading.h5 {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+  margin: 0;
+  font-family: var(--font-body-family);
+  font-size: var(--type-small);
   font-weight: 500;
-  letter-spacing: -0.015em;
-  line-height: 1.25;
-  font-size: 1.25rem;
+  line-height: 1.3;
+  letter-spacing: 0;
+  color: var(--color-text);
 }
 
 @media screen and (min-width: 990px) {
   .product-card-wrapper .card__heading.h5 {
-    font-size: 1.35rem;
+    font-size: 1.5rem;
   }
 }
 
 .product-card-wrapper .card__heading.h5 a {
-  transition: color 0.25s ease;
+  transition: color var(--dur-fast) var(--ease-standard);
 }
 
 .product-card-wrapper:hover .card__heading.h5 a {
   color: var(--color-brand-primary);
 }
 
-/* Kill generic underline on hover */
-@media screen and (min-width: 990px) {
-  .product-card-wrapper.underline-links-hover:hover .card__heading a {
-    text-decoration: none;
-  }
+.product-card-wrapper.underline-links-hover:hover .card__heading a {
+  text-decoration: none;
 }
 
-/* --- Price (single + range) --- */
-.product-card-wrapper .price__regular .price-item--regular,
-.product-card-wrapper .price__sale .price-item--sale {
-  font-weight: 600;
-  letter-spacing: 0.01em;
-  color: rgba(var(--color-foreground), 0.7);
+/* ── Price ── */
+.product-card-wrapper .price {
+  margin-top: var(--space-1);
+  font-size: var(--type-price);
+  letter-spacing: 0;
 }
 
-.card__price-range {
-  display: flex;
-  align-items: baseline;
-  gap: 0.25rem;
-  flex-wrap: wrap;
-  margin-top: 0.4rem;
+.product-card-wrapper .price .price-item {
+  font-weight: 700;
+  letter-spacing: 0;
+  color: var(--color-text);
 }
 
-.card__price-range-value {
-  font-weight: 600;
-  color: rgba(var(--color-foreground), 0.7);
-  letter-spacing: 0.01em;
+.product-card-wrapper .price--on-sale .price-item--sale {
+  color: var(--color-brand-primary);
 }
 
-.card__price-range-sep {
-  color: rgba(var(--color-foreground), 0.2);
+.product-card-wrapper .price--on-sale .price-item--regular {
   font-weight: 400;
+  color: var(--color-text-muted);
 }
 
-/* --- Badges — minimal, on-image bottom-left --- */
+/* ── Status badge (sold out / sale), on the image, bottom-left ── */
 .product-card-wrapper .badge {
-  font-size: 0.9rem;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  padding: 0.45rem 0.7rem;
-  border-radius: 3px;
+  display: inline-flex;
+  align-items: center;
+  height: 2.2rem;
+  padding: 0 0.8rem;
+  font-size: 1rem;
+  font-weight: 700;
   line-height: 1;
+  letter-spacing: var(--tracking-caps);
+  text-transform: uppercase;
   border: 0;
+  border-radius: 0;
 }
 
 .product-card-wrapper .card__badge .badge.color-scheme-4,
@@ -826,35 +843,619 @@
   color: #fff;
 }
 
+/* Sold out: ink text on paper with an ink border. Colours are fixed rather
+   than taken from the badge's colour scheme — the scheme class redefines
+   foreground and background on the badge itself, which rendered dark text
+   on a dark fill. */
 .product-card-wrapper .card__badge .badge.color-scheme-3 {
-  background-color: rgba(var(--color-foreground), 0.8);
-  color: rgb(var(--color-background));
+  background-color: rgb(var(--color-paper-rgb));
+  color: rgb(var(--color-ink-rgb));
+  box-shadow: inset 0 0 0 1px rgb(var(--color-ink-rgb));
 }
 
-/* --- Uniform card image ratio — override "adapt" so all cards crop to 1:1 --- */
-.product-card-wrapper .card.ratio,
-.product-card-wrapper .card .card__inner.ratio {
-  --ratio-percent: 100% !important;
+/* ── Sold out: still readable, no longer competing ── */
+.product-card-wrapper--sold-out .card__media .media {
+  opacity: 0.6;
 }
 
-/* --- Subtle vignette on hover for image depth --- */
-@media screen and (min-width: 990px) {
-  .product-card-wrapper .card__media .media::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: radial-gradient(
-      ellipse at center,
-      transparent 50%,
-      rgba(0, 0, 0, 0.04) 100%
-    );
-    z-index: 1;
+.product-card-wrapper--sold-out .price .price-item {
+  color: var(--color-text-muted);
+}
+
+/* ── Card text, per the agreed mockup ──
+   Bold name, the category path under it in grey, then a larger price. */
+.product-card-wrapper .card__heading.h5 {
+  font-weight: 700;
+}
+
+.product-card-wrapper .card__category-path {
+  margin: 0.2rem 0 0;
+  font-size: 1.3rem;
+  line-height: 1.35;
+  color: var(--color-text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.product-card-wrapper .price,
+.product-card-wrapper .price .price-item {
+  font-size: 1.7rem;
+}
+
+/* "5 sizes" chip: bottom-left of the image, same smoke chip as the tags. */
+.product-card-wrapper .card__variant-count {
+  position: absolute;
+  left: var(--space-2);
+  bottom: var(--space-2);
+  margin: 0;
+  letter-spacing: 0.02em;
+  text-transform: none;
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+/* ── Card as a column ──
+   Every card in a row is the grid row's height and the buy button sits at
+   its foot, so buttons line up across the row however long a name runs or
+   whether a category line is present. Name, category and price stay
+   together at the top. */
+.product-card-wrapper,
+.product-card-wrapper > .card {
+  height: 100%;
+}
+
+.product-card-wrapper > .card {
+  display: flex;
+  flex-direction: column;
+}
+
+.product-card-wrapper > .card > .card__content {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+}
+
+.product-card-wrapper > .card > .card__content > .quick-add {
+  margin-top: auto;
+}
+
+/* ── Buy button ──
+   Full card width, outline, arrow: "CHOOSE SIZE →" for products with sizes,
+   "ADD TO CART" for single products. Red fill on hover and while its size
+   panel is open. */
+.product-card-wrapper .quick-add {
+  position: relative;
+  z-index: 2;
+  margin: var(--space-3) 0 var(--space-4);
+  padding-top: var(--space-3);
+}
+
+.product-card-wrapper .quick-add__submit.button[disabled] {
+  color: var(--color-text-muted);
+  box-shadow: inset 0 0 0 1px var(--color-border);
+  opacity: 1;
+  cursor: not-allowed;
+}
+
+.product-card-wrapper .quick-add__submit.button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  width: 100%;
+  min-width: 0;
+  height: 4rem;
+  min-height: 4rem;
+  padding: 0 var(--space-3);
+  font-size: var(--type-meta);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: var(--tracking-caps);
+  text-transform: uppercase;
+  border-radius: 0;
+  color: rgb(var(--color-foreground));
+  background: rgb(var(--color-background));
+  box-shadow: inset 0 0 0 1px rgba(var(--color-foreground), 0.55);
+  cursor: pointer;
+  list-style: none;
+  transition: background-color var(--dur-fast) var(--ease-standard), color var(--dur-fast) var(--ease-standard),
+    box-shadow var(--dur-fast) var(--ease-standard);
+}
+
+.product-card-wrapper .quick-add__submit.button::before,
+.product-card-wrapper .quick-add__submit.button::after {
+  display: none;
+}
+
+.product-card-wrapper .quick-add__submit .icon-arrow,
+.product-card-wrapper .quick-add__submit .icon-bag-add {
+  flex-shrink: 0;
+  width: 1.4rem;
+  height: auto;
+  transition: transform var(--dur-base) var(--ease-out);
+}
+
+.product-card-wrapper .quick-add__submit .icon-bag-add {
+  width: 1.7rem;
+}
+
+.product-card-wrapper .quick-add__submit.button:not([disabled]):hover,
+.product-card-wrapper .quick-add__submit.button:focus-visible {
+  color: #fff;
+  background: var(--color-brand-primary);
+  box-shadow: inset 0 0 0 1px var(--color-brand-primary);
+}
+
+.product-card-wrapper .quick-add__submit.button:hover .icon-arrow {
+  transform: translateX(0.4rem);
+}
+
+.product-card-wrapper .quick-add__submit.button:focus-visible {
+  outline: 0.2rem solid rgb(var(--color-foreground));
+  outline-offset: 0.2rem;
+}
+
+.product-card-wrapper .quick-add__submit.loading > :not(.loading__spinner) {
+  visibility: hidden;
+}
+
+.product-card-wrapper .quick-add__submit .loading__spinner {
+  position: absolute;
+  width: 1.8rem;
+}
+
+@media screen and (max-width: 749px) {
+  .product-card-wrapper .quick-add__submit.button {
+    height: 4.4rem;
+    min-height: 4.4rem;
+    letter-spacing: 0.04em;
+  }
+}
+
+/* ── Size picker modal ──
+   A native <dialog> opened with showModal(): centred over a dimmed page,
+   straight-edged, red top rule. Head: thumbnail, product name, "Choose size",
+   close. Body: sizes as rows (size, price, stock state), then the red
+   "ADD TO CART {size}". An anchored popover came first and was rejected —
+   it opened over the card above. */
+.card-size-picker {
+  display: block;
+}
+
+.card-size-picker__dialog {
+  width: min(48rem, calc(100vw - 3rem));
+  max-height: min(64rem, calc(100vh - 6rem));
+  margin: auto;
+  padding: 0;
+  overflow: hidden;
+  color: var(--color-text);
+  background: rgb(var(--color-background));
+  border: 0;
+  border-top: var(--accent-rule-height) solid var(--color-brand-primary);
+  border-radius: 0;
+  box-shadow: 0 2.4rem 6.4rem rgba(var(--color-ink-rgb), 0.24);
+}
+
+.card-size-picker__dialog[open] {
+  display: flex;
+  flex-direction: column;
+  animation: rcModalIn var(--dur-slow) var(--ease-out);
+}
+
+.card-size-picker__dialog::backdrop {
+  background: rgba(var(--color-ink-rgb), 0.45);
+  animation: rcBackdropIn var(--dur-slow) var(--ease-standard);
+}
+
+@keyframes rcModalIn {
+  from {
     opacity: 0;
-    transition: opacity 0.5s ease;
-    pointer-events: none;
+    transform: translateY(1.2rem);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes rcBackdropIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.card-size-picker__head {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-4) var(--space-4) var(--space-4) var(--space-5);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.card-size-picker__thumb {
+  width: 6.4rem;
+  height: 6.4rem;
+  background: rgb(var(--color-card-tile-rgb));
+}
+
+.card-size-picker__thumb img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  mix-blend-mode: multiply;
+}
+
+.card-size-picker__name {
+  margin: 0;
+  font-size: 1.6rem;
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.card-size-picker__title {
+  margin: 0.2rem 0 0;
+  font-size: 1.3rem;
+  color: var(--color-text-muted);
+}
+
+.card-size-picker__close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  align-self: start;
+  width: 4.4rem;
+  height: 4.4rem;
+  padding: 1.2rem;
+  color: var(--color-text-muted);
+  background: none;
+  border: 0;
+  cursor: pointer;
+  transition: color var(--dur-fast) var(--ease-standard);
+}
+
+.card-size-picker__close:hover {
+  color: var(--color-text);
+}
+
+.card-size-picker__close svg {
+  width: 2rem;
+  height: 2rem;
+}
+
+.card-size-picker__panel {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  padding: var(--space-4) var(--space-5) var(--space-5);
+}
+
+.card-size-picker__panel product-form,
+.card-size-picker__panel form {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.card-size-picker__options {
+  min-height: 0;
+  max-height: 34rem;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  border: 0;
+  border-top: 1px solid var(--color-border);
+}
+
+.card-size-picker__row {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto 8.8rem;
+  align-items: center;
+  gap: var(--space-4);
+  min-height: 4.8rem;
+  padding: 0 var(--space-3);
+  border-bottom: 1px solid var(--color-border);
+  font-size: 1.4rem;
+  cursor: pointer;
+  transition: background-color var(--dur-fast) var(--ease-standard);
+}
+
+.card-size-picker__row input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.card-size-picker__row:hover {
+  background: var(--color-surface);
+}
+
+.card-size-picker__row:has(input:checked) {
+  background: var(--color-surface-strong);
+  box-shadow: inset 3px 0 0 var(--color-brand-primary);
+}
+
+.card-size-picker__row:has(input:focus-visible) {
+  outline: 0.2rem solid rgb(var(--color-foreground));
+  outline-offset: -0.2rem;
+}
+
+.card-size-picker__row.is-unavailable {
+  cursor: not-allowed;
+  color: var(--color-text-muted);
+}
+
+.card-size-picker__size {
+  font-weight: 700;
+  line-height: 1.3;
+  padding: var(--space-2) 0;
+  overflow-wrap: anywhere;
+}
+
+.card-size-picker__price {
+  color: var(--color-text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+.card-size-picker__state {
+  font-weight: 600;
+  text-align: right;
+}
+
+.card-size-picker__state--own,
+.card-size-picker__state--available {
+  color: var(--color-success);
+}
+
+.card-size-picker__state--partner {
+  color: var(--color-info);
+}
+
+.card-size-picker__state--none {
+  color: var(--color-text-muted);
+  font-weight: 400;
+}
+
+.card-size-picker__add.button {
+  width: 100%;
+  min-height: 4.8rem;
+  margin-top: var(--space-4);
+  font-size: var(--type-meta);
+  font-weight: 700;
+  letter-spacing: var(--tracking-caps);
+  text-transform: uppercase;
+  border-radius: 0;
+  color: #fff;
+  background: var(--color-brand-primary);
+  box-shadow: none;
+  transition: background-color var(--dur-fast) var(--ease-standard);
+}
+
+.card-size-picker__add.button::before,
+.card-size-picker__add.button::after {
+  display: none;
+}
+
+.card-size-picker__add.button:hover {
+  background: var(--color-brand-primary-dark);
+}
+
+.card-size-picker__add.loading > :not(.loading__spinner) {
+  visibility: hidden;
+}
+
+.card-size-picker__add .loading__spinner {
+  position: absolute;
+  width: 1.8rem;
+}
+
+.card-size-picker__add > span:first-child {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.card-size-picker__chosen {
+  min-width: 0;
+  margin-left: 0.6rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+/* Secondary action at the same size as the primary, directly under it. */
+.card-size-picker__details {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 4.8rem;
+  margin-top: var(--space-2);
+  font-size: var(--type-meta);
+  font-weight: 700;
+  letter-spacing: var(--tracking-caps);
+  text-transform: uppercase;
+  text-decoration: none;
+  color: var(--color-text);
+  box-shadow: inset 0 0 0 1px rgba(var(--color-foreground), 0.55);
+  transition: color var(--dur-fast) var(--ease-standard), box-shadow var(--dur-fast) var(--ease-standard);
+}
+
+.card-size-picker__details:hover {
+  color: var(--color-brand-primary);
+  box-shadow: inset 0 0 0 1px var(--color-brand-primary);
+}
+
+/* ── Multi-option products (Size + Color…) ──
+   One group per option; values are square chips. Selected = ink fill.
+   Values with no buyable variant for the current picks are struck through
+   but stay clickable, so a customer can still switch to them and see why. */
+.card-size-picker__groups {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  min-height: 0;
+  max-height: 40rem;
+  overflow-y: auto;
+}
+
+.card-size-picker__group {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.card-size-picker__legend {
+  margin: 0 0 var(--space-2);
+  padding: 0;
+  font-size: var(--type-meta);
+  font-weight: 700;
+  letter-spacing: var(--tracking-caps);
+  text-transform: uppercase;
+  color: var(--color-text);
+}
+
+.card-size-picker__legend-value {
+  margin-left: var(--space-2);
+  font-weight: 400;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--color-text-muted);
+}
+
+.card-size-picker__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.card-size-picker__chip {
+  position: relative;
+  cursor: pointer;
+}
+
+.card-size-picker__chip input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.card-size-picker__chip span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 4rem;
+  padding: var(--space-2) var(--space-3);
+  font-size: 1.3rem;
+  font-weight: 600;
+  line-height: 1.25;
+  color: var(--color-text);
+  background: rgb(var(--color-background));
+  box-shadow: inset 0 0 0 1px var(--color-border-strong);
+  transition: background-color var(--dur-fast) var(--ease-standard), color var(--dur-fast) var(--ease-standard),
+    box-shadow var(--dur-fast) var(--ease-standard);
+}
+
+.card-size-picker__chip:hover span {
+  box-shadow: inset 0 0 0 1px rgb(var(--color-foreground));
+}
+
+.card-size-picker__chip input:checked + span {
+  color: #fff;
+  background: rgb(var(--color-foreground));
+  box-shadow: inset 0 0 0 1px rgb(var(--color-foreground));
+}
+
+.card-size-picker__chip input:focus-visible + span {
+  outline: 0.2rem solid rgb(var(--color-foreground));
+  outline-offset: 0.2rem;
+}
+
+.card-size-picker__chip.is-unavailable span {
+  color: var(--color-text-muted);
+  text-decoration: line-through;
+  text-decoration-color: var(--color-border-strong);
+}
+
+.card-size-picker__chip.is-unavailable input:checked + span {
+  color: #fff;
+  background: var(--color-text-muted);
+  box-shadow: none;
+}
+
+.card-size-picker__summary {
+  position: sticky;
+  bottom: 0;
+  background: rgb(var(--color-background));
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--space-3);
+  margin: 0;
+  padding: var(--space-3) 0 0;
+  border-top: 1px solid var(--color-border);
+  font-size: 1.5rem;
+}
+
+.card-size-picker__summary-price {
+  font-weight: 700;
+}
+
+.card-size-picker__add.button[disabled] {
+  color: var(--color-text-muted);
+  background: var(--color-surface-strong);
+  cursor: not-allowed;
+  opacity: 1;
+}
+
+/* Phones: the same dialog as a bottom sheet. */
+@media screen and (max-width: 749px) {
+  .card-size-picker__dialog {
+    width: 100%;
+    max-width: none;
+    max-height: 85vh;
+    margin: auto 0 0;
+    box-shadow: none;
   }
 
-  .product-card-wrapper:hover .card__media .media::after {
-    opacity: 1;
+  .card-size-picker__dialog[open] {
+    animation-name: rcSheetIn;
+  }
+
+  .card-size-picker__head {
+    padding-left: var(--page-gutter);
+  }
+
+  .card-size-picker__panel {
+    padding: var(--space-4) var(--page-gutter) calc(var(--space-5) + env(safe-area-inset-bottom));
+  }
+
+  .card-size-picker__row {
+    grid-template-columns: minmax(0, 1fr) auto 8rem;
+    gap: var(--space-3);
+  }
+
+  @keyframes rcSheetIn {
+    from {
+      transform: translateY(100%);
+    }
+    to {
+      transform: none;
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card-size-picker__dialog[open],
+  .card-size-picker__dialog::backdrop {
+    animation: none;
   }
 }

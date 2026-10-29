@@ -11,6 +11,7 @@
 {%- unless section.settings.quick_add == 'none' -%}
   {{ 'quick-add.css' | asset_url | stylesheet_tag }}
   <script src="{{ 'product-form.js' | asset_url }}" defer="defer"></script>
+  <script src="{{ 'card-size-picker.js' | asset_url }}" defer="defer"></script>
 {%- endunless -%}
 
 {%- if section.settings.quick_add == 'standard' -%}
@@ -73,10 +74,27 @@
     data-id="{{ section.id }}"
   >
     <div class="collection__title title-wrapper title-wrapper--no-top-margin page-width{% if show_mobile_slider %} title-wrapper--self-padded-tablet-down{% endif %}{% if show_desktop_slider %} collection__title--desktop-slider{% endif %}">
+      {%- comment -%}
+        Title and "View all" share one row, the same section head every
+        Recharge section uses, so the way into the full collection sits where
+        the eye lands first instead of under eight cards.
+      {%- endcomment -%}
       {%- if section.settings.title != blank -%}
-        <h2 class="title inline-richtext home-heading {{ section.settings.heading_size }}{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--slide-in{% endif %}">
-          {{ section.settings.title }}
-        </h2>
+        <div class="rc-section-head">
+          <h2 class="title inline-richtext rc-section-title{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--slide-in{% endif %}">
+            {{ section.settings.title }}
+          </h2>
+          {%- if section.settings.show_view_all and more_in_collection -%}
+            <a
+              href="{{ section.settings.collection.url }}"
+              class="rc-arrow-link small-hide"
+              aria-label="{{ 'sections.featured_collection.view_all_label' | t: collection_name: section.settings.collection.title | escape }}"
+            >
+              {{- 'sections.featured_collection.view_all' | t -}}
+              {{- 'icon-arrow.svg' | inline_asset_content -}}
+            </a>
+          {%- endif -%}
+        </div>
       {%- endif -%}
       {%- if section.settings.description != blank
         or section.settings.show_description
@@ -198,7 +216,8 @@
     </slider-component>
 
     {%- if section.settings.show_view_all and more_in_collection -%}
-      <div class="center collection__view-all{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--slide-in{% endif %}">
+      {%- comment -%} Phones only: after scrolling eight cards the heading link is far behind. {%- endcomment -%}
+      <div class="center collection__view-all medium-hide large-up-hide{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--slide-in{% endif %}">
         <a
           href="{{ section.settings.collection.url }}"
           class="{% if section.settings.view_all_style == 'link' %}link underlined-link{% elsif section.settings.view_all_style == 'solid' %}button{% else %}button button--secondary{% endif %}"

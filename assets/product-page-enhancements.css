@@ -3,92 +3,15 @@
    Editorial sport/outdoor aesthetic — brand-red accents
    ============================================================ */
 
-/* --- Breadcrumb --- */
+/* --- Breadcrumb ---
+   Shared .rc-crumbs (recharge.css); only the product page's own spacing here. */
 .product-breadcrumb {
-  padding-top: 0;
-  padding-bottom: 1rem;
-  font-size: 1.2rem;
-  letter-spacing: 0.06em;
-  color: rgba(var(--color-foreground), 0.62);
+  padding-top: var(--space-4);
 }
 
-.product-breadcrumb a {
-  color: rgba(var(--color-foreground), 0.62);
-  text-decoration: none;
-  transition: color 0.2s ease;
-}
-
-.product-breadcrumb a:hover {
-  color: var(--color-brand-primary);
-}
-
-.product-breadcrumb__sep {
-  margin: 0 0.5rem;
-  opacity: 0.5;
-}
-
-a.product-breadcrumb__segment {
-  color: rgba(var(--color-foreground), 0.62);
-  text-decoration: none;
-  transition: color 0.2s ease;
-}
-
-a.product-breadcrumb__segment:hover {
-  color: var(--color-brand-primary);
-}
-
-/* Mobile: overflow + tap targets */
-@media screen and (max-width: 749px) {
-  .product-breadcrumb {
-    overflow-x: auto;
-    white-space: nowrap;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-    padding-bottom: 1.2rem;
-  }
-
-  .product-breadcrumb::-webkit-scrollbar {
-    display: none;
-  }
-
-  .product-breadcrumb a,
-  .product-breadcrumb span {
-    padding: 0.4rem 0;
-  }
-}
-
-.product-breadcrumb__current {
-  color: rgba(var(--color-foreground), 0.75);
-}
-
-/* --- Entrance Animations --- */
-@keyframes fadeSlideUp {
-  from { opacity: 0; transform: translateY(14px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to   { opacity: 1; }
-}
-
-/* Gallery column fades in */
-.product__media-wrapper {
-  animation: fadeIn 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.05s both;
-}
-
-/* Info column blocks stagger in */
-.product__info-container > * {
-  animation: fadeSlideUp 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
-}
-.product__info-container > *:nth-child(1) { animation-delay: 0.10s; }
-.product__info-container > *:nth-child(2) { animation-delay: 0.16s; }
-.product__info-container > *:nth-child(3) { animation-delay: 0.22s; }
-.product__info-container > *:nth-child(4) { animation-delay: 0.28s; }
-.product__info-container > *:nth-child(5) { animation-delay: 0.34s; }
-.product__info-container > *:nth-child(6) { animation-delay: 0.40s; }
-.product__info-container > *:nth-child(7) { animation-delay: 0.44s; }
-.product__info-container > *:nth-child(8) { animation-delay: 0.48s; }
+/* No entrance animation on the info column. It staggered price, sizes and
+   Add to cart in over ~0.5s, so the buy button was the last thing to appear
+   on the page a customer came to buy from. */
 
 /* --- Product Page Header — full-width above the image/info grid --- */
 .product-page-header {
@@ -120,10 +43,10 @@ a.product-breadcrumb__segment:hover {
 .product__title::after {
   content: '';
   display: block;
-  width: 32px;
-  height: 3px;
+  width: var(--accent-rule-width);
+  height: var(--accent-rule-height);
   background: var(--color-brand-primary);
-  margin-top: 0.9rem;
+  margin-top: var(--space-3);
 }
 
 .product__title h1,
@@ -161,7 +84,7 @@ a.product-breadcrumb__segment:hover {
 
 /* SKU/EAN — below buy buttons, modest gap */
 .product__info-container > .pbt-wrap {
-  margin-top: 1.6rem !important;
+  margin-top: var(--space-6);
 }
 
 /* Tighter gap from price to variant picker */
@@ -570,8 +493,14 @@ a.product-breadcrumb__segment:hover {
   transition: color 0.2s ease;
 }
 
+/* Accordion content eases in on open: state feedback, 200ms. */
+@keyframes rcAccordionIn {
+  from { opacity: 0; transform: translateY(-0.4rem); }
+  to   { opacity: 1; transform: none; }
+}
+
 .product__accordion details[open] .accordion__content {
-  animation: fadeSlideUp 0.3s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: rcAccordionIn var(--dur-base) var(--ease-out) both;
 }
 
 .product__accordion summary .icon-caret {

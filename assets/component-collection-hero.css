@@ -1,96 +1,23 @@
-/* --- Collection Breadcrumb --- */
-.collection-breadcrumb {
-  padding-top: 2.7rem;
-  margin-bottom: 2rem;
-  font-size: 1.2rem;
-  letter-spacing: 0.06em;
-  color: rgba(var(--color-foreground), 0.4);
+/* Collection page head.
+   Breadcrumb, title and red rule come from the shared .rc-page-head /
+   .rc-crumbs / .rc-page-title in recharge.css — the same component the
+   product, search and cart pages use. This file only styles what is specific
+   to collections: the description and the optional collection image. */
+
+.rc-page-head .collection-hero__description {
+  max-width: 72ch;
+  margin-top: var(--space-4);
+  font-size: var(--type-body);
+  line-height: 1.55;
+  color: var(--color-text-secondary);
 }
 
-@media screen and (min-width: 750px) {
-  .collection-breadcrumb {
-    padding-top: 3.6rem;
-  }
-}
-
-/* --- Collection Header (title + red accent bar) --- */
-.collection-header {
-  margin-bottom: 0;
-}
-
-.collection-header__title {
-  font-family: var(--font-heading-family);
-  font-size: clamp(2.2rem, calc(var(--font-heading-scale) * 3rem), 4rem);
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  text-transform: uppercase;
-  line-height: 1.1;
+.rc-page-head .collection-hero__description > * {
   margin: 0;
-  color: rgb(var(--color-foreground));
-  word-break: break-word;
 }
 
-@media screen and (min-width: 750px) {
-  .collection-header__title {
-    font-size: calc(var(--font-heading-scale) * 4rem);
-  }
-}
-
-.collection-header__title::after {
-  content: '';
-  display: block;
-  width: 4rem;
-  height: 3px;
-  background: var(--color-brand-primary);
-  margin-top: 1.2rem;
-}
-
-.collection-breadcrumb a {
-  color: rgba(var(--color-foreground), 0.4);
-  text-decoration: none;
-  transition: color 0.2s ease;
-}
-
-.collection-breadcrumb a:hover {
-  color: var(--color-brand-primary);
-}
-
-.collection-breadcrumb__sep {
-  margin: 0 0.5rem;
-  opacity: 0.5;
-}
-
-a.collection-breadcrumb__segment {
-  color: rgba(var(--color-foreground), 0.5);
-  text-decoration: none;
-  transition: color 0.2s ease;
-}
-
-a.collection-breadcrumb__segment:hover {
-  color: var(--color-brand-primary);
-}
-
-/* Mobile: overflow + tap targets */
-@media screen and (max-width: 749px) {
-  .collection-breadcrumb {
-    overflow-x: auto;
-    white-space: nowrap;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-  }
-
-  .collection-breadcrumb::-webkit-scrollbar {
-    display: none;
-  }
-
-  .collection-breadcrumb a,
-  .collection-breadcrumb span {
-    padding: 0.4rem 0;
-  }
-}
-
-.collection-breadcrumb__current {
-  color: rgba(var(--color-foreground), 0.6);
+.rc-page-head .collection-hero__description > * + * {
+  margin-top: var(--space-3);
 }
 
 .collection-hero__inner {

@@ -1,1 +1,2 @@
-{{ 'general.cart.view' | t: count: cart.item_count }}
+{{ 'general.cart.view_empty_cart' | t }}
+<span class="cart-notification__view-count">· {{ 'sections.cart.item_count' | t: count: cart.item_count }}</span>

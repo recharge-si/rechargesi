@@ -140,11 +140,10 @@
                       <div>
                         <span class="facets__summary-label">
                           {{- filter.label | escape }}
-                          {%- if filter_type == 'vertical' -%}
-                            <span class="facets__selected{% if filter.active_values.size == 0 %} hidden{% endif %}">
-                              ({{ filter.active_values.size }})</span
-                            >
-                          {%- endif -%}
+                          {%- comment -%} Count shown in every layout, so an active filter's field says so. {%- endcomment -%}
+                          <span class="facets__selected{% if filter.active_values.size == 0 %} hidden{% endif %}">
+                            ({{ filter.active_values.size }})</span
+                          >
                         </span>
                         {%- if filter_type == 'vertical' and filter.operator == 'AND' -%}
                           <span class="facets__and-helptext">

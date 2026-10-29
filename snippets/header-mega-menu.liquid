@@ -16,6 +16,7 @@
                 id="HeaderMenu-{{ link.handle }}"
                 class="header__menu-item list-menu__item link focus-inset"
                 data-url="{{ link.url }}"
+                aria-controls="MegaMenu-Content-{{ forloop.index }}"
               >
                 <span
                   {%- if link.current or link.child_active %}
@@ -32,10 +33,22 @@
                 tabindex="-1"
               >
                 <ul
-                  class="mega-menu__list page-width{% if link.levels == 1 %} mega-menu__list--condensed{% endif %}"
+                  class="mega-menu__list page-width"
                   role="list"
                 >
+                  {%- comment -%}
+                    One style for every menu: each category is the same uppercase
+                    heading. Categories with sub-items come first, as groups;
+                    categories without any follow as a tight stack of headings
+                    (mega-menu__leaf) so they read as a list, not as empty groups.
+                    A menu with no sub-items at all is just that stack.
+                  {%- endcomment -%}
+                  {%- assign has_leaf_children = false -%}
                   {%- for childlink in link.links -%}
+                    {%- if childlink.links == blank -%}
+                      {%- assign has_leaf_children = true -%}
+                      {%- continue -%}
+                    {%- endif -%}
                     <li>
                       <a
                         id="HeaderMenu-{{ link.handle }}-{{ childlink.handle }}"
@@ -67,7 +80,43 @@
                       {%- endif -%}
                     </li>
                   {%- endfor -%}
+                  {%- if has_leaf_children -%}
+                    {%- for childlink in link.links -%}
+                      {%- if childlink.links == blank -%}
+                        <li class="mega-menu__leaf">
+                          <a
+                            id="HeaderMenu-{{ link.handle }}-{{ childlink.handle }}"
+                            href="{{ childlink.url }}"
+                            class="mega-menu__link mega-menu__link--level-2 link{% if childlink.current %} mega-menu__link--active{% endif %}"
+                            {% if childlink.current %}
+                              aria-current="page"
+                            {% endif %}
+                          >
+                            {{ childlink.title | escape }}
+                          </a>
+                        </li>
+                      {%- endif -%}
+                    {%- endfor -%}
+                  {%- endif -%}
                 </ul>
+                {%- comment -%}
+                  The way into the whole sport. Clicking the tab already goes there,
+                  but a keyboard or touch user who opened the panel needs a target
+                  for it too, and the product count says how deep the category is.
+                {%- endcomment -%}
+                <div class="page-width">
+                  <div class="mega-menu__footer">
+                    <a href="{{ link.url }}" class="rc-arrow-link">
+                      {{- 'sections.header.shop_all' | t: title: link.title | escape -}}
+                      {{- 'icon-arrow.svg' | inline_asset_content -}}
+                    </a>
+                    {%- if link.type == 'collection_link' and link.object.all_products_count > 0 -%}
+                      <span class="mega-menu__count">
+                        {{- 'products.facets.product_count_simple' | t: count: link.object.all_products_count -}}
+                      </span>
+                    {%- endif -%}
+                  </div>
+                </div>
               </div>
             </details>
           </header-menu>

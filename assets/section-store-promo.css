@@ -36,15 +36,6 @@
   padding: 3.2rem 2rem 3.6rem;
 }
 
-.store-promo__eyebrow {
-  margin: 0 0 1.2rem;
-  font-size: 1.2rem;
-  font-weight: 700;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: rgba(var(--color-foreground), 0.75);
-}
-
 .store-promo__heading {
   color: rgb(var(--color-foreground));
 }

@@ -1,3 +1,14 @@
+/* Added-to-cart panel (snippets/cart-notification.liquid, contents from
+   sections/cart-notification-product.liquid).
+
+   Desktop: a panel hanging from the header's red rule at the right content
+   edge, like the mega menu — same 6px drop + fade in, faster fade out.
+   Below 750px: a full-width bottom sheet over a dimmed page; a 368px panel
+   under a phone header was a cramped strip.
+
+   Order of the actions is the commercial order: Check out (solid red) →
+   View cart (outline) → Continue shopping (text link). */
+
 .cart-notification-wrapper {
   position: relative;
 }
@@ -7,152 +18,437 @@
 }
 
 .cart-notification {
-  border-bottom-right-radius: var(--popup-corner-radius);
-  border-bottom-left-radius: var(--popup-corner-radius);
-  border-color: rgba(var(--color-foreground), var(--popup-border-opacity));
-  border-style: solid;
-  border-width: 0 0 var(--popup-border-width);
-  padding: 2.5rem 3.5rem;
   position: absolute;
   right: 0;
-  transform: translateY(-100%);
-  visibility: hidden;
-  width: 100%;
-  box-shadow: var(--popup-shadow-horizontal-offset) var(--popup-shadow-vertical-offset) var(--popup-shadow-blur-radius)
-    rgba(var(--color-shadow), var(--popup-shadow-opacity));
   z-index: -1;
-}
-
-.cart-notification.focused {
-  box-shadow: 0 0 0.2rem 0 rgba(var(--color-foreground), 0.3),
-    var(--popup-shadow-horizontal-offset) var(--popup-shadow-vertical-offset) var(--popup-shadow-blur-radius)
-      rgba(var(--color-shadow), var(--popup-shadow-opacity));
-}
-
-.cart-notification:focus-visible {
-  box-shadow: 0 0 0.2rem 0 rgba(var(--color-foreground), 0.3),
-    var(--popup-shadow-horizontal-offset) var(--popup-shadow-vertical-offset) var(--popup-shadow-blur-radius)
-      rgba(var(--color-shadow), var(--popup-shadow-opacity));
-}
-
-@media screen and (min-width: 750px) {
-  .header-wrapper:not(.header-wrapper--border-bottom) + cart-notification .cart-notification {
-    border-top-width: var(--popup-border-width);
-  }
-
-  .cart-notification {
-    border-width: 0 var(--popup-border-width) var(--popup-border-width);
-    max-width: 36.8rem;
-    right: 2.2rem;
-  }
-}
-
-@media screen and (min-width: 990px) {
-  .cart-notification-wrapper:is(.page-width) > .cart-notification {
-    right: 4rem;
-  }
-}
-
-.cart-notification.animate {
-  transition: transform var(--duration-short) ease, visibility 0s var(--duration-short) ease;
+  width: 100%;
+  padding: 0;
+  background-color: rgb(var(--color-background));
+  border: 1px solid var(--color-border);
+  border-top: 0;
+  box-shadow: 0 1.6rem 4rem rgba(var(--color-ink-rgb), 0.12), 0 0.2rem 0.6rem rgba(var(--color-ink-rgb), 0.05);
+  opacity: 0;
+  transform: translateY(-0.6rem);
+  visibility: hidden;
+  transition: opacity var(--dur-fast) ease, transform var(--dur-fast) ease, visibility 0s linear var(--dur-fast);
 }
 
 .cart-notification.active {
-  transform: translateY(0);
-  transition: transform var(--duration-default) ease, visibility 0s;
+  opacity: 1;
+  transform: none;
   visibility: visible;
+  transition: opacity var(--dur-slow) var(--ease-out), transform var(--dur-slow) var(--ease-out), visibility 0s;
 }
 
+/* The panel only takes focus so the focus trap has somewhere to start;
+   keyboard focus rings belong on its controls. */
+.cart-notification:focus,
+.cart-notification:focus-visible {
+  outline: none;
+}
+
+@media screen and (min-width: 750px) {
+  .cart-notification {
+    width: 42rem;
+    right: 2.2rem;
+  }
+
+  /* Right edge of the panel = right edge of the header content (cart icon). */
+  .cart-notification-wrapper.page-width > .cart-notification {
+    right: 5rem;
+  }
+}
+
+/* ── Mobile: bottom sheet ─────────────────────────────────────────────── */
+@media screen and (max-width: 749px) {
+  .cart-notification-wrapper::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: 1;
+    background: rgba(var(--color-ink-rgb), 0.4);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--dur-base) ease;
+  }
+
+  .cart-notification-wrapper:has(.cart-notification.active)::before {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .cart-notification {
+    position: fixed;
+    top: auto;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 2;
+    max-height: 88dvh;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    border-width: 1px 0 0;
+    border-top: 1px solid var(--color-border);
+    padding-bottom: env(safe-area-inset-bottom);
+    box-shadow: 0 -0.8rem 3.2rem rgba(var(--color-ink-rgb), 0.16);
+    transform: translateY(100%);
+    opacity: 1;
+    transition: transform var(--dur-base) ease-in, visibility 0s linear var(--dur-base);
+  }
+
+  .cart-notification.active {
+    transform: none;
+    transition: transform var(--dur-slow) var(--ease-out), visibility 0s;
+  }
+}
+
+/* ── Header ───────────────────────────────────────────────────────────── */
 .cart-notification__header {
-  align-items: flex-start;
   display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.2rem;
+  padding: 0.8rem 1rem 0.8rem 2.4rem;
+  border-bottom: 1px solid var(--color-border);
 }
 
 .cart-notification__heading {
-  align-items: center;
   display: flex;
-  flex-grow: 1;
-  margin-bottom: 0;
-  margin-top: 0;
+  align-items: center;
+  gap: 1rem;
+  margin: 0;
+  font-family: var(--font-body-family);
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1.3;
+  letter-spacing: 0.01em;
+  color: var(--color-text);
 }
 
-.cart-notification__heading .icon-checkmark {
-  color: rgb(var(--color-foreground));
-  margin-right: 1rem;
-  width: 1.3rem;
+.cart-notification__check {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  background: var(--color-success);
+  color: rgb(var(--color-paper-rgb));
+}
+
+.cart-notification__check .icon {
+  width: 1rem;
+  height: auto;
 }
 
 .cart-notification__close {
-  margin-top: -2rem;
-  margin-right: -3rem;
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 4.4rem;
+  height: 4.4rem;
+  margin: 0;
+  padding: 0;
+  color: var(--color-text-secondary);
+  transition: color var(--dur-fast) ease;
 }
 
-.cart-notification__links {
-  text-align: center;
+.cart-notification__close:hover {
+  color: var(--color-text);
 }
 
-.cart-notification__links > * {
-  margin-top: 1rem;
+.cart-notification__close .svg-wrapper {
+  width: 1.6rem;
+  height: 1.6rem;
 }
 
-/* flex-wrap so the full-width footer (subtotal + free-shipping bar) drops
-   under the image + details pair instead of becoming a third column. */
+.cart-notification__close:focus-visible {
+  outline: 2px solid rgb(var(--color-foreground));
+  outline-offset: -4px;
+  box-shadow: none;
+}
+
+.cart-notification__body {
+  padding: 2rem 2.4rem 2.4rem;
+}
+
+@media screen and (max-width: 749px) {
+  .cart-notification__header {
+    padding-left: 2rem;
+  }
+
+  .cart-notification__body {
+    padding: 2rem 2rem 2.4rem;
+  }
+}
+
+/* ── Added product ────────────────────────────────────────────────────── */
+/* #cart-notification-product receives the per-item div's *contents*, so
+   __item and __footer are its direct children. */
 .cart-notification-product {
-  align-items: flex-start;
   display: flex;
-  flex-wrap: wrap;
-  padding-bottom: 3rem;
-  padding-top: 2rem;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.cart-notification-product__item {
+  position: relative;
+  display: grid;
+  grid-template-columns: 10rem minmax(0, 1fr);
+  gap: 1.6rem;
+  align-items: start;
+}
+
+.cart-notification-product__image {
+  width: 10rem;
+  aspect-ratio: 1;
+  background-color: rgb(var(--color-card-tile-rgb));
+}
+
+.cart-notification-product__image.media > img {
+  object-fit: contain;
+  mix-blend-mode: multiply;
+  transition: transform var(--dur-slow) var(--ease-out);
+}
+
+.cart-notification-product__item:hover .cart-notification-product__image > img {
+  transform: scale(1.03);
+}
+
+.cart-notification-product__info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  min-width: 0;
+}
+
+.cart-notification-product__vendor {
+  margin: 0;
+  font-size: var(--type-meta);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.cart-notification-product__name {
+  margin: 0;
+  font-size: 1.6rem;
+  font-weight: 700;
+  line-height: 1.3;
+  letter-spacing: 0;
+  overflow-wrap: anywhere;
+  transition: color var(--dur-fast) ease;
+}
+
+.cart-notification-product__item:hover .cart-notification-product__name {
+  color: var(--color-brand-primary);
+}
+
+.cart-notification-product__link {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* Stretched link: the whole image + text row goes to the product. */
+.cart-notification-product__link::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+}
+
+.cart-notification-product__link:focus-visible {
+  outline: none;
+  box-shadow: none;
+}
+
+.cart-notification-product__item:has(.cart-notification-product__link:focus-visible) {
+  outline: 2px solid rgb(var(--color-foreground));
+  outline-offset: 4px;
+}
+
+.cart-notification-product__options {
+  margin: 0.2rem 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: var(--type-small);
+  line-height: 1.4;
+  color: var(--color-text-secondary);
+}
+
+.cart-notification-product__options li > span {
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.cart-notification-product__options a {
+  position: relative;
+  z-index: 1;
+}
+
+.cart-notification-product__meta {
+  margin: 0;
+  font-size: var(--type-meta);
+  line-height: 1.4;
+  letter-spacing: 0.02em;
+  color: var(--color-text-muted);
 }
 
 .cart-notification-product__price {
-  margin: 0.8rem 0 0;
-  font-size: 1.5rem;
-  font-weight: 700;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.2rem 0.8rem;
+  margin-top: 0.6rem;
 }
 
+.cart-notification-product__price-value {
+  font-size: 1.7rem;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--color-text);
+}
+
+.cart-notification-product__price-compare {
+  font-size: 1.3rem;
+  color: var(--color-text-muted);
+}
+
+@media screen and (max-width: 749px) {
+  .cart-notification-product__item {
+    grid-template-columns: 8.8rem minmax(0, 1fr);
+    gap: 1.4rem;
+  }
+
+  .cart-notification-product__image {
+    width: 8.8rem;
+  }
+}
+
+/* ── Summary ──────────────────────────────────────────────────────────── */
 .cart-notification-product__footer {
-  flex-basis: 100%;
-  margin-top: 1.6rem;
-  padding-top: 1.4rem;
-  border-top: 1px solid rgba(var(--color-foreground), 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+  padding-top: 1.6rem;
+  border-top: 1px solid var(--color-border);
 }
 
 .cart-notification-product__subtotal {
   display: flex;
-  justify-content: space-between;
   align-items: baseline;
-  gap: 1rem;
-  font-size: 1.3rem;
-  color: rgba(var(--color-foreground), 0.75);
+  justify-content: space-between;
+  gap: 1.2rem;
+  font-size: var(--type-small);
+  color: var(--color-text-secondary);
 }
 
 .cart-notification-product__subtotal-value {
-  font-size: 1.6rem;
+  font-size: 1.8rem;
   font-weight: 700;
-  color: rgb(var(--color-foreground));
+  color: var(--color-text);
+  white-space: nowrap;
 }
 
 .cart-notification-product__footer .free-shipping-bar {
-  margin-bottom: 0;
+  margin: 0;
+  max-width: none;
 }
 
-.cart-notification-product dl {
-  margin-bottom: 0;
-  margin-top: 0;
+/* ── Actions ──────────────────────────────────────────────────────────── */
+.cart-notification__links {
+  display: grid;
+  gap: 1rem;
+  margin-top: 2.4rem;
 }
 
-.cart-notification-product__image {
-  display: inline-flex;
-  margin-right: 1.5rem;
-  margin-top: 0.5rem;
+.cart-notification__links > * {
+  margin: 0;
 }
 
-.cart-notification-product__image:after {
+.cart-notification .cart-notification__checkout,
+.cart-notification .cart-notification__view {
+  gap: 1rem;
+  border-radius: 0;
+  font-weight: 700;
+  letter-spacing: 0.1rem;
+  text-transform: uppercase;
+  transition: background-color var(--dur-fast) ease, color var(--dur-fast) ease, border-color var(--dur-fast) ease;
+}
+
+.cart-notification .cart-notification__checkout::before,
+.cart-notification .cart-notification__checkout::after,
+.cart-notification .cart-notification__view::before,
+.cart-notification .cart-notification__view::after {
   content: none;
 }
 
-.cart-notification-product__name {
-  margin-bottom: 0.5rem;
-  margin-top: 0;
+.cart-notification .cart-notification__checkout {
+  min-height: 5.2rem;
+  padding: 1.4rem 2.4rem;
+  font-size: 1.5rem;
+  background-color: var(--color-brand-primary);
+  color: rgb(var(--color-paper-rgb));
+}
+
+.cart-notification .cart-notification__checkout:hover {
+  background-color: var(--color-brand-primary-dark);
+}
+
+.cart-notification .cart-notification__checkout:active {
+  background-color: var(--color-brand-primary-darker);
+}
+
+.cart-notification__checkout .svg-wrapper {
+  width: 1.4rem;
+  height: 1.4rem;
+  transition: transform var(--dur-base) var(--ease-out);
+}
+
+.cart-notification__checkout:hover .svg-wrapper {
+  transform: translateX(0.4rem);
+}
+
+.cart-notification .cart-notification__view {
+  min-height: 4.8rem;
+  padding: 1.2rem 2.4rem;
+  gap: 0.6rem;
+  font-size: 1.3rem;
+  background-color: transparent;
+  color: var(--color-text);
+  border: 1px solid rgb(var(--color-foreground));
+}
+
+.cart-notification .cart-notification__view:hover {
+  background-color: rgb(var(--color-foreground));
+  color: rgb(var(--color-background));
+}
+
+.cart-notification__view-count {
+  font-weight: 400;
+  opacity: 0.75;
+}
+
+.cart-notification .cart-notification__checkout:focus-visible,
+.cart-notification .cart-notification__view:focus-visible {
+  outline: 2px solid rgb(var(--color-foreground));
+  outline-offset: 3px;
+  box-shadow: none;
+}
+
+.cart-notification__continue {
+  justify-self: center;
+  margin-top: 0.2rem;
+  padding: 0.6rem 0.8rem;
+  font-size: 1.3rem;
+  color: var(--color-text-secondary);
+  text-underline-offset: 0.3rem;
+  text-decoration-color: var(--color-border-strong);
+  transition: color var(--dur-fast) ease, text-decoration-color var(--dur-fast) ease;
+}
+
+.cart-notification__continue:hover {
+  color: var(--color-text);
+  text-decoration-color: currentColor;
 }
