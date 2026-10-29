@@ -309,7 +309,7 @@ export function createHarness({ port = 0 } = {}) {
         const src = {};
         if (m && answers.weightKg == null) src.weightKg = 'text';
         const profile = { ...built.profile, source: { discipline: 'form', ...src } };
-        if (weight == null) return send(res, 200, { requestId: 'rb_0123456789abcdef01234567', profile, needs: ['weightKg'], whys: {}, variantIds: [], mode: 'plain', warnings: [] });
+        if (weight == null) return send(res, 200, { requestId: 'rb_0123456789abcdef01234567', profile, needs: ['weightKg'], whys: {}, variantIds: [], mode: 'plain', warnings: sc.explain === 'notread' ? [{ code: 'text_not_read', message: 'x' }] : [] });
         const items = built.rigs[0].items;
         const plainWhys = Object.fromEntries(items.map((i) => [String(i.variantId), i.why]));
         const aiWhys = Object.fromEntries(items.map((i) => [String(i.variantId), `Because ${i.title} fits you.`]));

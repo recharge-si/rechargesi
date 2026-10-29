@@ -430,18 +430,19 @@ if (!customElements.get('rig-builder')) {
       const rig = s.rig;
       let changed = false;
       rig.alternatives = rig.alternatives.filter((a) => !this.excluded.has(a.variantId) && a.available !== false);
-      rig.items = rig.items.filter((item) => {
-        if (!this.excluded.has(item.variantId)) return true;
+      const kept = [];
+      rig.items.forEach((item) => {
+        if (!this.excluded.has(item.variantId)) return kept.push(item);
         changed = true;
         const alt = rig.alternatives.find((a) => a.role === item.role);
         if (alt) {
           rig.alternatives = rig.alternatives.filter((a) => a !== alt);
-          rig.items.push({ ...alt, quantity: 1, available: true });
+          kept.push({ ...alt, quantity: 1, available: true });
         } else {
           s.unmet.push({ role: item.role, reason: 'no_compatible_in_stock' });
         }
-        return false;
       });
+      rig.items = kept;
       if (changed) rig.total = this.sum(rig.items);
       return changed;
     }
