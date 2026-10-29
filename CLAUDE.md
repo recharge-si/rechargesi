@@ -504,3 +504,12 @@ Key files:
 - `scripts/sync-stock-by-location.mjs` — one-time backfill, not a scheduled job
 - `assets/component-stock-locations.css` — all styles; verified no overflow down to a 300px container
 - Locale keys: `products.product.stock_locations.{title,in_stock,out_of_stock,selected,show_all,show_less}` in `en.default.json` + `sl.json` only
+
+## Rig builder (PRD 4, variant C "Live rig")
+
+Page `/pages/rig-builder` (template `templates/page.rig-builder.json`) that builds a compatible windsurf rig through the hub's App Proxy.
+
+- Files: `sections/rig-builder.liquid` (markup, schema, all strings as JSON from `rig_builder.*` in `locales/en.default.json` and `sl.json`), `assets/rig-builder.js` (custom element `rig-builder`), `assets/component-rig-builder.css` (brand colours via variables only, no hex).
+- Contract (owned by recharge-hub, `docs/rig-builder.md`): `POST /apps/rig/build` on every changed answer (debounced), `/explain` only on *Explain my rig* / *Read my text*, `/verify` after a swap, then one `POST /cart/add.js` with `items[{id, quantity:1, properties:{_rig: requestId}}]`. Errors: 503 `not_ready`, 429 `Retry-After`, network. The hub has no "exclude variant" key, so after a 422 sell-out the page drops the variant client-side and swaps in an alternative.
+- Slovenian strings are a draft, to be reviewed by a human.
+- Test without Shopify CLI: `scripts/rig-harness.mjs` renders the section (small Liquid subset, fails on a missing translation key) and stubs `/apps/rig/*` and the cart from `scripts/rig-fixtures/` (copied from recharge-hub `tests/fixtures/rig/api`). `scripts/rig-harness-check.mjs` drives it with Playwright (see its header for env vars; run it `nice`, one browser). `shopify theme check` still has to be run where the CLI is installed.

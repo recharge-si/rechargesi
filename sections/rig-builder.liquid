@@ -1,0 +1,367 @@
+{{ 'component-price.css' | asset_url | stylesheet_tag }}
+{{ 'component-rig-builder.css' | asset_url | stylesheet_tag }}
+
+{%- style -%}
+  .section-{{ section.id }}-padding {
+    padding-top: {{ section.settings.padding_top | times: 0.75 | round: 0 }}px;
+    padding-bottom: {{ section.settings.padding_bottom | times: 0.75 | round: 0 }}px;
+  }
+
+  @media screen and (min-width: 750px) {
+    .section-{{ section.id }}-padding {
+      padding-top: {{ section.settings.padding_top }}px;
+      padding-bottom: {{ section.settings.padding_bottom }}px;
+    }
+  }
+{%- endstyle -%}
+
+{%- liquid
+  assign heading = section.settings.heading
+  if heading == blank
+    assign heading = 'rig_builder.heading' | t
+  endif
+  assign intro = section.settings.intro
+  if intro == blank
+    assign intro = 'rig_builder.intro' | t
+  endif
+  assign fallback = section.settings.collection
+  if section.settings.contact_url != blank
+    assign contact_url = section.settings.contact_url
+  elsif shop.email != blank
+    assign contact_url = 'mailto:' | append: shop.email
+  else
+    assign contact_url = routes.root_url
+  endif
+  assign locale_code = request.locale.iso_code
+-%}
+
+<div class="rig-builder-section color-{{ section.settings.color_scheme }} gradient">
+  <div class="page-width section-{{ section.id }}-padding">
+    <rig-builder
+      class="rig-builder"
+      data-proxy-base="/apps/rig"
+      data-locale="{{ locale_code }}"
+      data-currency="{{ cart.currency.iso_code }}"
+      data-section-id="{{ section.id }}"
+    >
+      <h1 class="rig-builder__title">{{ heading | escape }}</h1>
+      <p class="rig-builder__lead">{{ intro | escape }}</p>
+
+      <div class="rig-builder__split" data-split>
+        <form class="rig-builder__form" data-form novalidate>
+          <h2 class="rig-builder__h2">{{ 'rig_builder.about_you' | t }}</h2>
+
+          <div class="rig-builder__row">
+            <div>
+              <label class="rig-builder__label" for="Rig-Weight-{{ section.id }}">{{ 'rig_builder.weight' | t }}</label>
+              <input
+                class="rig-builder__input"
+                id="Rig-Weight-{{ section.id }}"
+                name="weightKg"
+                type="number"
+                inputmode="numeric"
+                min="30"
+                max="200"
+                step="1"
+                autocomplete="off"
+                data-field="weightKg"
+                aria-describedby="Rig-Weight-Hint-{{ section.id }}"
+              >
+            </div>
+            <div>
+              <label class="rig-builder__label" for="Rig-Level-{{ section.id }}">{{ 'rig_builder.level' | t }}</label>
+              <select class="rig-builder__input rig-builder__select" id="Rig-Level-{{ section.id }}" name="skill" data-field="skill">
+                <option value="intermediate" selected>{{ 'rig_builder.level_improving' | t }}</option>
+                <option value="beginner">{{ 'rig_builder.level_start' | t }}</option>
+                <option value="advanced">{{ 'rig_builder.level_confident' | t }}</option>
+              </select>
+            </div>
+          </div>
+          <p class="rig-builder__hint" id="Rig-Weight-Hint-{{ section.id }}" data-hint="weightKg" hidden>{{ 'rig_builder.hint_weight' | t }}</p>
+
+          <div class="rig-builder__row">
+            <div>
+              <label class="rig-builder__label" for="Rig-WindMin-{{ section.id }}">{{ 'rig_builder.wind_from' | t }}</label>
+              <input
+                class="rig-builder__input"
+                id="Rig-WindMin-{{ section.id }}"
+                name="windMinKn"
+                type="number"
+                inputmode="numeric"
+                min="0"
+                max="60"
+                step="1"
+                value="15"
+                autocomplete="off"
+                data-field="windMinKn"
+                aria-describedby="Rig-Wind-Hint-{{ section.id }}"
+              >
+            </div>
+            <div>
+              <label class="rig-builder__label" for="Rig-WindMax-{{ section.id }}">{{ 'rig_builder.wind_to' | t }}</label>
+              <input
+                class="rig-builder__input"
+                id="Rig-WindMax-{{ section.id }}"
+                name="windMaxKn"
+                type="number"
+                inputmode="numeric"
+                min="0"
+                max="60"
+                step="1"
+                value="25"
+                autocomplete="off"
+                data-field="windMaxKn"
+                aria-describedby="Rig-Wind-Hint-{{ section.id }}"
+              >
+            </div>
+          </div>
+          <p class="rig-builder__hint" id="Rig-Wind-Hint-{{ section.id }}" data-hint="wind" hidden>{{ 'rig_builder.hint_wind' | t }}</p>
+
+          <div class="rig-builder__label" id="Rig-Owns-Label-{{ section.id }}">{{ 'rig_builder.already_own' | t }}</div>
+          <div class="rig-builder__chips" role="group" aria-labelledby="Rig-Owns-Label-{{ section.id }}">
+            {%- for role in 'board,sail,boom,fin' split: ',' -%}
+              {%- assign own_key = 'rig_builder.own_' | append: role -%}
+              <button type="button" class="rig-builder__chip" aria-pressed="false" data-own="{{ role }}">{{ own_key | t }}</button>
+            {%- endfor -%}
+          </div>
+
+          <label class="rig-builder__label" for="Rig-Text-{{ section.id }}">{{ 'rig_builder.or_tell' | t }}</label>
+          <textarea
+            class="rig-builder__input rig-builder__textarea"
+            id="Rig-Text-{{ section.id }}"
+            name="text"
+            maxlength="1000"
+            rows="4"
+            placeholder="{{ 'rig_builder.text_placeholder' | t | escape }}"
+            aria-describedby="Rig-Counter-{{ section.id }} Rig-Privacy-{{ section.id }}"
+            data-text
+          ></textarea>
+          <div class="rig-builder__counter" id="Rig-Counter-{{ section.id }}" data-counter>0 / 1000</div>
+          <p class="rig-builder__privacy" id="Rig-Privacy-{{ section.id }}">{{ 'rig_builder.privacy' | t }}</p>
+
+          <div class="rig-builder__actions">
+            <button type="submit" class="rig-builder__btn" data-build>{{ 'rig_builder.build' | t }}</button>
+            <button type="button" class="rig-builder__btn rig-builder__btn--ghost" data-read disabled>{{ 'rig_builder.read_text' | t }}</button>
+          </div>
+        </form>
+
+        <div class="rig-builder__side">
+          <p class="rig-builder__note" data-empty>{{ 'rig_builder.empty_note' | t }}</p>
+          <div
+            class="rig-builder__results"
+            data-results
+            aria-live="polite"
+            aria-busy="false"
+            tabindex="-1"
+            hidden
+          ></div>
+        </div>
+      </div>
+
+      <div class="rig-builder__note rig-builder__notready" data-notready role="status" hidden>
+        <p class="rig-builder__notready-title">{{ 'rig_builder.not_ready_title' | t }}</p>
+        {%- capture browse_link -%}
+          {%- if fallback != blank -%}
+            <a href="{{ fallback.url }}">{{ fallback.title | escape }}</a>
+          {%- else -%}
+            <a href="{{ routes.all_products_collection_url }}">{{ 'rig_builder.not_ready_shop' | t }}</a>
+          {%- endif -%}
+        {%- endcapture -%}
+        {%- capture write_link -%}
+          <a href="{{ contact_url }}">{{ 'rig_builder.not_ready_write' | t }}</a>
+        {%- endcapture -%}
+        <p>{{ 'rig_builder.not_ready_body_html' | t: browse: browse_link, write: write_link }}</p>
+      </div>
+
+      <script type="application/json" data-strings>
+        {
+          "role_board": {{ 'rig_builder.role_board' | t | json }},
+          "role_sail": {{ 'rig_builder.role_sail' | t | json }},
+          "role_mast": {{ 'rig_builder.role_mast' | t | json }},
+          "role_extension": {{ 'rig_builder.role_extension' | t | json }},
+          "role_boom": {{ 'rig_builder.role_boom' | t | json }},
+          "role_base": {{ 'rig_builder.role_base' | t | json }},
+          "role_fin": {{ 'rig_builder.role_fin' | t | json }},
+          "role_harness": {{ 'rig_builder.role_harness' | t | json }},
+          "kind_freeride": {{ 'rig_builder.kind_freeride' | t | json }},
+          "kind_wave": {{ 'rig_builder.kind_wave' | t | json }},
+          "level_improving": {{ 'rig_builder.level_improving' | t | json }},
+          "level_start": {{ 'rig_builder.level_start' | t | json }},
+          "level_confident": {{ 'rig_builder.level_confident' | t | json }},
+          "weight": {{ 'rig_builder.weight' | t | json }},
+          "level": {{ 'rig_builder.level' | t | json }},
+          "wind_from": {{ 'rig_builder.wind_from' | t | json }},
+          "wind_to": {{ 'rig_builder.wind_to' | t | json }},
+          "already_own": {{ 'rig_builder.already_own' | t | json }},
+          "kind": {{ 'rig_builder.kind' | t | json }},
+          "build": {{ 'rig_builder.build' | t | json }},
+          "update": {{ 'rig_builder.update' | t | json }},
+          "explain": {{ 'rig_builder.explain' | t | json }},
+          "explaining": {{ 'rig_builder.explaining' | t | json }},
+          "live_note": {{ 'rig_builder.live_note' | t | json }},
+          "reading_label": {{ 'rig_builder.reading_label' | t | json }},
+          "reading_group": {{ 'rig_builder.reading_group' | t | json }},
+          "edit": {{ 'rig_builder.edit' | t | json }},
+          "assumed": {{ 'rig_builder.assumed' | t | json }},
+          "chip_skill_beginner": {{ 'rig_builder.chip_skill_beginner' | t | json }},
+          "chip_skill_intermediate": {{ 'rig_builder.chip_skill_intermediate' | t | json }},
+          "chip_skill_advanced": {{ 'rig_builder.chip_skill_advanced' | t | json }},
+          "chip_weight": {{ 'rig_builder.chip_weight' | t: n: '[n]' | json }},
+          "chip_wind": {{ 'rig_builder.chip_wind' | t: min: '[min]', max: '[max]' | json }},
+          "chip_owns": {{ 'rig_builder.chip_owns' | t: parts: '[parts]' | json }},
+          "chip_owns_many": {{ 'rig_builder.chip_owns_many' | t: parts: '[parts]' | json }},
+          "loading_read": {{ 'rig_builder.loading_read' | t | json }},
+          "loading_match": {{ 'rig_builder.loading_match' | t | json }},
+          "loading_label": {{ 'rig_builder.loading_label' | t | json }},
+          "rig_label": {{ 'rig_builder.rig_label' | t | json }},
+          "cancel": {{ 'rig_builder.cancel' | t | json }},
+          "plain_note": {{ 'rig_builder.plain_note' | t | json }},
+          "text_not_read": {{ 'rig_builder.text_not_read' | t | json }},
+          "partial_one": {{ 'rig_builder.partial_one' | t: built: '[built]', total: '[total]', role: '[role]' | json }},
+          "partial_many": {{ 'rig_builder.partial_many' | t: built: '[built]', total: '[total]', roles: '[roles]' | json }},
+          "missing_title": {{ 'rig_builder.missing_title' | t: role: '[role]' | json }},
+          "missing_none": {{ 'rig_builder.missing_none' | t | json }},
+          "missing_norule": {{ 'rig_builder.missing_norule' | t | json }},
+          "owned_name": {{ 'rig_builder.owned_name' | t: role: '[role]' | json }},
+          "owned_spec": {{ 'rig_builder.owned_spec' | t: min: '[min]', max: '[max]' | json }},
+          "owned_spec_plain": {{ 'rig_builder.owned_spec_plain' | t | json }},
+          "owned_price": {{ 'rig_builder.owned_price' | t | json }},
+          "in_stock": {{ 'rig_builder.in_stock' | t | json }},
+          "check_availability": {{ 'rig_builder.check_availability' | t | json }},
+          "spec_box": {{ 'rig_builder.spec_box' | t: box: '[box]' | json }},
+          "spec_sail_range": {{ 'rig_builder.spec_sail_range' | t: min: '[min]', max: '[max]' | json }},
+          "spec_mast": {{ 'rig_builder.spec_mast' | t: min: '[min]', max: '[max]' | json }},
+          "spec_rdm": {{ 'rig_builder.spec_rdm' | t: rdm: '[rdm]' | json }},
+          "spec_boom": {{ 'rig_builder.spec_boom' | t: min: '[min]', max: '[max]' | json }},
+          "spec_base": {{ 'rig_builder.spec_base' | t: type: '[type]' | json }},
+          "hide_alternatives": {{ 'rig_builder.hide_alternatives' | t | json }},
+          "alt_swap": {{ 'rig_builder.alt_swap' | t: role: '[role]', title: '[title]' | json }},
+          "alt_use": {{ 'rig_builder.alt_use' | t | json }},
+          "keep_owned": {{ 'rig_builder.keep_owned' | t: parts: '[parts]' | json }},
+          "checked": {{ 'rig_builder.checked' | t: list: '[list]' | json }},
+          "not_checked": {{ 'rig_builder.not_checked' | t: list: '[list]' | json }},
+          "checks_failed": {{ 'rig_builder.checks_failed' | t: list: '[list]' | json }},
+          "check_size": {{ 'rig_builder.check_size' | t | json }},
+          "check_board_sail": {{ 'rig_builder.check_board_sail' | t | json }},
+          "check_mast": {{ 'rig_builder.check_mast' | t | json }},
+          "check_boom": {{ 'rig_builder.check_boom' | t | json }},
+          "check_base": {{ 'rig_builder.check_base' | t | json }},
+          "check_fin": {{ 'rig_builder.check_fin' | t | json }},
+          "check_owned_boom": {{ 'rig_builder.check_owned_boom' | t | json }},
+          "check_other": {{ 'rig_builder.check_other' | t | json }},
+          "disclaimer": {{ 'rig_builder.disclaimer' | t | json }},
+          "needs_weight": {{ 'rig_builder.needs_weight' | t | json }},
+          "needs_unit": {{ 'rig_builder.needs_unit' | t | json }},
+          "continue": {{ 'rig_builder.continue' | t | json }},
+          "error_network": {{ 'rig_builder.error_network' | t | json }},
+          "error_input": {{ 'rig_builder.error_input' | t | json }},
+          "error_cart": {{ 'rig_builder.error_cart' | t | json }},
+          "try_again": {{ 'rig_builder.try_again' | t | json }},
+          "sold_out": {{ 'rig_builder.sold_out' | t: title: '[title]' | json }},
+          "adding": {{ 'rig_builder.adding' | t | json }},
+          "rate_limited": {
+            "one": {{ 'rig_builder.rate_limited' | t: count: 1, minutes: '[n]' | json }},
+            "two": {{ 'rig_builder.rate_limited' | t: count: 2, minutes: '[n]' | json }},
+            "few": {{ 'rig_builder.rate_limited' | t: count: 3, minutes: '[n]' | json }},
+            "other": {{ 'rig_builder.rate_limited' | t: count: 5, minutes: '[n]' | json }}
+          },
+          "parts_summary": {
+            "one": {{ 'rig_builder.parts_summary' | t: count: 1, n: '[n]' | json }},
+            "two": {{ 'rig_builder.parts_summary' | t: count: 2, n: '[n]' | json }},
+            "few": {{ 'rig_builder.parts_summary' | t: count: 3, n: '[n]' | json }},
+            "other": {{ 'rig_builder.parts_summary' | t: count: 5, n: '[n]' | json }}
+          },
+          "add_to_cart": {
+            "one": {{ 'rig_builder.add_to_cart' | t: count: 1, n: '[n]' | json }},
+            "two": {{ 'rig_builder.add_to_cart' | t: count: 2, n: '[n]' | json }},
+            "few": {{ 'rig_builder.add_to_cart' | t: count: 3, n: '[n]' | json }},
+            "other": {{ 'rig_builder.add_to_cart' | t: count: 5, n: '[n]' | json }}
+          },
+          "added": {
+            "one": {{ 'rig_builder.added' | t: count: 1, n: '[n]' | json }},
+            "two": {{ 'rig_builder.added' | t: count: 2, n: '[n]' | json }},
+            "few": {{ 'rig_builder.added' | t: count: 3, n: '[n]' | json }},
+            "other": {{ 'rig_builder.added' | t: count: 5, n: '[n]' | json }}
+          },
+          "see_alternatives": {
+            "one": {{ 'rig_builder.see_alternatives' | t: count: 1, n: '[n]' | json }},
+            "two": {{ 'rig_builder.see_alternatives' | t: count: 2, n: '[n]' | json }},
+            "few": {{ 'rig_builder.see_alternatives' | t: count: 3, n: '[n]' | json }},
+            "other": {{ 'rig_builder.see_alternatives' | t: count: 5, n: '[n]' | json }}
+          }
+        }
+      </script>
+    </rig-builder>
+  </div>
+</div>
+
+<script src="{{ 'rig-builder.js' | asset_url }}" defer="defer"></script>
+
+{% schema %}
+{
+  "name": "Rig builder",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "info": "Leave empty to use the translated default (Build your rig)."
+    },
+    {
+      "type": "textarea",
+      "id": "intro",
+      "label": "Intro",
+      "info": "Leave empty to use the translated default."
+    },
+    {
+      "type": "collection",
+      "id": "collection",
+      "label": "Fallback collection",
+      "info": "Linked when the rig builder is not open yet."
+    },
+    {
+      "type": "url",
+      "id": "contact_url",
+      "label": "Contact link",
+      "info": "Shown when the rig builder is not open yet. Empty uses the shop email."
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Colour scheme",
+      "default": "scheme-1"
+    },
+    {
+      "type": "header",
+      "content": "Section padding"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Top padding",
+      "default": 28
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Bottom padding",
+      "default": 52
+    }
+  ],
+  "presets": [
+    {
+      "name": "Rig builder"
+    }
+  ]
+}
+{% endschema %}
