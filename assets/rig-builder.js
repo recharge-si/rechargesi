@@ -309,7 +309,8 @@ if (!customElements.get('rig-builder')) {
       if (r.status >= 200 && r.status < 300) return false;
       const s = this.s;
       s.retry = retry;
-      if (r.status === 503 && r.json && r.json.code === 'not_ready') {
+      // The hub answers 409 (a 5xx would be replaced by Shopify's own error page); the code is what counts.
+      if (r.json && r.json.code === 'not_ready') {
         this.showNotReady();
         return true;
       }

@@ -68,9 +68,11 @@ export function renderSection(lang = 'en') {
   src = src.replace(/\{%-?\s*liquid[\s\S]*?-?%\}/, '');
   src = src.replace(/^\{\{ '[^']+' \| asset_url \| (stylesheet_tag) \}\}\n/gm, '');
   src = src.replace(/^<script src=.*rig-builder\.js.*<\/script>\n/m, '');
-  // The role chips loop.
-  src = src.replace(/\{%-\s*for role in '([^']+)' split: ','\s*-%\}([\s\S]*?)\{%-\s*endfor\s*-%\}/, (m, list, body) =>
-    list
+  // The role chips loop: the list is assigned first (a filter is not allowed inside a for tag).
+  const ownRoles = (src.match(/\{%-\s*assign own_roles = '([^']+)' \| split: ','\s*-%\}/) || [])[1];
+  src = src.replace(/\{%-\s*assign own_roles[^%]*-%\}\s*/, '');
+  src = src.replace(/\{%-\s*for role in own_roles\s*-%\}([\s\S]*?)\{%-\s*endfor\s*-%\}/, (m, body) =>
+    ownRoles
       .split(',')
       .map((role) =>
         body
@@ -282,7 +284,7 @@ export function createHarness({ port = 0 } = {}) {
       await new Promise((r) => setTimeout(r, sc.delayMs));
       const mode = sc[which] ?? 'ok';
       if (mode === 'network') return req.socket.destroy();
-      if (mode === '503') return send(res, 503, { code: 'not_ready', reason: 'disabled' });
+      if (mode === '503') return send(res, 409, { code: 'not_ready', reason: 'disabled' });
       if (mode === '429') return send(res, 429, { code: 'rate_limited', retryAfterSeconds: sc.retryAfter }, { 'Retry-After': String(sc.retryAfter) });
       if (mode === '400') return send(res, 400, { code: 'invalid_body', field: 'answers.weightKg', message: 'Too small' });
 
