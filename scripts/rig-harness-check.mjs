@@ -47,6 +47,7 @@ const harness = createHarness();
 const origin = await harness.start();
 const browser = await chromium.launch({ executablePath: CHROMIUM, headless: true, args: ['--no-sandbox', '--disable-gpu', '--disable-dev-shm-usage'] });
 let exitCode = 0;
+let shotOnError;
 
 try {
   const context = await browser.newContext({ viewport: { width: 1440, height: 900 }, reducedMotion: 'reduce' });
@@ -70,6 +71,7 @@ try {
     await page.goto(`${origin}/`);
     await page.waitForFunction(() => customElements.get('rig-builder') && document.querySelector('rig-builder').ready);
   };
+  shotOnError = async () => page.screenshot({ path: path.join(SHOTS, 'error-state.png'), fullPage: true });
   const shot = async (name) => page.screenshot({ path: path.join(SHOTS, `${name}.png`), fullPage: true });
   const noHScroll = (label) =>
     page.evaluate(() => document.scrollingElement.scrollWidth <= window.innerWidth).then((ok) => check(`no horizontal scroll: ${label}`, ok));
@@ -144,7 +146,7 @@ try {
     check(`[${tag}] result: focus on results`, await page.evaluate(() => document.activeElement === document.querySelector('[data-results]')));
     check(`[${tag}] result: 6 parts`, (await page.locator('[data-results] .rig-builder__part').count()) === 6);
     check(`[${tag}] result: add button copy`, (await text('[data-add]')) === 'Add 6 parts to cart');
-    check(`[${tag}] result: total`, (await text('[data-total]')).replace(/\s/g, '') === '€2,385.80');
+    check(`[${tag}] result: total`, (await text('[data-total]')).replace(/\s/g, '') === '€2,834.00');
     await noHScroll(`${tag} result`);
     await tapTargets(`${tag} result`);
     await shot(`${tag}-result`);
@@ -235,9 +237,17 @@ try {
 
   // debounce: three quick changes, one request after 300 ms
   await reset();
-  await fillWeight(82);
-  await page.fill('[data-field="windMinKn"]', '14');
-  await page.fill('[data-field="windMinKn"]', '13');
+  // three input events inside one tick, so a slow machine cannot stretch them past the 300 ms debounce
+  await page.evaluate(() => {
+    const set = (name, v) => {
+      const el = document.querySelector(`[data-field="${name}"]`);
+      el.value = v;
+      el.dispatchEvent(new Event('input', { bubbles: true }));
+    };
+    set('weightKg', '82');
+    set('windMinKn', '14');
+    set('windMinKn', '13');
+  });
   await page.waitForSelector('[data-results] [data-add]');
   check('live: three quick changes, one build', (await count('/apps/rig/build')) === 1, String(await count('/apps/rig/build')));
   check('live: no focus theft on live update', !(await page.evaluate(() => document.activeElement === document.querySelector('[data-results]'))));
@@ -252,7 +262,7 @@ try {
   await fillWeight(82);
 
   // understood-wrong path: edit chip 82 -> 90, Update rig
-  await page.waitForTimeout(450);
+  await page.waitForTimeout(1000);
   const n0 = await count('/apps/rig/build');
   await page.click('[data-chip="weight"]');
   await page.fill('[data-edit="weightKg"]', '90');
@@ -265,21 +275,21 @@ try {
   check('chip edit: form field synced', (await page.inputValue('[data-field="weightKg"]')) === '90');
 
   // alternatives and verify
-  const sailPrice = await text('[data-role="sail"] .rig-builder__price');
+  const sailPrice = await text('[data-role="base"] .rig-builder__price');
   const totalBefore = await text('[data-total]');
-  await page.click('[data-swap="sail"]');
-  check('alternatives: list opens, aria-expanded', (await page.getAttribute('[data-swap="sail"]', 'aria-expanded')) === 'true');
-  await page.locator('[data-role="sail"] [data-use]').first().click();
-  await page.waitForFunction(() => document.querySelectorAll('[data-role="sail"] .rig-builder__name')[0].textContent !== 'Aero Ride 5.8');
+  await page.click('[data-swap="base"]');
+  check('alternatives: list opens, aria-expanded', (await page.getAttribute('[data-swap="base"]', 'aria-expanded')) === 'true');
+  await page.locator('[data-role="base"] [data-use]').first().click();
+  await page.waitForFunction(() => !document.querySelectorAll('[data-role="base"] .rig-builder__name')[0].textContent.startsWith('Euro Pin Base'));
   await page.waitForTimeout(300);
   const verify = await last('/apps/rig/verify');
-  check('swap: verify called with chosen variants', verify && verify.body.variantIds.length === 6 && verify.body.variantIds.includes(45500000010), JSON.stringify(verify && verify.body.variantIds));
-  check('swap: total updated', (await text('[data-total]')) !== totalBefore && (await text('[data-role="sail"] .rig-builder__price')) !== sailPrice);
+  check('swap: verify called with chosen variants', verify && verify.body.variantIds.length === 6 && verify.body.variantIds.includes(45500000032), JSON.stringify(verify && verify.body.variantIds));
+  check('swap: total updated', (await text('[data-total]')) !== totalBefore && (await text('[data-role="base"] .rig-builder__price')) !== sailPrice);
   await sc({ verify: 'bad' });
-  if ((await page.getAttribute('[data-swap="sail"]', 'aria-expanded')) !== 'true') await page.click('[data-swap="sail"]');
-  await page.locator('[data-role="sail"] [data-use]').first().click();
+  if ((await page.getAttribute('[data-swap="base"]', 'aria-expanded')) !== 'true') await page.click('[data-swap="base"]');
+  await page.locator('[data-role="base"] [data-use]').first().click();
   await page.waitForTimeout(400);
-  check('swap: a failing check is said plainly', (await text('[data-results]')).includes('do not fit together'));
+  check('swap: a failing check is said plainly, by human name', (await text('[data-results]')).includes('do not fit together: board and rider weight'), await text('[data-checks]'));
   await sc({ verify: 'ok' });
 
   // explain my rig (AI)
@@ -339,33 +349,139 @@ try {
   check('cart: double press sends one request', (await count('/cart/add.js')) === 1, String(await count('/cart/add.js')));
   await sc({ delayMs: 0 });
 
-  // 422 sold out, named in the message
+  // 422 sold out: the page names the part, adds nothing, and asks the hub for a rig without it (excludeVariantIds)
+  const SAIL = 45500000004;
+  const partIds = () => page.$$eval('[data-results] [data-variant]', (els) => els.map((e) => Number(e.dataset.variant)));
   for (const mode of ['422', '422-silent']) {
     await reset();
-    await sc({ soldOutVariant: 45500000005 });
+    await sc({ soldOutVariant: SAIL });
     await build(82);
+    check(`422 (${mode}): first build has no excludeVariantIds`, !('excludeVariantIds' in (await last('/apps/rig/build')).body));
     await sc({ cart: mode });
     const builds0 = await count('/apps/rig/build');
     await page.click('[data-add]');
     await page.waitForSelector('[data-sold-out]');
     await page.waitForTimeout(300);
-    check(`422 (${mode}): message names the part`, (await text('[data-sold-out]')) === 'One part just sold out: Aero Ride 5.8. We updated your rig.', await text('[data-sold-out]'));
+    check(`422 (${mode}): message names the part`, (await text('[data-sold-out]')) === 'One part just sold out: Aero Ride. We updated your rig.', await text('[data-sold-out]'));
     check(`422 (${mode}): nothing added`, (await text('#cart-count')) === '0' && (await page.locator('#drawer-state').innerText()) === 'closed');
     check(`422 (${mode}): rebuild requested`, (await count('/apps/rig/build')) === builds0 + 1);
-    const ids = await page.$$eval('[data-results] [data-variant]', (els) => els.map((e) => Number(e.dataset.variant)));
-    check(`422 (${mode}): sold-out variant gone, sail swapped for an alternative`, !ids.includes(45500000005) && ids.length === 6 && (await text('[data-add]')) === 'Add 6 parts to cart', JSON.stringify(ids));
+    const rb = await last('/apps/rig/build');
+    check(`422 (${mode}): rebuild body carries excludeVariantIds [sold-out variant]`, JSON.stringify(rb.body.excludeVariantIds) === JSON.stringify([SAIL]), JSON.stringify(rb.body));
+    const ids = await partIds();
+    check(`422 (${mode}): the hub's rig has no sold-out variant and the sail is the hub's replacement`, !ids.includes(SAIL) && ids.includes(45500000012) && ids.length === 6 && (await text('[data-add]')) === 'Add 6 parts to cart', JSON.stringify(ids));
+    check(`422 (${mode}): no client-side swap, so no verify call`, (await count('/apps/rig/verify')) === 0);
+    // the exclusion lasts for the session: a changed answer still sends it
+    await fillWeight(84);
+    await page.waitForTimeout(600);
+    check(`422 (${mode}): later builds keep excluding it`, JSON.stringify((await last('/apps/rig/build')).body.excludeVariantIds) === JSON.stringify([SAIL]) && (await last('/apps/rig/build')).body.answers.weightKg === 84);
     await sc({ cart: 'ok' });
     await page.click('[data-add]');
     await page.waitForFunction(() => document.getElementById('drawer-state').textContent === 'open');
-    check(`422 (${mode}): next press adds the updated rig (6 ids, none sold out)`, (await last('/cart/add.js')).body.items.every((i) => i.id !== 45500000005));
+    check(`422 (${mode}): next press adds the updated rig (6 ids, none sold out)`, (await last('/cart/add.js')).body.items.every((i) => i.id !== SAIL));
   }
   // 422 where the part has no alternative: shows a gap
   await reset();
   await build(82);
-  await sc({ cart: '422', soldOutVariant: 45500000015 });
+  await sc({ cart: '422', soldOutVariant: 45500000023 });
   await page.click('[data-add]');
   await page.waitForSelector('[data-missing]');
   check('422 without alternative: gap row and partial line', (await text('[data-add]')) === 'Add 5 parts to cart' && (await page.locator('[data-partial]').count()) === 1);
+  check('422 without alternative: exclude sent', JSON.stringify((await last('/apps/rig/build')).body.excludeVariantIds) === JSON.stringify([45500000023]));
+  // an older hub ignores excludeVariantIds: the page falls back to swapping an alternative itself
+  await reset();
+  await sc({ soldOutVariant: 45500000030, ignoreExclude: true });
+  await build(82);
+  await sc({ cart: '422' });
+  await page.click('[data-add]');
+  await page.waitForSelector('[data-sold-out]');
+  await page.waitForTimeout(500);
+  const oldIds = await partIds();
+  check('422 on an older hub: exclude was sent, the still-present variant is swapped client-side', JSON.stringify((await last('/apps/rig/build')).body.excludeVariantIds) === JSON.stringify([45500000030]) && !oldIds.includes(45500000030) && oldIds.length === 6, JSON.stringify(oldIds));
+  const oldVerify = await last('/apps/rig/verify');
+  check('422 on an older hub: the swap is re-verified, with the exclusion', oldVerify && oldVerify.body.variantIds.length === 6 && JSON.stringify(oldVerify.body.excludeVariantIds) === JSON.stringify([45500000030]), JSON.stringify(oldVerify && oldVerify.body));
+  await sc({ cart: 'ok', ignoreExclude: false });
+
+  /* ------------------------------------------------------------ what the hub now returns: image, link, vendor, facts, derived, unchecked */
+  for (const vp of [{ w: 1440, h: 900 }, { w: 390, h: 844 }]) {
+    await page.setViewportSize({ width: vp.w, height: vp.h });
+    const tag = `${vp.w}`;
+    await reset();
+    await build(82);
+    const sailRow = page.locator('[data-role="sail"]');
+    const img = await sailRow.locator('img.rig-builder__img').first().evaluate((el) => ({ src: el.getAttribute('src'), alt: el.alt, w: el.getAttribute('width'), h: el.getAttribute('height'), lazy: el.loading }));
+    check(`[${tag}] part: image, lazy, width/height set, alt = title`, img.src === '/img/45500000004.svg' && img.alt === 'Aero Ride' && img.w === '72' && img.h === '72' && img.lazy === 'lazy', JSON.stringify(img));
+    const link = await sailRow.locator('a.rig-builder__name-link').evaluate((el) => ({ href: el.getAttribute('href'), target: el.getAttribute('target'), text: el.textContent }));
+    check(`[${tag}] part: title links to productUrl, same tab`, link.href === '/products/aero-ride' && link.target === null && link.text === 'Aero Ride', JSON.stringify(link));
+    check(`[${tag}] part: vendor shown`, (await sailRow.locator('.rig-builder__name').innerText()).includes('Point-7'));
+    const sailFacts = await sailRow.locator('[data-facts]').innerText();
+    check(`[${tag}] part: facts as a compact spec line`, sailFacts.includes('Sail area 5.8 m²') && sailFacts.includes('Boom range 170–190 cm') && sailFacts.split('\n').length === 1, sailFacts);
+    check(`[${tag}] part: price shown`, (await sailRow.locator('.rig-builder__price').innerText()).replace(/\s/g, '') === '€619.00');
+    check(`[${tag}] derived: marker only on derived facts, with the note`, (await sailRow.locator('[data-derived-note]').count()) === 0 && (await page.locator('[data-role="mast"] [data-derived-note]').innerText()) === '* from the product title' && (await page.locator('[data-role="mast"] .rig-builder__derived').count()) === 3);
+    check(`[${tag}] derived: marker is announced to screen readers`, (await page.locator('[data-role="mast"] .visually-hidden').first().textContent()).includes('from the product title'));
+    // alternatives carry the same fields
+    await page.click('[data-swap="base"]');
+    const alt = page.locator('[data-role="base"] .rig-builder__alt').nth(1);
+    const altImg = await alt.locator('img').evaluate((el) => ({ alt: el.alt, src: el.getAttribute('src') }));
+    check(`[${tag}] alternatives: image, link, vendor, price, facts`, altImg.alt === 'Tendon Base' && (await alt.locator('a').getAttribute('href')) === '/products/tendon-base' && (await alt.innerText()).includes('Point-7') && (await alt.innerText()).includes('€49.00') && (await alt.innerText()).includes('Base connection tendon'), await alt.innerText());
+    const bare = page.locator('[data-role="base"] .rig-builder__alt').first();
+    check(`[${tag}] alternatives: an alternative without vendor or facts still renders`, (await bare.innerText()).includes('Base no data') && (await bare.locator('[data-use]').count()) === 1);
+    await noHScroll(`${tag} alternatives open`);
+    await tapTargets(`${tag} alternatives open`);
+    await shot(`${tag}-details-alternatives`);
+    await page.click('[data-swap="base"]');
+    await noHScroll(`${tag} details`);
+    await shot(`${tag}-details`);
+
+    // no image: a neutral block, nothing broken
+    await reset();
+    await sc({ build: 'noimage' });
+    await build(82);
+    check(`[${tag}] no image: placeholder block, no img for that part`, (await page.locator('[data-role="board"] img').count()) === 0 && (await page.locator('[data-role="board"] div.rig-builder__img').count()) === 1);
+
+    // honest checks: every check ran
+    await reset();
+    await build(82);
+    const all = await text('[data-checks]');
+    check(`[${tag}] checks: one calm sentence with human names, no unchecked part`, all.startsWith('Checked: sail size for you') && all.includes('board and sail range') && all.includes('fin box') && !all.includes('Not checked'), all);
+    // honest checks: some could not run
+    await reset();
+    await sc({ build: 'unchecked' });
+    await build(82);
+    const un = await text('[data-checks]');
+    check(`[${tag}] unchecked: sentence says what ran and what the shop has no data for`, /^Checked: .*\. Not checked \(the shop has no data for it\): sail and mast diameter · sail and mast length · boom range\.$/.test(un.replace(/\n/g, ' ')), un);
+    check(`[${tag}] unchecked: nothing claims the rig is verified`, !/verified|all checks|fully/i.test(await text('[data-results]')));
+    await noHScroll(`${tag} unchecked`);
+    await shot(`${tag}-unchecked`);
+    // a swap re-verifies; the sentence follows what verify says
+    await page.click('[data-swap="base"]');
+    await page.locator('[data-role="base"] [data-use]').first().click();
+    await page.waitForTimeout(400);
+    check(`[${tag}] unchecked: still shown after a swap and re-verify`, (await text('[data-checks]')).includes('Not checked (the shop has no data for it)'));
+
+    // an older hub: no image/link/vendor/facts/derived/unchecked fields at all
+    await reset();
+    await sc({ build: 'legacy' });
+    await build(82);
+    check(`[${tag}] older hub: 6 parts render, add button works`, (await page.locator('[data-results] .rig-builder__part').count()) === 6 && (await text('[data-add]')) === 'Add 6 parts to cart');
+    check(`[${tag}] older hub: no facts, no derived marker, no vendor, no unchecked sentence`, (await page.locator('[data-facts], [data-derived-note], .rig-builder__vendor').count()) === 0 && !(await text('[data-checks]')).includes('Not checked'));
+    check(`[${tag}] older hub: old spec line and the url/image keys still used`, (await text('[data-role="sail"] .rig-builder__spec')).includes('5.8 m') && (await page.locator('[data-role="sail"] a.rig-builder__name-link').getAttribute('href')) === '/products/aero-ride-5-8' && (await page.locator('[data-role="sail"] img').getAttribute('src')) === '/img/45500000005.svg');
+    check(`[${tag}] older hub: checked sentence uses human names`, (await text('[data-checks]')).startsWith('Checked: '), await text('[data-checks]'));
+    await noHScroll(`${tag} older hub`);
+    await shot(`${tag}-legacy`);
+  }
+  await page.setViewportSize({ width: 1440, height: 900 });
+  {
+    // Slovenian, same strings in the other file
+    await fetch(`${origin}/__reset`, { method: 'POST' });
+    await sc({ build: 'unchecked' });
+    await page.goto(`${origin}/?lang=sl`);
+    await page.waitForFunction(() => document.querySelector('rig-builder').ready);
+    await page.fill('[data-field="weightKg"]', '82');
+    await page.click('[data-build]');
+    await page.waitForSelector('[data-add]');
+    check('sl: checked and not-checked sentences', /^Preverjeno: .*Nepreverjeno \(trgovina nima podatkov\): /.test((await text('[data-checks]')).replace(/\n/g, ' ')), await text('[data-checks]'));
+    check('sl: derived note', (await page.locator('[data-derived-note]').first().innerText()) === '* iz naslova izdelka');
+  }
   // cart failure
   await reset();
   await build(82);
@@ -481,6 +597,7 @@ try {
   }
 } catch (e) {
   console.error(e);
+  await shotOnError?.().catch(() => {});
   exitCode = 1;
 } finally {
   await browser.close();
